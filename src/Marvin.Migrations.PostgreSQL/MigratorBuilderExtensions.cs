@@ -10,6 +10,10 @@ namespace Marvin.Migrations.PostgreSQL
             string connectionString,
             DbVersion? targetVersion = null)
         {
+            if (targetVersion.HasValue)
+            {
+                builder.SetUpTargetVersion(targetVersion.Value);
+            }
             builder.UserDbProvider(new PostgreDbProvider(connectionString));
             return builder;
         }

@@ -25,10 +25,6 @@ namespace Marvin.Migrations
             _migrationsProviders = new List<IMigrationsProvider>();
         }
         
-        public MigratorBuilder AddMigration(IMigration migration)
-        {
-            return this;
-        }
         
         public ScriptMigrationsProvider UseScriptMigrations()
         {

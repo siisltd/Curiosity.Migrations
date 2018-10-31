@@ -86,6 +86,8 @@ namespace Marvin.Migrations.Migrators
             if (lastMigrationVersion != targetVersion) throw new InvalidOperationException(
                 $"Can not migrate database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
+        
+        //todo downgrade
 
         private bool IsMigrationAllowed(DbVersionDifference versionDifference)
         {
