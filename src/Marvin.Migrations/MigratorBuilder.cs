@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Marvin.Migrations.DatabaseProviders;
 using Marvin.Migrations.Info;
+using Marvin.Migrations.MigrationProviders;
 using Marvin.Migrations.Migrators;
 using Microsoft.Extensions.Logging;
 
