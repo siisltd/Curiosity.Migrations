@@ -15,7 +15,7 @@ namespace Marvin.Migrations.Info
         /// Major version
         /// </summary>
         /// <remarks>
-        /// Change it if you change DB schema (create or drop table, column, relation, constraint)
+        /// Change it if you change DB schema (create or drop table, column, relation)
         /// </remarks>
         public int Major { get; }
 
@@ -23,7 +23,7 @@ namespace Marvin.Migrations.Info
         /// Minor version
         /// </summary>
         /// <remarks>
-        /// Change it if your migration do not change DB schema (cleaning data, inserting new values for existed tables)
+        /// Change it if your migration do not change DB schema (cleaning data, inserting new values for existed tables, creating index, etc)
         /// </remarks>
         public int Minor { get; }
 

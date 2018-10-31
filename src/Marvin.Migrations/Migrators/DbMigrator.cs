@@ -7,20 +7,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations.Migrators
 {
+    /// <summary>
+    /// Default realisation of <see cref="IDbMigrator"/>
+    /// </summary>
     public sealed class DbMigrator : IDbMigrator
     {
-        private readonly AutoMigrationPolicy _policy;
+        private readonly AutoMigrationPolicy _upgradePolicy;
+        private readonly AutoMigrationPolicy _downgradePolicy;
 
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Default realisation of <see cref="IDbMigrator"/>
+        /// </summary>
+        /// <param name="upgradePolicy"></param>
+        /// <param name="downgradePolicy"></param>
+        /// <param name="logger"></param>
         public DbMigrator(
-            AutoMigrationPolicy policy, 
+            AutoMigrationPolicy upgradePolicy, 
+            AutoMigrationPolicy downgradePolicy, 
             ILogger logger = null)
         {
-            _policy = policy;
+            _upgradePolicy = upgradePolicy;
+            _downgradePolicy = downgradePolicy;
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public async Task MigrateAsync(IDbProvider dbProvider, DbInfo dbInfo)
         {
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
@@ -36,16 +49,16 @@ namespace Marvin.Migrations.Migrators
                     ?? new DbVersion?(new DbVersion(0,0));
                 if (dbInfo.ActualVersion > dbVersion.Value)
                 {
-                    _logger?.LogInformation($"{GetType().Name}: Миграция базы {dbProvider.DbName}...");
+                    _logger?.LogInformation($"Migrating database {dbProvider.DbName}...");
 
                     await Upgrade(dbProvider, dbInfo, dbVersion.Value).ConfigureAwait(false);
 
-                    _logger?.LogInformation($"{GetType().Name}: Миграция базы {dbProvider.DbName} закончена.");
+                    _logger?.LogInformation($"Migrating database {dbProvider.DbName} completed.");
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Произошла ошибка миграции базы {dbProvider.DbName}.", ex);
+                _logger?.LogError($"Error while migrating database {dbProvider.DbName}", ex);
                 throw;
             }
         }
@@ -57,11 +70,11 @@ namespace Marvin.Migrations.Migrators
                 .OrderBy(x => x.Version)
                 .ToList();
             if (desiredMigrations.Count == 0) return;
-            var targerVersion = desiredMigrations.Last().Version;
+            var targetVersion = desiredMigrations.Last().Version;
             var lastMigrationVersion = new DbVersion(0,0);
             foreach (var migration in desiredMigrations)
             {
-                if (!CheckPolicyAllowsMigration(DbVersion.GetDifference(actualVersion, migration.Version)))
+                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version)))
                 {
                     return;
                 }
@@ -70,20 +83,19 @@ namespace Marvin.Migrations.Migrators
                 await dbProvider.UpdateCurrentDbVersionAsync(migration.Version).ConfigureAwait(false);
                 lastMigrationVersion = migration.Version;
             }
-            if (lastMigrationVersion != targerVersion) throw new InvalidOperationException(
-                $"Не удалось обновиться до требуемой версии {targerVersion}. Последний обработанный скрипт обновления {lastMigrationVersion}");
+            if (lastMigrationVersion != targetVersion) throw new InvalidOperationException(
+                $"Can not migrate database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
 
-        private bool CheckPolicyAllowsMigration(DbVersionDifference versionDifference)
+        private bool IsMigrationAllowed(DbVersionDifference versionDifference)
         {
             switch (versionDifference)
             {
                 case DbVersionDifference.Major:
-                    return _policy.HasFlag(AutoMigrationPolicy.Major);
+                    return _upgradePolicy.HasFlag(AutoMigrationPolicy.Major);
 
                 case DbVersionDifference.Minor:
-                    return _policy.HasFlag(AutoMigrationPolicy.Minor);
-
+                    return _upgradePolicy.HasFlag(AutoMigrationPolicy.Minor);
 
                 default:
                     return false;

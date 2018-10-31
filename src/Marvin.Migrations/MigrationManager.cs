@@ -40,6 +40,10 @@ namespace Marvin.Migrations
         public async Task MigrateAllAsync(string assemblyPartName)
         {
             if (String.IsNullOrEmpty(assemblyPartName)) throw new ArgumentNullException(nameof(assemblyPartName));
+            if (_configurationProvider == null) 
+                throw new InvalidOperationException($"{nameof(ConfigurationProvider)} not initialized. " +
+                                                    $"Setup desired {typeof(IMigrationConfigurationProvider)} before migration");
+            
             foreach (var migrationConfig in _configurationProvider.GetMigrationConfigurations(assemblyPartName))
             {
                 await _migrator.MigrateAsync(migrationConfig.GetProvider(), migrationConfig.GetInfo());

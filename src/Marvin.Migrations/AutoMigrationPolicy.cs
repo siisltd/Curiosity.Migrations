@@ -21,6 +21,6 @@ namespace Marvin.Migrations
         /// <summary>
         /// Допускаются миграции мажорный версий
         /// </summary>
-        Major = 0x2
+        Major = 0x2,
     }
 }

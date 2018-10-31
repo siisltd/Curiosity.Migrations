@@ -23,9 +23,11 @@ namespace Marvin.Migrations.Info
         /// Migration version
         /// </summary>
         public DbVersion Version { get; }
+        
+        
 
         /// <inheritdoc />
-        public DbMigration(string upgradeScript, DbVersion version)
+        public DbMigration(string upgradeScript, DbVersion version, bool isRestricted = false, string restrictionMessage = null)
         {
             if (string.IsNullOrEmpty(upgradeScript))
             {

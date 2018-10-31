@@ -3,12 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{22DB0148-0BD7-4846-B63F-421B490392AB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0E062AC8-023E-4D62-A696-8363130215DF}"
+ProjectSection(SolutionItems) = preProject
+	docs\versioning.md = docs\versioning.md
+	docs\usage.md = docs\usage.md
+	docs\home.md = docs\home.md
+	docs\migrations.md = docs\migrations.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{D9AFC501-CDBC-46AB-986B-0C16B2C55D34}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations", "src\Marvin.Migrations\Marvin.Migrations.csproj", "{E2F484A1-607F-4193-9592-341EFE7890BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSQL", "src\Marvin.Migrations.PostgreSQL\Marvin.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,11 +25,16 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE} = {22DB0148-0BD7-4846-B63F-421B490392AB}
+		{E43F2D68-2971-4AB3-9392-BCCCF39253F6} = {22DB0148-0BD7-4846-B63F-421B490392AB}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E43F2D68-2971-4AB3-9392-BCCCF39253F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E43F2D68-2971-4AB3-9392-BCCCF39253F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E43F2D68-2971-4AB3-9392-BCCCF39253F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E43F2D68-2971-4AB3-9392-BCCCF39253F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
