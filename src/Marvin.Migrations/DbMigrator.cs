@@ -177,7 +177,7 @@ namespace Marvin.Migrations
             var lastMigrationVersion = new DbVersion(0,0);
             foreach (var migration in desiredMigrations)
             {
-                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version), _upgradePolicy))
+                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version), _downgradePolicy))
                 {
                     throw new MigrationException(MigrationError.PolicyError, $"Policy restrict downgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }

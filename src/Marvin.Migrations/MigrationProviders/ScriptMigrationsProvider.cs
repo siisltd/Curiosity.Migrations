@@ -14,7 +14,7 @@ namespace Marvin.Migrations.MigrationProviders
         
         public void FromDirectory(string absolutePath)
         {
-            if (String.IsNullOrEmpty(_absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
+            if (String.IsNullOrEmpty(absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
 
             _absolutePath = absolutePath;
         }
@@ -31,7 +31,7 @@ namespace Marvin.Migrations.MigrationProviders
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
             foreach (var fileName in fileNames)
             {
-                var match = regex.Match(fileName);
+                var match = regex.Match(Path.GetFileName(fileName));
                 if (!match.Success) continue;
 
                 var majorVersion = match.Groups[1];
@@ -44,7 +44,7 @@ namespace Marvin.Migrations.MigrationProviders
                 var scriptInfo = scripts[version];
 
                 var script = File.ReadAllText(fileName);
-                if (match.Groups[5].Success)
+                if (match.Groups[4].Success)
                 {
                     if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript)) throw new InvalidOperationException($"There is more than one downgrade script with version {version}");
                     scriptInfo.DownScript = script;

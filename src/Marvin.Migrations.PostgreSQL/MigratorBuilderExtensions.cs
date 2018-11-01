@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Marvin.Migrations.PostgreSQL
 {
     public static class MigratorBuilderExtensions
