@@ -53,8 +53,8 @@ namespace Marvin.Migrations.MigrationProviders
             {
                 migrations.AddRange(assembly
                     .GetTypes()
-                    .Where(x => x.IsAssignableFrom(migratorType))
-                    .Select(GetMigration)
+                    .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
+                    .Select(x => GetMigration(x, dbProvider))
                     .ToList());
             }
 
@@ -67,16 +67,16 @@ namespace Marvin.Migrations.MigrationProviders
                 }
                 else
                 {
-                    selector = type => type == keyValue.Key;
+                    selector = type => type.IsSubclassOf(keyValue.Key);
                 }
 
                 foreach (var assembly in keyValue.Value)
                 { 
                     migrations.AddRange(assembly
                     .GetTypes()
-                    .Where(x => x.IsAssignableFrom(migratorType))
+                    .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
                     .Where(selector)
-                    .Select(GetMigration)
+                    .Select(x => GetMigration(x, dbProvider))
                     .ToList());
                 }
             }
@@ -90,12 +90,12 @@ namespace Marvin.Migrations.MigrationProviders
                 migrationCheckMap.Add(migration.Version);
             }
 
-            return migrations;
+            return migrations.OrderBy(x => x.Version).ToList();
         }
         
-        private IMigration GetMigration(Type type)
+        private IMigration GetMigration(Type type, IDbProvider dbProvider)
         {
-            return (CodeMigration)Activator.CreateInstance(type);
+            return (CodeMigration)Activator.CreateInstance(type, dbProvider);
         }
     }
 }

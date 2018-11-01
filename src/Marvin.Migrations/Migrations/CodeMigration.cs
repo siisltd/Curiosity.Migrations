@@ -5,20 +5,16 @@ namespace Marvin.Migrations.Migrations
 {
     public abstract class CodeMigration : IMigration
     {
-        public DbVersion Version { get; }
+        public abstract DbVersion Version { get; }
         
-        public string Comment { get; }
+        public abstract string Comment { get; }
         
         protected readonly IDbProvider _dbProvider;
 
         protected CodeMigration(
-            IDbProvider dbProvider, 
-            DbVersion version, 
-            string comment)
+            IDbProvider dbProvider)
         {
             _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
-            Version = version;
-            Comment = comment;
         }
 
         public abstract Task UpgradeAsync();

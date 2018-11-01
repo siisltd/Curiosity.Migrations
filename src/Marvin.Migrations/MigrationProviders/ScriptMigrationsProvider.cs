@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Marvin.Migrations.Migrations;
 
@@ -72,7 +73,7 @@ namespace Marvin.Migrations.MigrationProviders
                         scriptInfo.Value.Comment));
             }
 
-            return migrations;
+            return migrations.OrderBy(x => x.Version).ToList();
         }
         
         private class ScriptInfo
