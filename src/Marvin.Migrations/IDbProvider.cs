@@ -2,54 +2,64 @@ using System.Threading.Tasks;
 
 namespace Marvin.Migrations
 {
+    /// <summary>
+    /// Provide access to underlying database
+    /// </summary>
     public interface IDbProvider
     {
+        /// <summary>
+        /// Name of connected database
+        /// </summary>
         string DbName { get; }
 
         /// <summary>
-        /// 
+        /// Returns actual DB state
         /// </summary>
-        /// <param name="desiredVersion"></param>
+        /// <param name="desiredVersion">Version of the newest migration</param>
         /// <returns></returns>
         Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion);
         
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
-        /// <exception cref="CreatingDBException"></exception>
+        /// <summary>
+        /// Create database with default schema if not exist
+        /// </summary>
+        /// <exception cref="MigrationException"></exception>
         Task CreateDatabaseIfNotExistsAsync();
 
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
-        /// <exception cref="CreatingHistoryTableException"></exception>
+        /// <summary>
+        /// Create table for storing migration history info no exist
+        /// </summary>
+        /// <exception cref="MigrationException"></exception>
         Task CreateHistoryTableIfNotExistsAsync();
 
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
+        /// <summary>
+        /// Returns actual database version from migration history table
+        /// </summary>
         /// <exception cref="MigrationException"></exception>
         Task<DbVersion?> GetDbVersionSafeAsync();
 
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
+        /// <summary>
+        /// Update actual database version in migration history table
+        /// </summary>
         /// <exception cref="MigrationException"></exception>
         Task UpdateCurrentDbVersionAsync(DbVersion version);
-
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
+        
+        /// <summary>
+        /// Execute sql script without return value
+        /// </summary>
+        /// <param name="script">SQL script with DDL or DML commands</param>
         /// <exception cref="MigrationException"></exception>
         Task ExecuteScriptAsync(string script);
         
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
+        /// <summary>
+        /// Execute sql script and return scalar value
+        /// </summary>
+        /// <param name="script">SQL script with DDL or DML commands</param>
         /// <exception cref="MigrationException"></exception>
         Task<object> ExecuteScalarScriptAsync(string script);
         
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
         /// <exception cref="MigrationException"></exception>
         Task ExecuteScriptWithoutInitialCatalogAsync(string script);
         
-        /// <exception cref="ConnectionException"></exception>
-        /// <exception cref="AuthorizationException"></exception>
         /// <exception cref="MigrationException"></exception>
         Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script);
     }

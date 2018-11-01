@@ -11,12 +11,12 @@ namespace Marvin.Migrations
         NoDifference = 0,
         
         /// <summary>
-        /// 
+        /// Difference in major version number
         /// </summary>
         Minor = 1,
         
         /// <summary>
-        /// 
+        /// Difference in minor version number
         /// </summary>
         Major= 2
     }

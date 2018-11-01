@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Castle.DynamicProxy;
 using Marvin.Migrations.Migrations;
 using Moq;
 using Xunit;
@@ -14,7 +13,7 @@ namespace Marvin.Migrations.UnitTests
         public async Task MigrateAsync_SkipMigration_Ok()
         {
             var initialDbVersion = new DbVersion(1,0);
-            var policy = AutoMigrationPolicy.Major | AutoMigrationPolicy.Minor;
+            var policy = MigrationPolicy.Major | MigrationPolicy.Minor;
             
             var provider = new Mock<IDbProvider>();
 
@@ -51,7 +50,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(1,2);
-            var policy = AutoMigrationPolicy.Major | AutoMigrationPolicy.Minor;
+            var policy = MigrationPolicy.Major | MigrationPolicy.Minor;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -103,7 +102,7 @@ namespace Marvin.Migrations.UnitTests
         public async Task MigrateAsync_UpgradeOnNotSpecifiedTarget_Ok()
         {
             var initialDbVersion = new DbVersion(1,0);
-            var policy = AutoMigrationPolicy.All;
+            var policy = MigrationPolicy.All;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -155,7 +154,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(2,0);
-            var policy = AutoMigrationPolicy.Minor;
+            var policy = MigrationPolicy.Minor;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -215,7 +214,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(2,0);
-            var policy = AutoMigrationPolicy.Major;
+            var policy = MigrationPolicy.Major;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -275,16 +274,9 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(3,0);
-            var policy = AutoMigrationPolicy.All;
+            var policy = MigrationPolicy.All;
 
-            var dbVersionAfterUpdate = initialDbVersion;
-            
             var provider = new Mock<IDbProvider>();
-
-            provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
-                .Returns(() => Task.CompletedTask);
             
             provider
                 .Setup(x => x.GetDbVersionSafeAsync())
@@ -334,7 +326,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var targetDbVersion = new DbVersion(1,0);
             var initialDbVersion = new DbVersion(1,2);
-            var policy = AutoMigrationPolicy.All;
+            var policy = MigrationPolicy.All;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -387,7 +379,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(2,0);
             var targetDbVersion = new DbVersion(1,0);
-            var policy = AutoMigrationPolicy.Minor;
+            var policy = MigrationPolicy.Minor;
 
             var dbVersionAfterUpdate = initialDbVersion;
             
@@ -447,7 +439,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(2,0);
             var targetDbVersion = new DbVersion(1,0);
-            var policy = AutoMigrationPolicy.Major;
+            var policy = MigrationPolicy.Major;
 
             var dbVersionAfterUpdate = initialDbVersion;
             

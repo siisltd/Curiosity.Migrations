@@ -127,6 +127,12 @@ namespace Marvin.Migrations
             return version1.CompareTo(version2) >= 0;
         }
 
+        /// <summary>
+        /// Returns difference between two <see cref="DbVersion"/>
+        /// </summary>
+        /// <param name="version1">First database version</param>
+        /// <param name="version2">Second database version</param>
+        /// <returns>returns the difference in version number(major or minor)</returns>
         public static DbVersionDifference GetDifference(DbVersion version1, DbVersion version2)
         {
             if (version1.Major != version2.Major)
@@ -141,6 +147,12 @@ namespace Marvin.Migrations
             return DbVersionDifference.NoDifference;
         }
 
+        /// <summary>
+        /// Try parse <see cref="DbVersion"/> from <see cref="String"/>
+        /// </summary>
+        /// <param name="source">Text presentation of <see cref="DbVersion"/></param>
+        /// <param name="version">Database version</param>
+        /// <returns>Result of parsing</returns>
         public static bool TryParse(string source, out DbVersion version)
         {
             if (string.IsNullOrWhiteSpace(source))

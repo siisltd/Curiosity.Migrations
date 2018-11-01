@@ -3,18 +3,30 @@ using System.Threading.Tasks;
 
 namespace Marvin.Migrations.Migrations
 {
+    /// <summary>
+    /// Migration that uses raw sql 
+    /// </summary>
     public class ScriptMigration : IMigration
     {
+        /// <inheritdoc />
         public DbVersion Version { get; }
         
+        /// <inheritdoc />
+        public string Comment { get; }
+        
+        /// <summary>
+        /// SQL script to apply migration
+        /// </summary>
         public string UpScript { get; }
         
+        /// <summary>
+        /// SQL script to undo migration
+        /// </summary>
         public string DownScript { get; }
-        
-        public string Comment { get; }
 
         private readonly IDbProvider _dbProvider;
 
+        /// <inheritdoc />
         public ScriptMigration(
             IDbProvider dbProvider, 
             DbVersion version, 
@@ -31,11 +43,13 @@ namespace Marvin.Migrations.Migrations
             Comment = comment;
         }
 
+        /// <inheritdoc />
         public Task UpgradeAsync()
         {
             return _dbProvider.ExecuteScriptAsync(UpScript);
         }
 
+        /// <inheritdoc />
         public Task DowngradeAsync()
         {
             if (String.IsNullOrWhiteSpace(DownScript)) return Task.CompletedTask;

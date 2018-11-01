@@ -8,21 +8,39 @@ ProjectSection(SolutionItems) = preProject
 	docs\usage.md = docs\usage.md
 	docs\home.md = docs\home.md
 	docs\migrations.md = docs\migrations.md
+	docs\quikstart.md = docs\quikstart.md
+	docs\features.md = docs\features.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
+ProjectSection(SolutionItems) = preProject
+	tests\run_tests.sh = tests\run_tests.sh
+EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations", "src\Marvin.Migrations\Marvin.Migrations.csproj", "{E2F484A1-607F-4193-9592-341EFE7890BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSQL", "src\Marvin.Migrations.PostgreSQL\Marvin.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{8DB6C739-ACB4-47CD-B72E-A5180C22B84F}"
+ProjectSection(SolutionItems) = preProject
+	tests\UnitTests\build.cake = tests\UnitTests\build.cake
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{98A180F1-B3B9-41F0-9974-2333B4F03390}"
+ProjectSection(SolutionItems) = preProject
+	tests\IntegrationTests\build.cake = tests\IntegrationTests\build.cake
+	tests\IntegrationTests\env-compose.yml = tests\IntegrationTests\env-compose.yml
+EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.UnitTests", "tests\UnitTests\Marvin.Migrations.UnitTests\Marvin.Migrations.UnitTests.csproj", "{E21F04B2-76AB-4BA9-A85C-2347CAABC0AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSql.IntegrationTests", "tests\IntegrationTests\Marvin.Migrations.PostgreSql.IntegrationTests\Marvin.Migrations.PostgreSql.IntegrationTests.csproj", "{3BDC5BA6-1A8B-443D-B3F7-D0983921E3C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{99EA9F71-94B8-4B62-B32A-4573D569CED3}"
+ProjectSection(SolutionItems) = preProject
+	nuspec\Marvin.Migrations.nuspec = nuspec\Marvin.Migrations.nuspec
+	nuspec\Marvin.Migrations.PostgreSQL.nuspec = nuspec\Marvin.Migrations.PostgreSQL.nuspec
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

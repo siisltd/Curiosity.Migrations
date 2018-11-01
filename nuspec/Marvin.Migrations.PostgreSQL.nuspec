@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Marvin.Migrations.PostgreSQL</id>
+    <version>0.1.1</version>
+    <authors>Maxim Markelow (@markeli)</authors>
+    <owners>Marvin</owners>
+    <licenseUrl>https://github.com/MarvinBand/Migrations/blob/master/LICENSE/</licenseUrl>
+    <projectUrl>https://github.com/MarvinBand/Migrations</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>PostgreSQL migrations via Marvin.Migrations</description>
+    <tags>migrations, migration, migration-tool, .net-core, .netstandard, database</tags>
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Npgsql" version="4.0.3"/>
+        <dependency id="Marvin.Migrations" version="0.1"/>
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+	  <file src="..\src\Marvin.Migrations.PostgreSQL\bin\Release\netstandard2.0\Marvin.Migrations.PostgreSQL.dll" target="lib" />
+  </files>
+</package>

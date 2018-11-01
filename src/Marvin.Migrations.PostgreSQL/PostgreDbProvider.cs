@@ -5,7 +5,7 @@ using Npgsql;
 namespace Marvin.Migrations.PostgreSQL
 {
     /// <summary>
-    /// 
+    /// Provide access to Postgre database
     /// </summary>
     //todo reduce connections usage
     public class PostgreDbProvider : IDbProvider
@@ -27,6 +27,10 @@ namespace Marvin.Migrations.PostgreSQL
         private readonly string _connectionString;
         private readonly string _connectionStringWithoutInitialCatalog;
 
+        /// <summary>
+        /// Provide access to Postgre database
+        /// </summary>
+        /// <param name="connectionString">String with connection params</param>
         public PostgreDbProvider(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(nameof(connectionString));
@@ -46,6 +50,7 @@ namespace Marvin.Migrations.PostgreSQL
         }
 
 
+        /// <inheritdoc />
         public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
         {
             try
@@ -86,6 +91,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task CreateDatabaseIfNotExistsAsync()
         {
             var createDbQuery = $"CREATE DATABASE \"{DbName}\" "
@@ -162,6 +168,7 @@ namespace Marvin.Migrations.PostgreSQL
                 .ConfigureAwait(false);
         }
 
+        /// <inheritdoc />
         public async Task CreateHistoryTableIfNotExistsAsync()
         {
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationTableName}\" "
@@ -201,6 +208,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task<DbVersion?> GetDbVersionSafeAsync()
         {
             try
@@ -245,6 +253,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
             var script = $"DELETE FROM public.\"{MigrationTableName}\"; "
@@ -281,6 +290,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task ExecuteScriptAsync(string script)
         {
             try
@@ -313,6 +323,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptAsync(string script)
         {
             try
@@ -364,6 +375,7 @@ namespace Marvin.Migrations.PostgreSQL
                 .ExecuteScalarAsync();
         }
 
+        /// <inheritdoc />
         public async Task ExecuteScriptWithoutInitialCatalogAsync(string script)
         {
             try
@@ -395,6 +407,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script)
         {
             try

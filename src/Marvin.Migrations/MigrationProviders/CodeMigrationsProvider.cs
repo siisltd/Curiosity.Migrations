@@ -7,13 +7,14 @@ using Marvin.Migrations.Migrations;
 namespace Marvin.Migrations.MigrationProviders
 {
     /// <summary>
-    /// 
+    /// Class for providing <see cref="CodeMigration"/>
     /// </summary>
     public class CodeMigrationsProvider : IMigrationsProvider
     {
         private readonly List<Assembly> _assemblies;
         private readonly Dictionary<Type, List<Assembly>> _typedAssemblies;
 
+        /// <inheritdoc />
         public CodeMigrationsProvider()
         {
             _assemblies = new List<Assembly>();
@@ -23,7 +24,7 @@ namespace Marvin.Migrations.MigrationProviders
         /// <summary>
         /// Set up assembly for scanning migrations
         /// </summary>
-        /// <param name="assembly"></param>
+        /// <param name="assembly">Assembly to scan</param>
         /// <exception cref="ArgumentNullException"></exception>
         public void FromAssembly(Assembly assembly)
         {
@@ -31,6 +32,11 @@ namespace Marvin.Migrations.MigrationProviders
             _assemblies.Add(assembly);
         }
         
+        /// <summary>
+        /// Set up assembly for scanning migrations with specified type
+        /// </summary>
+        /// <param name="assembly">Assembly to scan</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void FromAssembly<T>(Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
@@ -44,7 +50,8 @@ namespace Marvin.Migrations.MigrationProviders
 
             _typedAssemblies[migrationType].Add(assembly);
         }
-        
+
+        /// <inheritdoc />
         public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
         {
             var migrations = new List<IMigration>();

@@ -7,12 +7,23 @@ using Marvin.Migrations.Migrations;
 
 namespace Marvin.Migrations.MigrationProviders
 {
+    /// <summary>
+    /// Class for providing migration that uses raq sql scripts
+    /// </summary>
     public class ScriptMigrationsProvider : IMigrationsProvider
     {
-        private const string MigrationFileNameRegex = @"^(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
+        /// <summary>
+        /// Regex patterns for scanning files
+        /// </summary>
+        private const string MigrationFileNamePattern = @"^(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
 
         private string _absolutePath;
         
+        /// <summary>
+        /// Setup directory to scan for migrations
+        /// </summary>
+        /// <param name="absolutePath"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void FromDirectory(string absolutePath)
         {
             if (String.IsNullOrEmpty(absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
@@ -20,6 +31,7 @@ namespace Marvin.Migrations.MigrationProviders
             _absolutePath = absolutePath;
         }
 
+        /// <inheritdoc />
         public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
         {
             if (String.IsNullOrEmpty(_absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
@@ -28,7 +40,7 @@ namespace Marvin.Migrations.MigrationProviders
 
             var fileNames = Directory.GetFiles(_absolutePath);
 
-            var regex = new Regex(MigrationFileNameRegex, RegexOptions.IgnoreCase);
+            var regex = new Regex(MigrationFileNamePattern, RegexOptions.IgnoreCase);
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
             foreach (var fileName in fileNames)
             {
@@ -76,15 +88,19 @@ namespace Marvin.Migrations.MigrationProviders
             return migrations.OrderBy(x => x.Version).ToList();
         }
         
+        /// <summary>
+        /// Internal class for analysis sql script files
+        /// </summary>
         private class ScriptInfo
         {
-            public DbVersion Version { get; }
 
             public ScriptInfo(DbVersion version)
             {
                 Version = version;
             }
 
+            public DbVersion Version { get; }
+            
             public string Comment { get; set; }
             
             public string UpScript { get; set; }

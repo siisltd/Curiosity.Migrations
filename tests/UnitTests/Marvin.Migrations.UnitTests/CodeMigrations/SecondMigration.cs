@@ -14,12 +14,12 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
         
         public override Task UpgradeAsync()
         {
-            return _dbProvider.ExecuteScriptAsync(ScriptConstants.UpScript);
+            return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript);
         }
 
         public override Task DowngradeAsync()
         {
-            return _dbProvider.ExecuteScriptAsync(ScriptConstants.DownScript);
+            return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript);
         }
     }
 }
