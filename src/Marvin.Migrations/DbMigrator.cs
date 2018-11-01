@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Marvin.Migrations.DatabaseProviders;
+using Marvin.Migrations.Exceptions;
 using Marvin.Migrations.Info;
 using Microsoft.Extensions.Logging;
 
-namespace Marvin.Migrations.Migrators
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Default realisation of <see cref="IDbMigrator"/>
@@ -17,6 +18,11 @@ namespace Marvin.Migrations.Migrators
 
         private readonly ILogger _logger;
 
+        private readonly IDbProvider _dbProvider;
+        private readonly List<IMigration> _migrations;
+
+        private readonly DbVersion? _targetVersion;
+        
         /// <summary>
         /// Default realisation of <see cref="IDbMigrator"/>
         /// </summary>
@@ -33,71 +39,100 @@ namespace Marvin.Migrations.Migrators
             _logger = logger;
         }
 
-        /// <inheritdoc />
-        public async Task MigrateAsync(IDbProvider dbProvider, DbInfo dbInfo)
+        public async Task<MigrationResult> MigrateSafeAsync()
         {
-            if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
-            if (dbInfo == null) throw new ArgumentNullException(nameof(dbInfo));
-
             try
             {
-                await dbProvider.CreateDatabaseIfNotExistsAsync().ConfigureAwait(false);
-                await dbProvider.CreateHistoryTableIfNotExistsAsync().ConfigureAwait(false);
-                var dbVersion = await dbProvider
-                    .GetDbVersionAsync()
-                    .ConfigureAwait(false)
-                    ?? new DbVersion?(new DbVersion(0,0));
-                if (dbInfo.ActualVersion > dbVersion.Value)
-                {
-                    _logger?.LogInformation($"Migrating database {dbProvider.DbName}...");
-
-                    await Upgrade(dbProvider, dbInfo, dbVersion.Value).ConfigureAwait(false);
-
-                    _logger?.LogInformation($"Migrating database {dbProvider.DbName} completed.");
-                }
+                await MigrateAsync();
+                return MigrationResult.SuccessfullyResult();
             }
-            catch (Exception ex)
+            catch (MigrationException e)
             {
-                _logger?.LogError($"Error while migrating database {dbProvider.DbName}", ex);
-                throw;
+                return MigrationResult.FailureResult(e.Error, e.Message);
+            }
+            catch (Exception e)
+            {
+                return MigrationResult.FailureResult(MigrationError.Unknown, e.Message);
             }
         }
 
-        private async Task Upgrade(IDbProvider dbProvider, DbInfo info, DbVersion actualVersion)
+        public async Task MigrateAsync()
         {
-            var desiredMigrations = info.Migrations
+            try
+            {
+                await _dbProvider.CreateDatabaseIfNotExistsAsync();
+                await _dbProvider.CreateHistoryTableIfNotExistsAsync();
+                var dbVersion = await _dbProvider
+                                    .GetDbVersionSafeAsync()
+                                    .ConfigureAwait(false)
+                                ?? new DbVersion?(new DbVersion(0,0));
+
+            
+                var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
+                if (targetVersion == dbVersion.Value)
+                {
+                    _logger?.LogInformation($"Database {_dbProvider.DbName} is actual. Skip migration.");
+                    return;
+                }
+                
+                if (_migrations.All(x => x.Version != targetVersion))
+                    throw new MigrationException(MigrationError.MigrationNotFound, $"Migration {targetVersion} not found");
+            
+                _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
+                if (targetVersion > dbVersion.Value)
+                {
+                    _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} from {dbVersion.Value} to {targetVersion}...");
+                    await UpgradeAsync(dbVersion.Value);
+                    _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} completed.");
+                }
+                //todo downgrade
+                _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed.");
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError($"Error while migrating database {_dbProvider.DbName}", e);
+                throw;
+            }
+           
+        }
+
+        private async Task UpgradeAsync(DbVersion actualVersion)
+        {
+            var desiredMigrations = _migrations
                 .Where(x => x.Version > actualVersion)
                 .OrderBy(x => x.Version)
                 .ToList();
             if (desiredMigrations.Count == 0) return;
+            
             var targetVersion = desiredMigrations.Last().Version;
             var lastMigrationVersion = new DbVersion(0,0);
             foreach (var migration in desiredMigrations)
             {
-                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version)))
+                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version), _upgradePolicy))
                 {
-                    return;
+                    throw new MigrationException(MigrationError.PolicyError, $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
-
-                await dbProvider.ExecuteScriptAsync(migration.Script).ConfigureAwait(false);
-                await dbProvider.UpdateCurrentDbVersionAsync(migration.Version).ConfigureAwait(false);
+                _logger.LogInformation($"Executing migration {migration.Version} to DB {_dbProvider.DbName}...");
+                await migration.UpgradeAsync();
+                await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
                 lastMigrationVersion = migration.Version;
+                _logger.LogInformation($"Executing migration {migration.Version} to DB {_dbProvider.DbName} completed.");
             }
-            if (lastMigrationVersion != targetVersion) throw new InvalidOperationException(
+            
+            if (lastMigrationVersion != targetVersion) throw new MigrationException(
+                MigrationError.MigratingError, 
                 $"Can not migrate database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
-        
-        //todo downgrade
-
-        private bool IsMigrationAllowed(DbVersionDifference versionDifference)
+   
+        private bool IsMigrationAllowed(DbVersionDifference versionDifference, AutoMigrationPolicy policy)
         {
             switch (versionDifference)
             {
                 case DbVersionDifference.Major:
-                    return _upgradePolicy.HasFlag(AutoMigrationPolicy.Major);
+                    return policy.HasFlag(AutoMigrationPolicy.Major);
 
                 case DbVersionDifference.Minor:
-                    return _upgradePolicy.HasFlag(AutoMigrationPolicy.Minor);
+                    return policy.HasFlag(AutoMigrationPolicy.Minor);
 
                 default:
                     return false;

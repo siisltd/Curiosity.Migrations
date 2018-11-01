@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Marvin.Migrations.DatabaseProviders;
 
 namespace Marvin.Migrations.Info
 {
@@ -65,16 +64,20 @@ namespace Marvin.Migrations.Info
         
         public string Comment { get; }
         
-        private readonly IDbProvider _dbProvider;
-        
-        public Task UpgradeAsync()
+        protected readonly IDbProvider _dbProvider;
+
+        protected CodeMigration(
+            IDbProvider dbProvider, 
+            DbVersion version, 
+            string comment)
         {
-            return Task.CompletedTask;
+            _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+            Version = version;
+            Comment = comment;
         }
 
-        public Task DowngradeAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public abstract Task UpgradeAsync();
+
+        public abstract Task DowngradeAsync();
     }
 }

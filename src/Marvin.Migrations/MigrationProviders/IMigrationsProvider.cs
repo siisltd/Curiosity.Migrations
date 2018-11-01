@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Marvin.Migrations.DatabaseProviders;
 using Marvin.Migrations.Info;
 
-namespace Marvin.Migrations
+namespace Marvin.Migrations.MigrationProviders
 {
     public interface IMigrationsProvider
     {

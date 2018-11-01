@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using Marvin.Migrations.DatabaseProviders;
+using Marvin.Migrations.Exceptions;
 using Marvin.Migrations.Info;
 
-namespace Marvin.Migrations.Migrators
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Database migrator
@@ -12,9 +12,12 @@ namespace Marvin.Migrations.Migrators
         /// <summary>
         /// Execute migration
         /// </summary>
-        /// <param name="dbProvider">Database provider</param>
-        /// <param name="dbInfo">Info about database</param>
-        /// <returns></returns>
-        Task MigrateAsync(IDbProvider dbProvider, DbInfo dbInfo);
+        /// <exception cref="MigrationException"></exception>
+        Task MigrateAsync();
+        
+        /// <summary>
+        /// Execute migration without throwing exception
+        /// </summary>
+        Task<MigrationResult> MigrateSafeAsync();
     }
 }

@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Marvin.Migrations.DatabaseProviders;
 using Marvin.Migrations.Info;
 
-namespace Marvin.Migrations
+namespace Marvin.Migrations.MigrationProviders
 {
     public class ScriptMigrationsProvider : IMigrationsProvider
     {

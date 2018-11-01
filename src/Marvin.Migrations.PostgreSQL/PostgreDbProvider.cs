@@ -1,29 +1,33 @@
 using System;
 using System.Threading.Tasks;
-using Marvin.Migrations.DatabaseProviders;
+using Marvin.Migrations.Exceptions;
 using Marvin.Migrations.Info;
 using Npgsql;
 
 namespace Marvin.Migrations.PostgreSQL
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    //todo reduce connections usage
     public class PostgreDbProvider : IDbProvider
     {
         private const string CheckDbExistQueryFormat = "SELECT 1 AS result FROM pg_database WHERE datname='{0}'";
-        
+
         private const string MigrationTableName = "MigrationHistory";
-        
+
         /// <summary>
         /// 'Postgres' database is garanteed to exist, need to create own db
         /// </summary>
         /// <remarks>
         /// Can not open connection without specified database name
         /// </remarks>
-        private const string PostgressDefaultDatabase = "postgres";
+        private const string PostgreDefaultDatabase = "postgres";
 
         public string DbName { get; }
 
         private readonly string _connectionString;
-        private readonly string _connectionStringWitoutInitialCatalog;
+        private readonly string _connectionStringWithoutInitialCatalog;
 
         public PostgreDbProvider(string connectionString)
         {
@@ -38,17 +42,17 @@ namespace Marvin.Migrations.PostgreSQL
             var tempConnectionBuilder =
                 new NpgsqlConnectionStringBuilder(connectionString)
                 {
-                    Database = PostgressDefaultDatabase
+                    Database = PostgreDefaultDatabase
                 };
-            _connectionStringWitoutInitialCatalog = tempConnectionBuilder.ConnectionString;
+            _connectionStringWithoutInitialCatalog = tempConnectionBuilder.ConnectionString;
         }
 
 
-        public async Task<DbState> GetDbStateAsync(DbVersion desireDbVersion)
+        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
         {
             try
             {
-                using (var connection = new NpgsqlConnection(_connectionStringWitoutInitialCatalog))
+                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
                     await connection
                         .OpenAsync()
@@ -87,30 +91,58 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task CreateDatabaseIfNotExistsAsync()
         {
             var createDbQuery = $"CREATE DATABASE \"{DbName}\" "
-                        + @"WITH 
+                                + @"WITH 
                            ENCODING = 'UTF8'
                            LC_COLLATE = 'Russian_Russia.1251'
                            LC_CTYPE = 'Russian_Russia.1251'
                            CONNECTION LIMIT = -1; ";
 
-            using (var connection = new NpgsqlConnection(_connectionStringWitoutInitialCatalog))
+            try
             {
-                await connection
-                    .OpenAsync()
-                    .ConfigureAwait(false);
-
-                var result = await InternalExecuteScalarScriptAsync(
-                        connection,
-                        String.Format(CheckDbExistQueryFormat, DbName))
-                    .ConfigureAwait(false);
-                if (result == null || (Int32)result != 1)
+                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
-                    await InternalExecuteScriptAsync(connection, createDbQuery)
+                    await connection
+                        .OpenAsync()
                         .ConfigureAwait(false);
+
+                    var result = await InternalExecuteScalarScriptAsync(
+                            connection,
+                            String.Format(CheckDbExistQueryFormat, DbName))
+                        .ConfigureAwait(false);
+                    if (result == null || (Int32) result != 1)
+                    {
+                        await InternalExecuteScriptAsync(connection, createDbQuery)
+                            .ConfigureAwait(false);
+                    }
                 }
             }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.CreatingDBError, $"Can not create database {DbName}", e);
+            }
         }
-        
+
+
+
         private async Task ExecuteScriptAsync(string connectionString, string script)
         {
             using (var connection = new NpgsqlConnection(connectionString))
@@ -131,30 +163,64 @@ namespace Marvin.Migrations.PostgreSQL
                 .ExecuteNonQueryAsync()
                 .ConfigureAwait(false);
         }
-        
-        public Task CreateHistoryTableIfNotExistsAsync()
+
+        public async Task CreateHistoryTableIfNotExistsAsync()
         {
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationTableName}\" "
-                        + @"( 
+                         + @"( 
                          version text 
                         ) 
                         WITH ( 
                           OIDS=FALSE 
                         ); ";
-            return ExecuteScriptAsync(script);
+            try
+            {
+                await ExecuteScriptAsync(script);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.CreatingHistoryTable, $"Can not create database {DbName}",
+                    e);
+            }
         }
 
-        public async Task<DbVersion?> GetDbVersionAsync()
+        public async Task<DbVersion?> GetDbVersionSafeAsync()
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            try
             {
-                await connection
-                    .OpenAsync()
-                    .ConfigureAwait(false);
-                var version = await InternalGetDbVersionAsync(connection)
-                    .ConfigureAwait(false);
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection
+                        .OpenAsync()
+                        .ConfigureAwait(false);
+                    var version = await InternalGetDbVersionAsync(connection)
+                        .ConfigureAwait(false);
 
-                return version;
+                    return version;
+                }
+            }
+            catch (Exception)
+            {
+                return default(DbVersion?);
             }
         }
 
@@ -181,61 +247,193 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
-        public Task UpdateCurrentDbVersionAsync(DbVersion version)
+        public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
             var script = $"DELETE FROM public.\"{MigrationTableName}\"; "
-                       + $"INSERT INTO public.\"{MigrationTableName}\"("
-                       + "version) "
-                       + $" VALUES ('{version.ToString()}'); ";
+                         + $"INSERT INTO public.\"{MigrationTableName}\"("
+                         + "version) "
+                         + $" VALUES ('{version.ToString()}'); ";
 
-            return ExecuteScriptAsync(_connectionString, script);
+            try
+            {
+                await ExecuteScriptAsync(_connectionString, script);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not update DB version", e);
+            }
         }
 
-        public Task ExecuteScriptAsync(string script)
+        public async Task ExecuteScriptAsync(string script)
         {
-            return ExecuteScriptAsync(_connectionString, script);
+            try
+            {
+
+                await ExecuteScriptAsync(_connectionString, script);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
+            }
         }
 
         public async Task<object> ExecuteScalarScriptAsync(string script)
         {
-            using (var connection = new NpgsqlConnection(_connectionStringWitoutInitialCatalog))
+            try
             {
-                await connection
-                    .OpenAsync()
-                    .ConfigureAwait(false);
 
-                var result = await InternalExecuteScalarScriptAsync(connection, script)
-                    .ConfigureAwait(false);
-                return result;
+                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
+                {
+                    await connection
+                        .OpenAsync()
+                        .ConfigureAwait(false);
+
+                    var result = await InternalExecuteScalarScriptAsync(connection, script)
+                        .ConfigureAwait(false);
+                    return result;
+                }
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
             }
         }
 
         private Task<object> InternalExecuteScalarScriptAsync(
-            NpgsqlConnection opennedConnection, 
+            NpgsqlConnection openedConnection,
             string query)
         {
-            var command = opennedConnection.CreateCommand();
+            var command = openedConnection.CreateCommand();
             command.CommandText = query;
             return command
                 .ExecuteScalarAsync();
         }
 
-        public Task ExecuteScriptWithoutInitialCatalogAsync(string script)
+        public async Task ExecuteScriptWithoutInitialCatalogAsync(string script)
         {
-            return ExecuteScriptAsync(_connectionStringWitoutInitialCatalog, script);
+            try
+            {
+                await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
+            }
         }
 
         public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script)
         {
-            using (var connection = new NpgsqlConnection(_connectionStringWitoutInitialCatalog))
+            try
             {
-                await connection
-                    .OpenAsync()
-                    .ConfigureAwait(false);
+                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
+                {
+                    await connection
+                        .OpenAsync()
+                        .ConfigureAwait(false);
 
-                var result = await InternalExecuteScalarScriptAsync(connection, script)
-                    .ConfigureAwait(false);
-                return result;
+                    var result = await InternalExecuteScalarScriptAsync(connection, script)
+                        .ConfigureAwait(false);
+                    return result;
+                }
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
             }
         }
     }

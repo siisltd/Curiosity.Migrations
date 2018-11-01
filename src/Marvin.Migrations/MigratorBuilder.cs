@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Marvin.Migrations.DatabaseProviders;
 using Marvin.Migrations.Info;
 using Marvin.Migrations.MigrationProviders;
-using Marvin.Migrations.Migrators;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -78,7 +76,6 @@ namespace Marvin.Migrations
             {
                 migrations.AddRange(migrationsProvider.GetMigrations(_dbProvider));
             }
-            if (migrations.Count == 0) throw new InvalidOperationException("No migrations found");
             
             return new DbMigrator(_upgradePolicy, _downgradePolicy, _logger);
         }
