@@ -1,6 +1,6 @@
 using System;
 
-namespace Marvin.Migrations.Info
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Database version

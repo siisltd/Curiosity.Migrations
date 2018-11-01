@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Marvin.Migrations.Info;
 
 namespace Marvin.Migrations.PostgreSQL
 {

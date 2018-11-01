@@ -32,7 +32,7 @@ namespace Marvin.Migrations
         Unknown = 0,
         ConnectionError = 1,
         AuthorizationError = 2,
-        CreatingDBError = 3,
+        CreatingDbError = 3,
         CreatingHistoryTable = 4,
         MigratingError = 5,
         MigrationNotFound = 6,

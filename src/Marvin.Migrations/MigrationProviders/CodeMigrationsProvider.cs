@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Marvin.Migrations.Info;
+using Marvin.Migrations.Migrations;
 
 namespace Marvin.Migrations.MigrationProviders
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class CodeMigrationsProvider : IMigrationsProvider
     {
         private readonly List<Assembly> _assemblies;
@@ -17,6 +20,11 @@ namespace Marvin.Migrations.MigrationProviders
             _typedAssemblies = new Dictionary<Type, List<Assembly>>();
         }
         
+        /// <summary>
+        /// Set up assembly for scanning migrations
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public void FromAssembly(Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));

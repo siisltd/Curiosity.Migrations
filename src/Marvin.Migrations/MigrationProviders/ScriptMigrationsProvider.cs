@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Marvin.Migrations.Info;
+using Marvin.Migrations.Migrations;
 
 namespace Marvin.Migrations.MigrationProviders
 {

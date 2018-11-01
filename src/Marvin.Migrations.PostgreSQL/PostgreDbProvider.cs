@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Marvin.Migrations.Exceptions;
-using Marvin.Migrations.Info;
 using Npgsql;
 
 namespace Marvin.Migrations.PostgreSQL
@@ -137,7 +135,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (Exception e)
             {
-                throw new MigrationException(MigrationError.CreatingDBError, $"Can not create database {DbName}", e);
+                throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
             }
         }
 

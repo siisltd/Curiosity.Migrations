@@ -1,4 +1,4 @@
-namespace Marvin.Migrations.Info
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Difference between current DB version and desired migration

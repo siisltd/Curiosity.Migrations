@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations", "src\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSQL", "src\Marvin.Migrations.PostgreSQL\Marvin.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{8DB6C739-ACB4-47CD-B72E-A5180C22B84F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{98A180F1-B3B9-41F0-9974-2333B4F03390}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +30,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE} = {22DB0148-0BD7-4846-B63F-421B490392AB}
 		{E43F2D68-2971-4AB3-9392-BCCCF39253F6} = {22DB0148-0BD7-4846-B63F-421B490392AB}
+		{8DB6C739-ACB4-47CD-B72E-A5180C22B84F} = {44C236B2-FD3A-4F44-AD71-0289973BA57B}
+		{98A180F1-B3B9-41F0-9974-2333B4F03390} = {44C236B2-FD3A-4F44-AD71-0289973BA57B}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

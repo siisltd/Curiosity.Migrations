@@ -1,6 +1,6 @@
 using System;
 
-namespace Marvin.Migrations.Exceptions
+namespace Marvin.Migrations
 {
     public class MigrationException : Exception
     {

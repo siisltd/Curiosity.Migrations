@@ -3,24 +3,24 @@ using System;
 namespace Marvin.Migrations
 {
     /// <summary>
-    /// Политики автоматический миграции
+    /// Automigration policy. Can restrict some migrations
     /// </summary>
     [Flags]
     public enum AutoMigrationPolicy
     {
         /// <summary>
-        /// Никакие автоматические миграции не разрешены
+        /// All migrations are forbidden
         /// </summary>
         None = 0x0,
       
         /// <summary>
-        /// Допускается миграции при изменении Minor версих.
+        /// Only minor migrations are allowed
         /// </summary>
         Minor = 0x1,
 
         /// <summary>
-        /// Допускаются миграции мажорный версий
+        /// Only major migrations are allowed
         /// </summary>
-        Major = 0x2,
+        Major = 0x2
     }
 }

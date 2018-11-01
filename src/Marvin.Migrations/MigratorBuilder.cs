@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Marvin.Migrations.Info;
 using Marvin.Migrations.MigrationProviders;
+using Marvin.Migrations.Migrations;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -14,7 +14,7 @@ namespace Marvin.Migrations
 
         private AutoMigrationPolicy _upgradePolicy;
         private AutoMigrationPolicy _downgradePolicy;
-        private DbVersion? targetVersion;
+        private DbVersion? _targetVersion;
 
         private ILogger _logger;
         
@@ -62,7 +62,7 @@ namespace Marvin.Migrations
 
         public MigratorBuilder SetUpTargetVersion(DbVersion targetDbVersion)
         {
-            targetVersion = targetDbVersion;
+            _targetVersion = targetDbVersion;
             return this;
         }
 
@@ -77,7 +77,13 @@ namespace Marvin.Migrations
                 migrations.AddRange(migrationsProvider.GetMigrations(_dbProvider));
             }
             
-            return new DbMigrator(_upgradePolicy, _downgradePolicy, _logger);
+            return new DbMigrator(
+                _dbProvider, 
+                migrations, 
+                _upgradePolicy, 
+                _downgradePolicy, 
+                _targetVersion, 
+                _logger);
         }
 
     }
