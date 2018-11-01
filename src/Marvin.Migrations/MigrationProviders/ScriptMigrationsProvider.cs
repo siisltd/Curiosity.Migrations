@@ -46,10 +46,12 @@ namespace Marvin.Migrations.MigrationProviders
                 var script = File.ReadAllText(fileName);
                 if (match.Groups[5].Success)
                 {
+                    if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript)) throw new InvalidOperationException($"There is more than one downgrade script with version {version}");
                     scriptInfo.DownScript = script;
                 }
                 else
                 {
+                    if (!String.IsNullOrWhiteSpace(scriptInfo.UpScript)) throw new InvalidOperationException($"There is more than one upgrade script with version {version}");
                     scriptInfo.UpScript = script;
                     var comment = match.Groups[7];
                     scriptInfo.Comment = comment.Success 

@@ -43,6 +43,17 @@ namespace Marvin.Migrations
             _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
             
             _migrations = migrations.ToList();
+            
+            var  migrationCheckMap = new HashSet<DbVersion>();
+            foreach (var migration in _migrations)
+            {
+                if (migrationCheckMap.Contains(migration.Version))
+                    throw new InvalidOperationException(
+                        $"There is more than one migration with version {migration.Version}");
+
+                migrationCheckMap.Add(migration.Version);
+            }
+            
             _upgradePolicy = upgradePolicy;
             _downgradePolicy = downgradePolicy;
             _targetVersion = targetVersion;

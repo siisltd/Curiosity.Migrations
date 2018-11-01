@@ -80,6 +80,15 @@ namespace Marvin.Migrations.MigrationProviders
                     .ToList());
                 }
             }
+            var  migrationCheckMap = new HashSet<DbVersion>();
+            foreach (var migration in migrations)
+            {
+                if (migrationCheckMap.Contains(migration.Version))
+                    throw new InvalidOperationException(
+                        $"There is more than one migration with version {migration.Version}");
+
+                migrationCheckMap.Add(migration.Version);
+            }
 
             return migrations;
         }
