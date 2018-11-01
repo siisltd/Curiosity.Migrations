@@ -21,6 +21,11 @@ namespace Marvin.Migrations
         /// <summary>
         /// Only major migrations are allowed
         /// </summary>
-        Major = 0x2
+        Major = 0x2,
+        
+        /// <summary>
+        /// All migrations are allowed
+        /// </summary>
+        All = Minor | Major
     }
 }

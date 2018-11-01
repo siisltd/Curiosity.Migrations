@@ -36,7 +36,7 @@ namespace Marvin.Migrations
             ICollection<IMigration> migrations,
             AutoMigrationPolicy upgradePolicy, 
             AutoMigrationPolicy downgradePolicy,
-            DbVersion? targetVersion,
+            DbVersion? targetVersion = null,
             ILogger logger = null)
         {
             if (migrations == null) throw new ArgumentNullException(nameof(migrations));
@@ -132,17 +132,19 @@ namespace Marvin.Migrations
             
             var targetVersion = desiredMigrations.Last().Version;
             var lastMigrationVersion = new DbVersion(0,0);
+            var currentDbVersion = actualVersion;
             foreach (var migration in desiredMigrations)
             {
-                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version), _upgradePolicy))
+                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _upgradePolicy))
                 {
                     throw new MigrationException(MigrationError.PolicyError, $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
-                _logger.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName})...");
+                _logger?.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName})...");
                 await migration.UpgradeAsync();
                 await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
                 lastMigrationVersion = migration.Version;
-                _logger.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                currentDbVersion = migration.Version;
+                _logger?.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName}) completed.");
             }
             
             if (lastMigrationVersion != targetVersion) throw new MigrationException(
@@ -168,24 +170,26 @@ namespace Marvin.Migrations
         private async Task DowngradeAsync(DbVersion actualVersion)
         {
             var desiredMigrations = _migrations
-                .Where(x => x.Version > actualVersion)
+                .Where(x => x.Version < actualVersion)
                 .OrderByDescending(x => x.Version)
                 .ToList();
             if (desiredMigrations.Count == 0) return;
             
             var targetVersion = desiredMigrations.Last().Version;
             var lastMigrationVersion = new DbVersion(0,0);
+            var currentDbVersion = actualVersion;
             foreach (var migration in desiredMigrations)
             {
-                if (!IsMigrationAllowed(DbVersion.GetDifference(actualVersion, migration.Version), _downgradePolicy))
+                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _downgradePolicy))
                 {
                     throw new MigrationException(MigrationError.PolicyError, $"Policy restrict downgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
-                _logger.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName})...");
+                _logger?.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName})...");
                 await migration.DowngradeAsync();
                 await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
                 lastMigrationVersion = migration.Version;
-                _logger.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                currentDbVersion = migration.Version;
+                _logger?.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
             }
             
             if (lastMigrationVersion != targetVersion) throw new MigrationException(
