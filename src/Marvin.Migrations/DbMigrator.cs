@@ -14,6 +14,7 @@ namespace Marvin.Migrations
     {
         private readonly MigrationPolicy _upgradePolicy;
         private readonly MigrationPolicy _downgradePolicy;
+        private readonly ICollection<IMigration> _preMigrations;
 
         private readonly ILogger _logger;
 
@@ -25,17 +26,19 @@ namespace Marvin.Migrations
         /// <summary>
         /// Default realisation of <see cref="IDbMigrator"/>
         /// </summary>
-        /// <param name="dbProvider"></param>
-        /// <param name="migrations"></param>
-        /// <param name="upgradePolicy"></param>
-        /// <param name="downgradePolicy"></param>
-        /// <param name="targetVersion"></param>
-        /// <param name="logger"></param>
+        /// <param name="dbProvider">Provider for database</param>
+        /// <param name="migrations">Main migrations for changing database</param>
+        /// <param name="upgradePolicy">Policy for upgrading database</param>
+        /// <param name="downgradePolicy">Policy for downgrading database</param>
+        /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
+        /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version</param>
+        /// <param name="logger">Optional logger</param>
         public DbMigrator(
             IDbProvider dbProvider,
             ICollection<IMigration> migrations,
             MigrationPolicy upgradePolicy, 
             MigrationPolicy downgradePolicy,
+            ICollection<IMigration> preMigrations = null,
             DbVersion? targetVersion = null,
             ILogger logger = null)
         {
@@ -56,6 +59,7 @@ namespace Marvin.Migrations
             
             _upgradePolicy = upgradePolicy;
             _downgradePolicy = downgradePolicy;
+            _preMigrations = preMigrations ?? new List<IMigration>(0);
             _targetVersion = targetVersion;
             _logger = logger;
         }
@@ -101,6 +105,11 @@ namespace Marvin.Migrations
                 if (_migrations.All(x => x.Version != targetVersion))
                     throw new MigrationException(MigrationError.MigrationNotFound, $"Migration {targetVersion} not found");
             
+                
+                _logger?.LogInformation($"Executing pre migration scripts for {_dbProvider.DbName}...");
+                await ExecutePreMigrationScriptsAsync();
+                _logger?.LogInformation($"Executing pre migration scripts for{_dbProvider.DbName} completed.");
+                
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
                 if (targetVersion > dbVersion.Value)
                 {
@@ -124,6 +133,25 @@ namespace Marvin.Migrations
                 throw;
             }
            
+        }
+        /// <summary>
+        /// Upgrade database to new version
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="MigrationException"></exception>
+        private async Task ExecutePreMigrationScriptsAsync()
+        {
+            var desiredMigrations = _preMigrations
+                .OrderBy(x => x.Version)
+                .ToList();
+            if (desiredMigrations.Count == 0) return;
+            
+            foreach (var migration in desiredMigrations)
+            {
+               _logger?.LogInformation($"Executing pre migration script {migration.Version} ({migration.Comment}) for DB {_dbProvider.DbName}...");
+                await migration.UpgradeAsync();
+                _logger?.LogInformation($"Executing pre migration script {migration.Version} for DB {_dbProvider.DbName}) completed.");
+            }
         }
 
         /// <summary>
