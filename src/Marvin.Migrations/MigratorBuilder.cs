@@ -12,7 +12,7 @@ namespace Marvin.Migrations
     public class MigratorBuilder
     {
         private readonly List<IMigrationsProvider> _migrationsProviders;
-        private IDbProvider _dbProvider;
+        private IDbProviderFactory _dbProviderFactory;
 
         private MigrationPolicy _upgradePolicy;
         private MigrationPolicy _downgradePolicy;
@@ -98,13 +98,13 @@ namespace Marvin.Migrations
         }
 
         /// <summary>
-        /// Setup provider to database access
+        /// Setup factory for provider to database access
         /// </summary>
-        /// <param name="dbProvider"></param>
+        /// <param name="dbProviderFactory"></param>
         /// <returns></returns>
-        public MigratorBuilder UserDbProvider(IDbProvider dbProvider)
+        public MigratorBuilder UserDbProviderFactory(IDbProviderFactory dbProviderFactory)
         {
-            _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+            _dbProviderFactory = dbProviderFactory ?? throw new ArgumentNullException(nameof(dbProviderFactory));
             return this;
         }
 
@@ -130,17 +130,18 @@ namespace Marvin.Migrations
         /// <exception cref="InvalidOperationException">Throws when <see cref="IDbProvider"/> or <see cref="IMigration"/> does not specified</exception>
         public IDbMigrator Build()
         {
-            if (_dbProvider == null) throw new InvalidOperationException($"{typeof(IDbProvider)} not set up. Use {nameof(UserDbProvider)}");
+            if (_dbProviderFactory == null) throw new InvalidOperationException($"{typeof(IDbProvider)} not set up. Use {nameof(UserDbProviderFactory)}");
             if (_migrationsProviders.Count == 0) throw new InvalidOperationException($"{typeof(IMigrationsProvider)} not set up. Use {nameof(UseScriptMigrations)} or {nameof(UseCodeMigrations)}");
             
             var migrations = new List<IMigration>();
+            var dbProvider = _dbProviderFactory.CreateDbProvider();
             foreach (var migrationsProvider in _migrationsProviders)
             {
-                migrations.AddRange(migrationsProvider.GetMigrations(_dbProvider));
+                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider));
             }
             
             return new DbMigrator(
-                _dbProvider, 
+                dbProvider, 
                 migrations, 
                 _upgradePolicy, 
                 _downgradePolicy, 

@@ -15,13 +15,20 @@ namespace Marvin.Migrations.PostgreSQL
         public static MigratorBuilder UsePostgreSQL(
             this MigratorBuilder builder,
             string connectionString,
-            DbVersion? targetVersion = null)
+            string migrationTableHistoryName= null,
+            string databaseEncoding = null,
+            string lcCollate = null,
+            string lcCtype = null, 
+            int? connectionLimit = null)
         {
-            if (targetVersion.HasValue)
-            {
-                builder.SetUpTargetVersion(targetVersion.Value);
-            }
-            builder.UserDbProvider(new PostgreDbProvider(connectionString));
+            var options = new PostgreDbProviderOptions(
+                connectionString,
+                migrationTableHistoryName,
+                databaseEncoding,
+                lcCollate,
+                lcCtype,
+                connectionLimit);
+            builder.UserDbProviderFactory(new PostgreDbProviderFactory(options));
             return builder;
         }
     }

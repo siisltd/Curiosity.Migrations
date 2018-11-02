@@ -10,7 +10,7 @@ namespace Marvin.Migrations
     /// <summary>
     /// Default realisation of <see cref="IDbMigrator"/>
     /// </summary>
-    public sealed class DbMigrator : IDbMigrator
+    public sealed class DbMigrator : IDbMigrator, IDisposable
     {
         private readonly MigrationPolicy _upgradePolicy;
         private readonly MigrationPolicy _downgradePolicy;
@@ -83,11 +83,11 @@ namespace Marvin.Migrations
         {
             try
             {
+                await _dbProvider.OpenConnectionAsync();
                 await _dbProvider.CreateDatabaseIfNotExistsAsync();
                 await _dbProvider.CreateHistoryTableIfNotExistsAsync();
                 var dbVersion = await _dbProvider
                                     .GetDbVersionSafeAsync()
-                                    .ConfigureAwait(false)
                                 ?? new DbVersion?(new DbVersion(0,0));
 
             
@@ -114,6 +114,8 @@ namespace Marvin.Migrations
                     await DowngradeAsync(dbVersion.Value, targetVersion);
                     _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} completed.");
                 }
+
+                await _dbProvider.CloseConnectionAsync();
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed.");
             }
             catch (Exception e)
@@ -180,11 +182,12 @@ namespace Marvin.Migrations
                     return false;
             }
         }
-        
+
         /// <summary>
         /// Downgrade database to specific version
         /// </summary>
         /// <param name="actualVersion"></param>
+        /// <param name="targetVersion"></param>
         /// <returns></returns>
         /// <exception cref="MigrationException"></exception>
         private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion)
@@ -214,6 +217,11 @@ namespace Marvin.Migrations
             if (lastMigrationVersion != targetVersion) throw new MigrationException(
                 MigrationError.MigratingError, 
                 $"Can not downgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
+        }
+
+        public void Dispose()
+        {
+            _dbProvider?.Dispose();
         }
     }
 }
