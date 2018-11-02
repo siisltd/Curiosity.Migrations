@@ -22,6 +22,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// </remarks>
         private const string PostgreDefaultDatabase = "postgres";
 
+        /// <inheritdoc />
         public string DbName { get; }
 
         private readonly string _connectionString;

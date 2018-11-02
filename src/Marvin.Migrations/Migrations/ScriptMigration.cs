@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Marvin.Migrations.Migrations
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Migration that uses raw sql 

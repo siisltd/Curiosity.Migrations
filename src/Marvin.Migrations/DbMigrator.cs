@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Marvin.Migrations.Migrations;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -247,6 +246,7 @@ namespace Marvin.Migrations
                 $"Can not downgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _dbProvider?.Dispose();

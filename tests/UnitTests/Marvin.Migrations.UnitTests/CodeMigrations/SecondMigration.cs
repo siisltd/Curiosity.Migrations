@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Marvin.Migrations.Migrations;
 
 namespace Marvin.Migrations.UnitTests.CodeMigrations
 {

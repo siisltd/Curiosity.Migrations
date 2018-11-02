@@ -59,21 +59,25 @@ namespace Marvin.Migrations
             Minor = GetCorrectNumber(int.Parse(mainValues[1]));
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is DbVersion version && Equals(version);
         }
 
+        /// <inheritdoc />
         public bool Equals(DbVersion other)
         {
             return Major == other.Major && Minor == other.Minor;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"{Major}.{Minor}";
         }
 
+        /// <inheritdoc />
         public int CompareTo(object obj)
         {
             var version = (DbVersion)obj;
@@ -87,6 +91,7 @@ namespace Marvin.Migrations
            return Minor.CompareTo(version.Minor);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked
