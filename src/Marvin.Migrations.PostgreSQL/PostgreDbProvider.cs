@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -12,7 +13,6 @@ namespace Marvin.Migrations.PostgreSQL
     {
         private const string CheckDbExistQueryFormat = "SELECT 1 AS result FROM pg_database WHERE datname='{0}'";
 
-        private const string MigrationTableName = "MigrationHistory";
 
         /// <summary>
         /// 'Postgres' database is garanteed to exist, need to create own db
@@ -27,98 +27,44 @@ namespace Marvin.Migrations.PostgreSQL
         private readonly string _connectionString;
         private readonly string _connectionStringWithoutInitialCatalog;
 
+        private NpgsqlConnection _connection;
+
+        private readonly PostgreDbProviderOptions _options;
+        
         /// <summary>
         /// Provide access to Postgre database
         /// </summary>
-        /// <param name="connectionString">String with connection params</param>
-        public PostgreDbProvider(string connectionString)
+        /// <param name="options">Options to connect and manage database</param>
+        public PostgreDbProvider(PostgreDbProviderOptions options)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(nameof(connectionString));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrEmpty(options.ConnectionString)) throw new ArgumentNullException(nameof(options.ConnectionString));
 
-            _connectionString = connectionString;
 
-            var connectionBuilder = new NpgsqlConnectionStringBuilder(connectionString);
+            var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database;
             _connectionString = connectionBuilder.ConnectionString;
 
             var tempConnectionBuilder =
-                new NpgsqlConnectionStringBuilder(connectionString)
+                new NpgsqlConnectionStringBuilder(options.ConnectionString)
                 {
                     Database = PostgreDefaultDatabase
                 };
             _connectionStringWithoutInitialCatalog = tempConnectionBuilder.ConnectionString;
-        }
 
-
-        /// <inheritdoc />
-        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
-        {
-            try
-            {
-                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-
-                    var result = await InternalExecuteScalarScriptAsync(
-                            connection,
-                            String.Format(CheckDbExistQueryFormat, DbName))
-                        .ConfigureAwait(false);
-                    if (result == null || (Int32) result != 1)
-                    {
-                        return DbState.NotCreated;
-                    }
-                }
-
-                using (var connection = new NpgsqlConnection(_connectionString))
-                {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-                    var dbVersion = await InternalGetDbVersionAsync(connection)
-                        .ConfigureAwait(false);
-                    if (dbVersion == null) return DbState.Outdated;
-                    if (dbVersion.Value == desireDbVersion) return DbState.Ok;
-                    return dbVersion.Value < desireDbVersion
-                        ? DbState.Outdated
-                        : DbState.Newer;
-                }
-            }
-            catch (Exception)
-            {
-                return DbState.Unknown;
-            }
+            _options = options;
         }
 
         /// <inheritdoc />
-        public async Task CreateDatabaseIfNotExistsAsync()
+        public async Task OpenConnectionAsync()
         {
-            var createDbQuery = $"CREATE DATABASE \"{DbName}\" "
-                                + @"WITH 
-                           ENCODING = 'UTF8'
-                           LC_COLLATE = 'Russian_Russia.1251'
-                           LC_CTYPE = 'Russian_Russia.1251'
-                           CONNECTION LIMIT = -1; ";
-
+            if (_connection != null && _connection.State != ConnectionState.Closed && _connection.State != ConnectionState.Broken)
+                throw new InvalidOperationException("Connection have already opened");
+            
             try
             {
-                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-
-                    var result = await InternalExecuteScalarScriptAsync(
-                            connection,
-                            String.Format(CheckDbExistQueryFormat, DbName))
-                        .ConfigureAwait(false);
-                    if (result == null || (Int32) result != 1)
-                    {
-                        await InternalExecuteScriptAsync(connection, createDbQuery)
-                            .ConfigureAwait(false);
-                    }
-                }
+                _connection = new NpgsqlConnection(_connectionString);
+                await _connection.OpenAsync();
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -146,32 +92,115 @@ namespace Marvin.Migrations.PostgreSQL
         }
 
 
+        /// <inheritdoc />
+        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
+        {
+            try
+            {
+                var result = await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName))
+                    .ConfigureAwait(false);
+                if (result == null || (Int32) result != 1)
+                {
+                    return DbState.NotCreated;
+                }
 
+                var dbVersion = await InternalGetDbVersionAsync()
+                    .ConfigureAwait(false);
+                if (dbVersion == null) return DbState.Outdated;
+                if (dbVersion.Value == desireDbVersion) return DbState.Ok;
+                return dbVersion.Value < desireDbVersion
+                    ? DbState.Outdated
+                    : DbState.Newer;
+            }
+            catch (Exception)
+            {
+                return DbState.Unknown;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task CreateDatabaseIfNotExistsAsync()
+        {
+            AssertConnection();
+            
+            var createDbQueryFormat = "CREATE DATABASE \"{0}\" "
+                                + @"WITH 
+                           ENCODING = '{1}'
+                           LC_COLLATE = '{2}'
+                           LC_CTYPE = '{3}'
+                           CONNECTION LIMIT = {4}; ";
+
+            var createDbQueryString = String.Format(createDbQueryFormat,
+                DbName,
+                _options.DatabaseEncoding,
+                _options.LC_COLLATE,
+                _options.LC_CTYPE,
+                _options.ConnectionLimit);
+            try
+            {
+                var result =
+                    await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
+                    if (result == null || (Int32) result != 1)
+                    {
+                        await InternalExecuteScriptAsync(createDbQueryString);
+                    }
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
+            }
+        }
+
+        private void AssertConnection()
+        {
+            if (_connection == null || _connection.State == ConnectionState.Closed || _connection.State == ConnectionState.Broken)
+                throw new InvalidOperationException($"Connection is not opened. Use {nameof(OpenConnectionAsync)}");
+        }
+        
         private async Task ExecuteScriptAsync(string connectionString, string script)
         {
             using (var connection = new NpgsqlConnection(connectionString))
             {
-                await connection
-                    .OpenAsync()
-                    .ConfigureAwait(false);
-                await InternalExecuteScriptAsync(connection, script)
-                    .ConfigureAwait(false);
+                await connection.OpenAsync();
+                await InternalExecuteScriptAsync(script);
             }
         }
 
-        private async Task InternalExecuteScriptAsync(NpgsqlConnection opennedConnection, string script)
+        private async Task InternalExecuteScriptAsync(string script)
         {
-            var command = opennedConnection.CreateCommand();
+            AssertConnection();
+            
+            var command = _connection.CreateCommand();
             command.CommandText = script;
             await command
-                .ExecuteNonQueryAsync()
-                .ConfigureAwait(false);
+                .ExecuteNonQueryAsync();
         }
 
         /// <inheritdoc />
         public async Task CreateHistoryTableIfNotExistsAsync()
         {
-            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationTableName}\" "
+            AssertConnection();
+            
+            var script = $"CREATE TABLE IF NOT EXISTS public.\"{_options.MigrationHistoryTableName}\" "
                          + @"( 
                          version text 
                         ) 
@@ -213,16 +242,9 @@ namespace Marvin.Migrations.PostgreSQL
         {
             try
             {
-                using (var connection = new NpgsqlConnection(_connectionString))
-                {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-                    var version = await InternalGetDbVersionAsync(connection)
-                        .ConfigureAwait(false);
+                var version = await InternalGetDbVersionAsync();
 
-                    return version;
-                }
+                return version;
             }
             catch (Exception)
             {
@@ -230,18 +252,18 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
-        private async Task<DbVersion?> InternalGetDbVersionAsync(NpgsqlConnection opennedConnection)
+        private async Task<DbVersion?> InternalGetDbVersionAsync()
         {
-            var query = $"SELECT * FROM public.\"{MigrationTableName}\" LIMIT 1;";
+            var query = $"SELECT * FROM public.\"{_options.MigrationHistoryTableName}\" LIMIT 1;";
 
-            var command = opennedConnection.CreateCommand();
+            var command = _connection.CreateCommand();
             command.CommandText = query;
 
-            using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+            using (var reader = await command.ExecuteReaderAsync())
             {
                 if (!reader.HasRows) return default(DbVersion?);
 
-                await reader.ReadAsync().ConfigureAwait(false);
+                await reader.ReadAsync();
                 var stringVersion = reader.GetString(0);
 
                 if (!DbVersion.TryParse(stringVersion, out var version))
@@ -256,14 +278,16 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
-            var script = $"DELETE FROM public.\"{MigrationTableName}\"; "
-                         + $"INSERT INTO public.\"{MigrationTableName}\"("
+            AssertConnection();
+            
+            var script = $"DELETE FROM public.\"{_options.MigrationHistoryTableName}\"; "
+                         + $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\"("
                          + "version) "
                          + $" VALUES ('{version.ToString()}'); ";
 
             try
             {
-                await ExecuteScriptAsync(_connectionString, script);
+                await ExecuteScriptAsync(script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -293,10 +317,11 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task ExecuteScriptAsync(string script)
         {
+            AssertConnection();
+            
             try
             {
-
-                await ExecuteScriptAsync(_connectionString, script);
+                await ExecuteScriptAsync(script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -326,19 +351,12 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptAsync(string script)
         {
+            AssertConnection();
+            
             try
             {
-
-                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-
-                    var result = await InternalExecuteScalarScriptAsync(connection, script)
-                        .ConfigureAwait(false);
-                    return result;
-                }
+                var result = await InternalExecuteScalarScriptAsync(_connection, script);
+                return result;
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -365,19 +383,18 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
-        private Task<object> InternalExecuteScalarScriptAsync(
-            NpgsqlConnection openedConnection,
-            string query)
+        private Task<object> InternalExecuteScalarScriptAsync(NpgsqlConnection connection, string query)
         {
-            var command = openedConnection.CreateCommand();
+            var command = connection.CreateCommand();
             command.CommandText = query;
-            return command
-                .ExecuteScalarAsync();
+            return command.ExecuteScalarAsync();
         }
 
         /// <inheritdoc />
         public async Task ExecuteScriptWithoutInitialCatalogAsync(string script)
         {
+            AssertConnection();
+            
             try
             {
                 await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script);
@@ -410,16 +427,15 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script)
         {
+            AssertConnection();
+            
             try
             {
                 using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
-                    await connection
-                        .OpenAsync()
-                        .ConfigureAwait(false);
-
-                    var result = await InternalExecuteScalarScriptAsync(connection, script)
-                        .ConfigureAwait(false);
+                    await connection.OpenAsync();
+                    var result = await InternalExecuteScalarScriptAsync(connection, script);
+                    
                     return result;
                 }
             }
@@ -446,6 +462,49 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
             }
+        }
+
+        /// <inheritdoc />
+        public Task CloseConnectionAsync()
+        { 
+            try
+            {
+                if (_connection.State == ConnectionState.Closed) return Task.CompletedTask;
+                
+                _connection.Close();
+                
+                return Task.CompletedTask;
+
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (NpgsqlException e)
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _connection?.Dispose();
         }
     }
 }

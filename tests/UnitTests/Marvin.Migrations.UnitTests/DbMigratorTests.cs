@@ -29,6 +29,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 initialDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -90,6 +91,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -199,6 +201,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -259,6 +262,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -312,6 +316,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -366,6 +371,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -424,6 +430,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();
@@ -484,6 +491,7 @@ namespace Marvin.Migrations.UnitTests
                 migrations,
                 policy,
                 policy,
+                null,
                 targetDbVersion);
 
             var result = await migrator.MigrateSafeAsync();

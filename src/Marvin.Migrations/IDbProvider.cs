@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Marvin.Migrations
@@ -5,13 +6,19 @@ namespace Marvin.Migrations
     /// <summary>
     /// Provide access to underlying database
     /// </summary>
-    public interface IDbProvider
+    public interface IDbProvider : IDisposable
     {
         /// <summary>
         /// Name of connected database
         /// </summary>
         string DbName { get; }
 
+        /// <summary>
+        /// Open connection to database
+        /// </summary>
+        /// <returns></returns>
+        Task OpenConnectionAsync();
+        
         /// <summary>
         /// Returns actual DB state
         /// </summary>
@@ -62,5 +69,11 @@ namespace Marvin.Migrations
         
         /// <exception cref="MigrationException"></exception>
         Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script);
+
+        /// <summary>
+        /// Close connection to database
+        /// </summary>
+        /// <returns></returns>
+        Task CloseConnectionAsync();
     }
 }

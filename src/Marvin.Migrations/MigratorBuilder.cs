@@ -12,7 +12,11 @@ namespace Marvin.Migrations
     public class MigratorBuilder
     {
         private readonly List<IMigrationsProvider> _migrationsProviders;
-        private IDbProvider _dbProvider;
+        
+        
+        private readonly List<IMigrationsProvider> _preMigrationsProviders;
+        
+        private IDbProviderFactory _dbProviderFactory;
 
         private MigrationPolicy _upgradePolicy;
         private MigrationPolicy _downgradePolicy;
@@ -24,6 +28,7 @@ namespace Marvin.Migrations
         public MigratorBuilder()
         {
             _migrationsProviders = new List<IMigrationsProvider>();
+            _preMigrationsProviders = new List<IMigrationsProvider>();
             _upgradePolicy = MigrationPolicy.All;
             _downgradePolicy = MigrationPolicy.All;
             _targetVersion = default(DbVersion?);
@@ -39,6 +44,17 @@ namespace Marvin.Migrations
             _migrationsProviders.Add(scriptMigrationProvider);
             return scriptMigrationProvider;
         }
+        
+        /// <summary>
+        /// Allow to add <see cref="ScriptMigration"/> scripts that will be executed before main migration
+        /// </summary>
+        /// <returns>Provider of <see cref="ScriptMigration"/></returns>
+        public ScriptMigrationsProvider UseScriptPreMigrations()
+        {
+            var scriptMigrationProvider = new ScriptMigrationsProvider();
+            _preMigrationsProviders.Add(scriptMigrationProvider);
+            return scriptMigrationProvider;
+        }
 
         /// <summary>
         /// Allow to add <see cref="CodeMigration"/> migrations from assembly
@@ -48,6 +64,17 @@ namespace Marvin.Migrations
         {
             var codeMigrationProvider = new CodeMigrationsProvider();
             _migrationsProviders.Add(codeMigrationProvider);
+            return codeMigrationProvider;
+        }
+        
+        /// <summary>
+        /// Allow to add <see cref="CodeMigration"/> scripts that will be executed before main migration
+        /// </summary>
+        /// <returns>Provider of <see cref="CodeMigration"/></returns>
+        public CodeMigrationsProvider UseCodePreMigrations()
+        {
+            var codeMigrationProvider = new CodeMigrationsProvider();
+            _preMigrationsProviders.Add(codeMigrationProvider);
             return codeMigrationProvider;
         }
 
@@ -98,13 +125,13 @@ namespace Marvin.Migrations
         }
 
         /// <summary>
-        /// Setup provider to database access
+        /// Setup factory for provider to database access
         /// </summary>
-        /// <param name="dbProvider"></param>
+        /// <param name="dbProviderFactory"></param>
         /// <returns></returns>
-        public MigratorBuilder UserDbProvider(IDbProvider dbProvider)
+        public MigratorBuilder UserDbProviderFactory(IDbProviderFactory dbProviderFactory)
         {
-            _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+            _dbProviderFactory = dbProviderFactory ?? throw new ArgumentNullException(nameof(dbProviderFactory));
             return this;
         }
 
@@ -130,20 +157,29 @@ namespace Marvin.Migrations
         /// <exception cref="InvalidOperationException">Throws when <see cref="IDbProvider"/> or <see cref="IMigration"/> does not specified</exception>
         public IDbMigrator Build()
         {
-            if (_dbProvider == null) throw new InvalidOperationException($"{typeof(IDbProvider)} not set up. Use {nameof(UserDbProvider)}");
+            if (_dbProviderFactory == null) throw new InvalidOperationException($"{typeof(IDbProvider)} not set up. Use {nameof(UserDbProviderFactory)}");
             if (_migrationsProviders.Count == 0) throw new InvalidOperationException($"{typeof(IMigrationsProvider)} not set up. Use {nameof(UseScriptMigrations)} or {nameof(UseCodeMigrations)}");
+            
+            var dbProvider = _dbProviderFactory.CreateDbProvider();
             
             var migrations = new List<IMigration>();
             foreach (var migrationsProvider in _migrationsProviders)
             {
-                migrations.AddRange(migrationsProvider.GetMigrations(_dbProvider));
+                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider));
+            }
+            
+            var preMigrations = new List<IMigration>();
+            foreach (var migrationsProvider in _preMigrationsProviders)
+            {
+                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider));
             }
             
             return new DbMigrator(
-                _dbProvider, 
+                dbProvider, 
                 migrations, 
                 _upgradePolicy, 
                 _downgradePolicy, 
+                preMigrations,
                 _targetVersion, 
                 _logger);
         }
