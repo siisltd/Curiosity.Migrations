@@ -33,10 +33,26 @@ namespace Marvin.Migrations
         Task CreateDatabaseIfNotExistsAsync();
 
         /// <summary>
+        /// Check if database already exists
+        /// </summary>
+        /// <param name="databaseName">Database name</param>
+        /// <returns><see langword="true"/> if exists, <see langword="false"/> if not</returns>
+        /// <exception cref="MigrationException"></exception>
+        Task<bool> CheckIfDatabaseExistsAsync(string databaseName);
+
+        /// <summary>
         /// Create table for storing migration history info no exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
         Task CreateHistoryTableIfNotExistsAsync();
+
+        /// <summary>
+        /// Check if table already exists
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <returns><see langword="true"/> if exists, <see langword="false"/> if not</returns>
+        /// <exception cref="MigrationException"></exception>
+        Task<bool> CheckIfTableExistsAsync(string tableName);
 
         /// <summary>
         /// Returns actual database version from migration history table

@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -8,7 +9,6 @@ namespace Marvin.Migrations.PostgreSQL
     /// <summary>
     /// Provide access to Postgre database
     /// </summary>
-    //todo reduce connections usage
     public class PostgreDbProvider : IDbProvider
     {
         private const string CheckDbExistQueryFormat = "SELECT 1 AS result FROM pg_database WHERE datname='{0}'";
@@ -44,7 +44,7 @@ namespace Marvin.Migrations.PostgreSQL
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database;
             _connectionString = connectionBuilder.ConnectionString;
-
+            
             var tempConnectionBuilder =
                 new NpgsqlConnectionStringBuilder(options.ConnectionString)
                 {
@@ -122,9 +122,9 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task CreateDatabaseIfNotExistsAsync()
         {
             AssertConnection();
-            
+
             var createDbQueryFormat = "CREATE DATABASE \"{0}\" "
-                                + @"WITH 
+                                      + @"WITH 
                            ENCODING = '{1}'
                            LC_COLLATE = '{2}'
                            LC_CTYPE = '{3}'
@@ -140,10 +140,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 var result =
                     await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
-                    if (result == null || (Int32) result != 1)
-                    {
-                        await InternalExecuteScriptAsync(createDbQueryString);
-                    }
+                if (result == null || (Int32) result != 1)
+                {
+                    await InternalExecuteScriptAsync(createDbQueryString);
+                }
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -167,6 +167,36 @@ namespace Marvin.Migrations.PostgreSQL
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> CheckIfDatabaseExistsAsync(string databaseName)
+        {
+            try
+            {
+                var result =
+                    await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
+                return result != null && (Int32) result == 1;
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.Unknown, $"Can not check existence of {DbName} database", e);
             }
         }
 
@@ -235,6 +265,54 @@ namespace Marvin.Migrations.PostgreSQL
                 throw new MigrationException(MigrationError.CreatingHistoryTable, $"Can not create database {DbName}",
                     e);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> CheckIfTableExistsAsync(string tableName)
+        {
+            if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
+            
+            try
+            {
+                var checkTableExistenceQuery = @"SELECT EXISTS (
+                                                       SELECT 1
+                                                       FROM   information_schema.tables "
+                                               + $" WHERE  table_schema = '{GetSchemeNameFromConnectionString()}'"
+                                               + $" AND    table_name = '{tableName}');";
+                var result = await ExecuteScalarScriptAsync(checkTableExistenceQuery);
+                return result != null && (Int32) result == 1;
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("08")
+                      || e.SqlState == "3D000"
+                      || e.SqlState == "3F000")
+            {
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (PostgresException e)
+                when (e.SqlState.StartsWith("28")
+                      || e.SqlState == "OP000"
+                      || e.SqlState.StartsWith("42"))
+            {
+                throw new MigrationException(MigrationError.AuthorizationError,
+                    $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (Exception e)
+            {
+                throw new MigrationException(MigrationError.Unknown, $"Can not check existence of {DbName} database",
+                    e);
+            }
+        }
+
+        private string GetSchemeNameFromConnectionString()
+        {
+            const string schemeParseRegexPattern = "initial schema ?= ?(.+)";
+            var regex = new Regex(schemeParseRegexPattern);
+            var matches = regex.Match(_connectionString);
+
+            return matches.Success && matches.Groups.Count > 1 && matches.Groups[1].Success
+                ? matches.Groups[1].Value
+                : "public";
         }
 
         /// <inheritdoc />
