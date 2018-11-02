@@ -7,15 +7,29 @@ namespace Marvin.Migrations.PostgreSQL
     /// </summary>
     public class PostgreDbProviderOptions : IDbProviderOptions
     {
-        
+        /// <summary>
+        /// Default value for <see cref="MigrationHistoryTableName"/>
+        /// </summary>
         public const string DefaultMigrationTableName = "MigrationHistory";
         
+        /// <summary>
+        /// Default value for <see cref="DatabaseEncoding"/>
+        /// </summary>
         public const string DefaultDatabaseEncoding = "UTF8";
         
+        /// <summary>
+        /// Default value for <see cref="LC_COLLATE"/>
+        /// </summary>
         public const string DefaultLC_COLLATE= "Russian_Russia.1251";
         
+        /// <summary>
+        /// Default value for <see cref="LC_CTYPE"/>
+        /// </summary>
         public const string DefaultLC_CTYPE= "Russian_Russia.1251";
 
+        /// <summary>
+        /// Default value for <see cref="ConnectionLimit"/>
+        /// </summary>
         public const int DefaultConnectionLimit = -1;
         
         /// <inheritdoc />

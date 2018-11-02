@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using Marvin.Migrations.MigrationProviders;
-using Marvin.Migrations.Migrations;
 using Moq;
 using Xunit;
 

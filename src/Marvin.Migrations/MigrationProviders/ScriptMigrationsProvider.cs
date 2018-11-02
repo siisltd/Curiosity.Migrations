@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Marvin.Migrations.Migrations;
 
-namespace Marvin.Migrations.MigrationProviders
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Class for providing migration that uses raq sql scripts
