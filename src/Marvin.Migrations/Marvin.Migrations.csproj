@@ -8,7 +8,6 @@
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     </ItemGroup>
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
         <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
