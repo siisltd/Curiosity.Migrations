@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Marvin.Migrations.MigrationProviders;
-using Marvin.Migrations.Migrations;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -141,8 +139,8 @@ namespace Marvin.Migrations
         /// <param name="targetDbVersion">Target database version</param>
         /// <returns></returns>
         /// <remarks>
-        /// If <param name="targetDbVersion"></param> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
-        /// If <param name="targetDbVersion"></param> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
+        /// If <paramref name="targetDbVersion"></paramref> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
+        /// If <paramref name="targetDbVersion"></paramref> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
         /// </remarks>
         public MigratorBuilder SetUpTargetVersion(DbVersion targetDbVersion)
         {

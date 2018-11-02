@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Marvin.Migrations.Migrations;
 
-namespace Marvin.Migrations.MigrationProviders
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Class for providing migrations from different sources

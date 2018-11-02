@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Marvin.Migrations.Migrations;
 
-namespace Marvin.Migrations.MigrationProviders
+namespace Marvin.Migrations
 {
     /// <summary>
     /// Class for providing <see cref="CodeMigration"/>
