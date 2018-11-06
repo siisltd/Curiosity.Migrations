@@ -89,6 +89,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
@@ -99,6 +103,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
         {
+            AssertConnection();
+            
             try
             {
                 var result = await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName))
@@ -146,7 +152,7 @@ namespace Marvin.Migrations.PostgreSQL
                     await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
                 if (result == null || (Int32) result != 1)
                 {
-                    await InternalExecuteScriptAsync(createDbQueryString);
+                    await InternalExecuteScriptAsync(_connection, createDbQueryString);
                 }
             }
             catch (PostgresException e)
@@ -168,6 +174,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
@@ -177,6 +187,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<bool> CheckIfDatabaseExistsAsync(string databaseName)
         {
+            AssertConnection();
+            
             try
             {
                 var result =
@@ -198,6 +210,10 @@ namespace Marvin.Migrations.PostgreSQL
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.Unknown, $"Can not check existence of {DbName} database", e);
@@ -215,11 +231,11 @@ namespace Marvin.Migrations.PostgreSQL
             using (var connection = new NpgsqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-                await InternalExecuteScriptAsync(script);
+                await InternalExecuteScriptAsync(connection, script);
             }
         }
 
-        private async Task InternalExecuteScriptAsync(string script)
+        private async Task InternalExecuteScriptAsync(NpgsqlConnection connection, string script)
         {
             AssertConnection();
             
@@ -232,8 +248,6 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task CreateHistoryTableIfNotExistsAsync()
         {
-            AssertConnection();
-            
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
                          + @"( 
                          version text 
@@ -243,7 +257,7 @@ namespace Marvin.Migrations.PostgreSQL
                         ); ";
             try
             {
-                await ExecuteScriptAsync(script);
+                await InternalExecuteScriptAsync(_connection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -264,6 +278,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.CreatingHistoryTable, $"Can not create database {DbName}",
@@ -275,6 +293,7 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task<bool> CheckIfTableExistsAsync(string tableName)
         {
             if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
+            AssertConnection();
             
             try
             {
@@ -283,7 +302,7 @@ namespace Marvin.Migrations.PostgreSQL
                                                        FROM   information_schema.tables "
                                                + $" WHERE  table_schema = '{GetSchemeNameFromConnectionString()}'"
                                                + $" AND    table_name = '{tableName}');";
-                var result = await ExecuteScalarScriptAsync(checkTableExistenceQuery);
+                var result = await InternalExecuteScalarScriptAsync(_connection, checkTableExistenceQuery);
                 return result != null && (Int32) result == 1;
             }
             catch (PostgresException e)
@@ -300,6 +319,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -360,8 +383,6 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
-            AssertConnection();
-            
             var script = $"DELETE FROM public.\"{_options.MigrationHistoryTableName}\"; "
                          + $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\"("
                          + "version) "
@@ -369,7 +390,7 @@ namespace Marvin.Migrations.PostgreSQL
 
             try
             {
-                await ExecuteScriptAsync(script);
+                await InternalExecuteScriptAsync(_connection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -389,6 +410,10 @@ namespace Marvin.Migrations.PostgreSQL
             catch (NpgsqlException e)
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -399,11 +424,9 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task ExecuteScriptAsync(string script)
         {
-            AssertConnection();
-            
             try
             {
-                await ExecuteScriptAsync(script);
+                await InternalExecuteScriptAsync(_connection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -423,6 +446,10 @@ namespace Marvin.Migrations.PostgreSQL
             catch (NpgsqlException e)
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -458,6 +485,10 @@ namespace Marvin.Migrations.PostgreSQL
             catch (NpgsqlException e)
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -500,6 +531,10 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
@@ -510,14 +545,14 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script)
         {
             AssertConnection();
-            
+
             try
             {
                 using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
                     await connection.OpenAsync();
                     var result = await InternalExecuteScalarScriptAsync(connection, script);
-                    
+
                     return result;
                 }
             }
@@ -539,6 +574,10 @@ namespace Marvin.Migrations.PostgreSQL
             catch (NpgsqlException e)
             {
                 throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception e)
             {
