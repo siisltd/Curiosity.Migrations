@@ -74,8 +74,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public PostgreDbProviderOptions(
             string connectionString, 
-            string migrationHistoryTableName = null, 
-            string databaseEncoding = null, 
+            string migrationHistoryTableName = DefaultMigrationTableName, 
+            string databaseEncoding = DefaultDatabaseEncoding, 
             string lcCollate = DefaultLC_COLLATE, 
             string lcCtype = DefaultLC_CTYPE, 
             int? connectionLimit = DefaultConnectionLimit)
