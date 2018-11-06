@@ -239,7 +239,7 @@ namespace Marvin.Migrations.PostgreSQL
         {
             AssertConnection();
             
-            var command = _connection.CreateCommand();
+            var command = connection.CreateCommand();
             command.CommandText = script;
             await command
                 .ExecuteNonQueryAsync();
