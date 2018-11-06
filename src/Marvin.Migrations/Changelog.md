@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.3] - 2018-11-06
+
+### Added
+
+- `MigrationHistoryTableName` available as property of `IDbProvider`
+
 ## [0.2.2] - 2018-11-02
 
 ### Fixed
