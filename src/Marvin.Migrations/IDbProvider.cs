@@ -12,6 +12,11 @@ namespace Marvin.Migrations
         /// Name of connected database
         /// </summary>
         string DbName { get; }
+        
+        /// <summary>
+        /// Name of table with migration history
+        /// </summary>
+        string MigrationHistoryTableName { get; }
 
         /// <summary>
         /// Open connection to database

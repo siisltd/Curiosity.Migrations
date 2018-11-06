@@ -25,6 +25,9 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public string DbName { get; }
 
+        /// <inheritdoc />
+        public string MigrationHistoryTableName { get; }
+
         private readonly string _connectionString;
         private readonly string _connectionStringWithoutInitialCatalog;
 
@@ -41,7 +44,7 @@ namespace Marvin.Migrations.PostgreSQL
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrEmpty(options.ConnectionString)) throw new ArgumentNullException(nameof(options.ConnectionString));
 
-
+            MigrationHistoryTableName = options.MigrationHistoryTableName;
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database;
             _connectionString = connectionBuilder.ConnectionString;
@@ -231,7 +234,7 @@ namespace Marvin.Migrations.PostgreSQL
         {
             AssertConnection();
             
-            var script = $"CREATE TABLE IF NOT EXISTS public.\"{_options.MigrationHistoryTableName}\" "
+            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
                          + @"( 
                          version text 
                         ) 
