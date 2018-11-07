@@ -13,7 +13,7 @@ namespace Marvin.Migrations.PostgreSql.IntegrationTests
         {
             var random = new Random();
             DbName = $"temp_{random.Next(100)}";
-            Options = new PostgreDbProviderOptions($"Server=dev2.siisltd.ru;Port=5432; Database={DbName}; User Id=postgres; Password=18082034", lcCollate: "C", lcCtype: "C", databaseEncoding: "SQL_ASCII");
+            Options = new PostgreDbProviderOptions($"connection_string", lcCollate: "C", lcCtype: "C", databaseEncoding: "SQL_ASCII");
             DbProvider = new PostgreDbProvider(Options);
         }
         
