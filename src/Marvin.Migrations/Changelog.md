@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4] - 2018-11-07
+
+### Changed
+
+- Creating `MigrationHistory` table after executing premigrations
+
 ## [0.2.3] - 2018-11-06
 
 ### Added
