@@ -128,7 +128,7 @@ namespace Marvin.Migrations
             }
             catch (Exception e)
             {
-                _logger?.LogError($"Error while migrating database {_dbProvider.DbName}", e);
+                _logger?.LogError(e, $"Error while migrating database {_dbProvider.DbName}");
                 throw;
             }
            
