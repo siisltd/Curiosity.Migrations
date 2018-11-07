@@ -88,11 +88,9 @@ namespace Marvin.Migrations
             {
                 await _dbProvider.OpenConnectionAsync();
                 await _dbProvider.CreateDatabaseIfNotExistsAsync();
-                await _dbProvider.CreateHistoryTableIfNotExistsAsync();
                 var dbVersion = await _dbProvider
                                     .GetDbVersionSafeAsync()
                                 ?? new DbVersion?(new DbVersion(0,0));
-
             
                 var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
                 if (targetVersion == dbVersion.Value)
@@ -108,6 +106,8 @@ namespace Marvin.Migrations
                 _logger?.LogInformation($"Executing pre migration scripts for {_dbProvider.DbName}...");
                 await ExecutePreMigrationScriptsAsync();
                 _logger?.LogInformation($"Executing pre migration scripts for{_dbProvider.DbName} completed.");
+                
+                await _dbProvider.CreateHistoryTableIfNotExistsAsync();
                 
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
                 if (targetVersion > dbVersion.Value)
