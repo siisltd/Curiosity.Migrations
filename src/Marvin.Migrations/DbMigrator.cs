@@ -86,8 +86,8 @@ namespace Marvin.Migrations
         {
             try
             {
-                await _dbProvider.OpenConnectionAsync();
                 await _dbProvider.CreateDatabaseIfNotExistsAsync();
+                await _dbProvider.OpenConnectionAsync();
                 var dbVersion = await _dbProvider
                                     .GetDbVersionSafeAsync()
                                 ?? new DbVersion?(new DbVersion(0,0));
