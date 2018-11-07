@@ -1,8 +1,14 @@
 # Changelog
 
+## [0.2.6] - 2018-11-07
+
+### Changed
+
+- Assert connections only for script with initial catalogue.  
+
 ## [0.2.5] - 2018-11-06
 
-### Added
+### Fixed
 
 - Fixed `StackOverflowException` in  `PostgreDbProvider`
 
