@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.7] - 2018-11-07
+
+### Fixed
+
+- Error logging
+
 ## [0.2.6] - 2018-11-07
 
 ### Changed
