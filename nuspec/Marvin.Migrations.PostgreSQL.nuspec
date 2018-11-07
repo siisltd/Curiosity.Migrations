@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Marvin.Migrations.PostgreSQL</id>
-    <version>0.2.6</version>
+    <version>0.2.7</version>
     <authors>Maxim Markelow</authors>
     <owners>Marvin</owners>
     <licenseUrl>https://github.com/MarvinBand/Migrations/blob/master/LICENSE/</licenseUrl>
@@ -14,7 +14,7 @@
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Npgsql" version="4.0.3"/>
-        <dependency id="Marvin.Migrations" version="0.2.3"/>
+        <dependency id="Marvin.Migrations" version="0.2.5"/>
       </group>
     </dependencies>
   </metadata>

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.5] - 2018-11-07
+
+### Fixed
+
+- Fixed release notes link in nuget package
+
 ## [0.2.4] - 2018-11-07
 
 ### Changed
