@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Marvin.Migrations</id>
-    <version>0.2.5</version>
+    <version>0.2.6</version>
     <authors>Maxim Markelow</authors>
     <owners>Marvin</owners>
     <licenseUrl>https://github.com/MarvinBand/Migrations/blob/master/LICENSE/</licenseUrl>
@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <title>Migration tool for .NET</title>
     <description>Migration tool for .NET: supports sql script migrations and custom migrations by C#</description>
-    <releaseNotes>https://github.com/MarvinBand/Migrations/tree/master/src/Marvin.Migrations/changelog.md</releaseNotes>
+    <releaseNotes>https://github.com/MarvinBand/Migrations/blob/master/src/Marvin.Migrations/changelog.md</releaseNotes>
     <tags>migrations, migration, migrator, versioning, migration-tool, .net-core, .netstandard, database</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
