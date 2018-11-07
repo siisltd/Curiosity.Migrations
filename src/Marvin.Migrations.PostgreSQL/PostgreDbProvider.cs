@@ -103,17 +103,16 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)
         {
-            AssertConnection();
-            
             try
             {
-                var result = await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName))
+                var result = await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName))
                     .ConfigureAwait(false);
                 if (result == null || (Int32) result != 1)
                 {
                     return DbState.NotCreated;
                 }
 
+                AssertConnection(_connection);
                 var dbVersion = await InternalGetDbVersionAsync()
                     .ConfigureAwait(false);
                 if (dbVersion == null) return DbState.Outdated;
@@ -131,8 +130,6 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task CreateDatabaseIfNotExistsAsync()
         {
-            AssertConnection();
-
             var createDbQueryFormat = "CREATE DATABASE \"{0}\" "
                                       + @"WITH 
                            ENCODING = '{1}'
@@ -149,10 +146,10 @@ namespace Marvin.Migrations.PostgreSQL
             try
             {
                 var result =
-                    await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
-                if (result == null || (Int32) result != 1)
+                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName));
+                if (result == null || result is int i && i != 1 || result is bool b && !b)
                 {
-                    await InternalExecuteScriptAsync(_connection, createDbQueryString);
+                    await ExecuteScriptWithoutInitialCatalogAsync(createDbQueryString);
                 }
             }
             catch (PostgresException e)
@@ -187,13 +184,11 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<bool> CheckIfDatabaseExistsAsync(string databaseName)
         {
-            AssertConnection();
-            
             try
             {
                 var result =
-                    await InternalExecuteScalarScriptAsync(_connection, String.Format(CheckDbExistQueryFormat, DbName));
-                return result != null && (Int32) result == 1;
+                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName));
+                return result != null && (result is int i && i == 1 || result is bool b && b);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -220,9 +215,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
-        private void AssertConnection()
+        private void AssertConnection(NpgsqlConnection connection)
         {
-            if (_connection == null || _connection.State == ConnectionState.Closed || _connection.State == ConnectionState.Broken)
+            if (connection == null || connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken)
                 throw new InvalidOperationException($"Connection is not opened. Use {nameof(OpenConnectionAsync)}");
         }
         
@@ -237,8 +232,6 @@ namespace Marvin.Migrations.PostgreSQL
 
         private async Task InternalExecuteScriptAsync(NpgsqlConnection connection, string script)
         {
-            AssertConnection();
-            
             var command = connection.CreateCommand();
             command.CommandText = script;
             await command
@@ -248,6 +241,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task CreateHistoryTableIfNotExistsAsync()
         {
+            AssertConnection(_connection);
+            
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
                          + @"( 
                          version text 
@@ -293,7 +288,7 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task<bool> CheckIfTableExistsAsync(string tableName)
         {
             if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
-            AssertConnection();
+            AssertConnection(_connection);
             
             try
             {
@@ -303,7 +298,7 @@ namespace Marvin.Migrations.PostgreSQL
                                                + $" WHERE  table_schema = '{GetSchemeNameFromConnectionString()}'"
                                                + $" AND    table_name = '{tableName}');";
                 var result = await InternalExecuteScalarScriptAsync(_connection, checkTableExistenceQuery);
-                return result != null && (Int32) result == 1;
+                return result != null && (result is int i && i == 1 || result is bool b && b);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -383,6 +378,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
+            AssertConnection(_connection);
+            
             var script = $"DELETE FROM public.\"{_options.MigrationHistoryTableName}\"; "
                          + $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\"("
                          + "version) "
@@ -424,6 +421,8 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task ExecuteScriptAsync(string script)
         {
+            AssertConnection(_connection);
+            
             try
             {
                 await InternalExecuteScriptAsync(_connection, script);
@@ -460,7 +459,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptAsync(string script)
         {
-            AssertConnection();
+            AssertConnection(_connection);
             
             try
             {
@@ -506,8 +505,6 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task ExecuteScriptWithoutInitialCatalogAsync(string script)
         {
-            AssertConnection();
-            
             try
             {
                 await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script);
@@ -544,8 +541,6 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script)
         {
-            AssertConnection();
-
             try
             {
                 using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
