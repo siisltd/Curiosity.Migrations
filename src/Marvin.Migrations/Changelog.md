@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.6] - 2018-11-07
+
+### Changed
+
+- Open connection after creating database
+
 ## [0.2.5] - 2018-11-07
 
 ### Fixed
