@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.8] - 2018-11-09
+
+### Added
+
+- Added property `ConnectionString` to `IDbProvider`
+
 ## [0.2.7] - 2018-11-07
 
 ### Fixed
