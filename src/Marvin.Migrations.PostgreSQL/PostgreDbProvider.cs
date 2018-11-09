@@ -13,7 +13,6 @@ namespace Marvin.Migrations.PostgreSQL
     {
         private const string CheckDbExistQueryFormat = "SELECT 1 AS result FROM pg_database WHERE datname='{0}'";
 
-
         /// <summary>
         /// 'Postgres' database is garanteed to exist, need to create own db
         /// </summary>
@@ -26,9 +25,11 @@ namespace Marvin.Migrations.PostgreSQL
         public string DbName { get; }
 
         /// <inheritdoc />
+        public string ConnectionString { get; }
+
+        /// <inheritdoc />
         public string MigrationHistoryTableName { get; }
 
-        private readonly string _connectionString;
         private readonly string _connectionStringWithoutInitialCatalog;
 
         private NpgsqlConnection _connection;
@@ -47,7 +48,7 @@ namespace Marvin.Migrations.PostgreSQL
             MigrationHistoryTableName = options.MigrationHistoryTableName;
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database;
-            _connectionString = connectionBuilder.ConnectionString;
+            ConnectionString = connectionBuilder.ConnectionString;
             
             var tempConnectionBuilder =
                 new NpgsqlConnectionStringBuilder(options.ConnectionString)
@@ -55,7 +56,7 @@ namespace Marvin.Migrations.PostgreSQL
                     Database = PostgreDefaultDatabase
                 };
             _connectionStringWithoutInitialCatalog = tempConnectionBuilder.ConnectionString;
-
+            
             _options = options;
         }
 
@@ -67,7 +68,7 @@ namespace Marvin.Migrations.PostgreSQL
             
             try
             {
-                _connection = new NpgsqlConnection(_connectionString);
+                _connection = new NpgsqlConnection(ConnectionString);
                 await _connection.OpenAsync();
             }
             catch (PostgresException e)
@@ -330,7 +331,7 @@ namespace Marvin.Migrations.PostgreSQL
         {
             const string schemeParseRegexPattern = "initial schema ?= ?(.+)";
             var regex = new Regex(schemeParseRegexPattern);
-            var matches = regex.Match(_connectionString);
+            var matches = regex.Match(ConnectionString);
 
             return matches.Success && matches.Groups.Count > 1 && matches.Groups[1].Success
                 ? matches.Groups[1].Value
