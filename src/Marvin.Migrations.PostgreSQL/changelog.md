@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Default values for `PostgreDbProviderOptions` replaced by `null`. Now `PostgreDbProvider` is using default values from DataBase
+
 ## [0.2.9] - 2018-11-09
 
 ### Added
