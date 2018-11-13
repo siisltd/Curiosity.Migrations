@@ -1,5 +1,6 @@
 using System;
 using Marvin.Migrations.PostgreSQL;
+using Microsoft.Extensions.Configuration;
 
 namespace Marvin.Migrations.PostgreSql.IntegrationTests
 {
@@ -13,7 +14,12 @@ namespace Marvin.Migrations.PostgreSql.IntegrationTests
         {
             var random = new Random();
             DbName = $"temp_{random.Next(100)}";
-            Options = new PostgreDbProviderOptions($"connection_string", lcCollate: "C", lcCtype: "C", databaseEncoding: "SQL_ASCII");
+            Options = new PostgreDbProviderOptions(
+                String.Format(ConfigProvider.GetConfig().ConnectionStringMask, DbName), 
+                lcCollate: "C",
+                lcCtype: "C",
+                template: "template0",
+                databaseEncoding: "SQL_ASCII");
             DbProvider = new PostgreDbProvider(Options);
         }
         
@@ -25,10 +31,10 @@ namespace Marvin.Migrations.PostgreSql.IntegrationTests
                 {
 
                     DbProvider.OpenConnectionAsync().GetAwaiter().GetResult();
+                    DbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {DbName}").GetAwaiter().GetResult();
+                    DbProvider.CloseConnectionAsync().GetAwaiter().GetResult();
                 }
-                catch(Exception e){}
-                DbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {DbName}").GetAwaiter().GetResult();
-                DbProvider.CloseConnectionAsync().GetAwaiter().GetResult();
+                catch(Exception){}
             }
             catch (Exception e)
             {
