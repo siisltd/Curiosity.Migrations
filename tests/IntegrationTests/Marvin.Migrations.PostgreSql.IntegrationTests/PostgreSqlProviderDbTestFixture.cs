@@ -34,7 +34,7 @@ namespace Marvin.Migrations.PostgreSql.IntegrationTests
                     DbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {DbName}").GetAwaiter().GetResult();
                     DbProvider.CloseConnectionAsync().GetAwaiter().GetResult();
                 }
-                catch(Exception e){}
+                catch(Exception){}
             }
             catch (Exception e)
             {
