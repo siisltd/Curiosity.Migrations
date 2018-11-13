@@ -1,0 +1,2 @@
+# маска строки подключения к БД. Должно быть указано все, кроме имя БД
+connectionStringMask: "Server=your_host;Port=your_port; Database={0}; User Id=postgres; Password=test"

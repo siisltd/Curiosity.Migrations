@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Npgsql;
@@ -131,26 +132,13 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task CreateDatabaseIfNotExistsAsync()
         {
-            var createDbQueryFormat = "CREATE DATABASE \"{0}\" "
-                                      + @"WITH 
-                           ENCODING = '{1}'
-                           LC_COLLATE = '{2}'
-                           LC_CTYPE = '{3}'
-                           CONNECTION LIMIT = {4}; ";
-
-            var createDbQueryString = String.Format(createDbQueryFormat,
-                DbName,
-                _options.DatabaseEncoding,
-                _options.LC_COLLATE,
-                _options.LC_CTYPE,
-                _options.ConnectionLimit);
             try
             {
                 var result =
                     await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName));
                 if (result == null || result is int i && i != 1 || result is bool b && !b)
                 {
-                    await ExecuteScriptWithoutInitialCatalogAsync(createDbQueryString);
+                    await ExecuteScriptWithoutInitialCatalogAsync(GetCreationDbQuery());
                 }
             }
             catch (PostgresException e)
@@ -180,6 +168,55 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.CreatingDbError, $"Can not create database {DbName}", e);
             }
+        }
+
+        private string GetCreationDbQuery()
+        {
+            var queryBuilder = new StringBuilder();
+            queryBuilder.Append($"CREATE DATABASE \"{DbName}\" ");
+            if (String.IsNullOrWhiteSpace(_options.DatabaseEncoding)
+                && String.IsNullOrWhiteSpace(_options.LC_COLLATE)
+                && String.IsNullOrWhiteSpace(_options.LC_CTYPE)
+                && !_options.ConnectionLimit.HasValue
+                && String.IsNullOrWhiteSpace(_options.TableSpace)
+                && String.IsNullOrWhiteSpace(_options.Template))
+            {
+                return queryBuilder.ToString();
+            }
+
+            queryBuilder.AppendLine("WITH ");
+
+            if (!String.IsNullOrWhiteSpace(_options.DatabaseEncoding))
+            {
+                queryBuilder.AppendLine($"ENCODING = '{_options.DatabaseEncoding}'");
+            }
+            
+            if (!String.IsNullOrWhiteSpace(_options.LC_COLLATE))
+            {
+                queryBuilder.AppendLine($"LC_COLLATE = '{_options.LC_COLLATE}'");
+            }
+            
+            if (!String.IsNullOrWhiteSpace(_options.LC_CTYPE))
+            {
+                queryBuilder.AppendLine($"LC_CTYPE = '{_options.LC_CTYPE}'");
+            }
+            
+            if (!String.IsNullOrWhiteSpace(_options.Template))
+            {
+                queryBuilder.AppendLine($"TEMPLATE = '{_options.Template}'");
+            }
+            
+            if (!String.IsNullOrWhiteSpace(_options.TableSpace))
+            {
+                queryBuilder.AppendLine($"TABLESPACE = '{_options.TableSpace}'");
+            }
+            
+            if (_options.ConnectionLimit.HasValue)
+            {
+                queryBuilder.AppendLine($"CONNECTION LIMIT = {_options.ConnectionLimit.Value}");
+            }
+
+            return queryBuilder.ToString();
         }
 
         /// <inheritdoc />
