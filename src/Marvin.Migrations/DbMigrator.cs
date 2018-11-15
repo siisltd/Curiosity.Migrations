@@ -88,12 +88,10 @@ namespace Marvin.Migrations
             {
                 await _dbProvider.CreateDatabaseIfNotExistsAsync();
                 await _dbProvider.OpenConnectionAsync();
-                var dbVersion = await _dbProvider
-                                    .GetDbVersionSafeAsync()
-                                ?? new DbVersion?(new DbVersion(0,0));
+                var dbVersion = await GetCurrentDbVersion();
             
                 var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
-                if (targetVersion == dbVersion.Value)
+                if (targetVersion == dbVersion)
                 {
                     _logger?.LogInformation($"Database {_dbProvider.DbName} is actual. Skip migration.");
                     return;
@@ -108,18 +106,21 @@ namespace Marvin.Migrations
                 _logger?.LogInformation($"Executing pre migration scripts for{_dbProvider.DbName} completed.");
                 
                 await _dbProvider.CreateHistoryTableIfNotExistsAsync();
+
+                // DB version might change after pre-migration
+                dbVersion = await GetCurrentDbVersion();
                 
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
-                if (targetVersion > dbVersion.Value)
+                if (targetVersion > dbVersion)
                 {
-                    _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} from {dbVersion.Value} to {targetVersion}...");
-                    await UpgradeAsync(dbVersion.Value, targetVersion);
+                    _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} from {dbVersion} to {targetVersion}...");
+                    await UpgradeAsync(dbVersion, targetVersion);
                     _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} completed.");
                 }
                 else
                 {
-                    _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} from {dbVersion.Value} to {targetVersion}...");
-                    await DowngradeAsync(dbVersion.Value, targetVersion);
+                    _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} from {dbVersion} to {targetVersion}...");
+                    await DowngradeAsync(dbVersion, targetVersion);
                     _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} completed.");
                 }
 
@@ -133,6 +134,13 @@ namespace Marvin.Migrations
             }
            
         }
+
+        private async Task<DbVersion> GetCurrentDbVersion()
+        {
+            return await _dbProvider.GetDbVersionSafeAsync()
+                   ?? new DbVersion(0, 0);
+        }
+        
         /// <summary>
         /// Upgrade database to new version
         /// </summary>
