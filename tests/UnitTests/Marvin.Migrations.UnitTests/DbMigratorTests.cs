@@ -40,7 +40,7 @@ namespace Marvin.Migrations.UnitTests
                 .Verify(x => x.CreateDatabaseIfNotExistsAsync(), Times.Once);
 
             provider
-                .Verify(x => x.CreateHistoryTableIfNotExistsAsync(), Times.Once);
+                .Verify(x => x.CreateHistoryTableIfNotExistsAsync(), Times.Never);
             
             Assert.True(result.IsSuccessfully);
         }
