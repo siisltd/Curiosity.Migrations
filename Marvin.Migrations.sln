@@ -36,12 +36,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.UnitTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSql.IntegrationTests", "tests\IntegrationTests\Marvin.Migrations.PostgreSql.IntegrationTests\Marvin.Migrations.PostgreSql.IntegrationTests.csproj", "{3BDC5BA6-1A8B-443D-B3F7-D0983921E3C6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{99EA9F71-94B8-4B62-B32A-4573D569CED3}"
-ProjectSection(SolutionItems) = preProject
-	nuspec\Marvin.Migrations.nuspec = nuspec\Marvin.Migrations.nuspec
-	nuspec\Marvin.Migrations.PostgreSQL.nuspec = nuspec\Marvin.Migrations.PostgreSQL.nuspec
-EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
