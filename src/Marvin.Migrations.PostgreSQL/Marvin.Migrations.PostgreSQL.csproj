@@ -2,6 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+
+        <PackageId>Marvin.Migrations.PostgreSQL</PackageId>
+        <Version>0.2.11</Version>
+        <Authors>Maxim Markelow</Authors>
+        <Company>Marvin</Company>
+        <PackageLicenseUrl>https://github.com/MarvinBand/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/MarvinBand/Migrations</PackageProjectUrl>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <Title>Migration tool for .NET</Title>
+        <Description>Migration tool for .NET: supports sql script migrations and custom migrations by C#</Description>
+        <PackageReleaseNotes>https://github.com/MarvinBand/Migrations/blob/master/src/Marvin.Migrations/changelog.md</PackageReleaseNotes>
+        <PackageTags>migrations, migration, migrator, versioning, migration-tool, .net-core, .netstandard, database</PackageTags>
+        
         <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
         <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
