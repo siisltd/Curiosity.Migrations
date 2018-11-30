@@ -377,6 +377,9 @@ namespace Marvin.Migrations.UnitTests
             
             Assert.True(result.IsSuccessfully);
             Assert.Equal(targetDbVersion, dbVersionAfterUpdate);
+            firstMigration.Verify(x => x.DowngradeAsync(), Times.Never);
+            secondMigration.Verify(x => x.DowngradeAsync(), Times.Once);
+            thirdMigration.Verify(x => x.DowngradeAsync(), Times.Once);
         }
         
         [Fact]

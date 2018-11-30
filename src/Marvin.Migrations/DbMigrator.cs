@@ -228,25 +228,28 @@ namespace Marvin.Migrations
         private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion)
         {
             var desiredMigrations = _migrations
-                .Where(x => x.Version < actualVersion && x.Version >= targetVersion)
+                .Where(x => x.Version <= actualVersion && x.Version >= targetVersion)
                 .OrderByDescending(x => x.Version)
                 .ToList();
-            if (desiredMigrations.Count == 0) return;
+            if (desiredMigrations.Count == 0 || desiredMigrations.Count == 1) return;
             
             var lastMigrationVersion = new DbVersion(0,0);
             var currentDbVersion = actualVersion;
-            foreach (var migration in desiredMigrations)
+            for (var i = 0; i < desiredMigrations.Count - 1; ++i)
             {
-                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _downgradePolicy))
+                var targetLocalVersion = desiredMigrations[i + 1].Version;
+                var migration = desiredMigrations[i];
+                
+                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, targetLocalVersion), _downgradePolicy))
                 {
-                    throw new MigrationException(MigrationError.PolicyError, $"Policy restrict downgrade to {migration.Version}. Migration comment: {migration.Comment}");
+                    throw new MigrationException(MigrationError.PolicyError, $"Policy restrict downgrade to {targetLocalVersion}. Migration comment: {migration.Comment}");
                 }
-                _logger?.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName})...");
-                await migration.DowngradeAsync();
-                await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
-                lastMigrationVersion = migration.Version;
-                currentDbVersion = migration.Version;
-                _logger?.LogInformation($"Downgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                _logger?.LogInformation($"Downgrade to {desiredMigrations[i+1].Version} (DB {_dbProvider.DbName})...");
+                await desiredMigrations[i].DowngradeAsync();
+                await _dbProvider.UpdateCurrentDbVersionAsync(targetLocalVersion);
+                lastMigrationVersion = targetLocalVersion;
+                currentDbVersion = targetLocalVersion;
+                _logger?.LogInformation($"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
             }
             
             if (lastMigrationVersion != targetVersion) throw new MigrationException(
