@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.10] - 2018-11-30
+
+### Fixed
+
+- Executing current version migration downgrade, stopping executing on target version
+
+## [0.2.9] - 2018-11-15
+
+### Fixed
+
+- Error on check db version before pre-migrations
+
 ## [0.2.8] - 2018-11-09
 
 ### Added
