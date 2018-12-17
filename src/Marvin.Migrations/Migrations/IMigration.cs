@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Marvin.Migrations
 {
@@ -21,12 +22,12 @@ namespace Marvin.Migrations
         /// Upgrade database to the version specified in <see cref="Version"/>
         /// </summary>
         /// <returns></returns>
-        Task UpgradeAsync();
+        Task UpgradeAsync(CommittableTransaction transaction);
 
         /// <summary>
         /// Downgrade database to the previous version undoing changes to this migration
         /// </summary>
         /// <returns></returns>
-        Task DowngradeAsync();
+        Task DowngradeAsync(CommittableTransaction transaction);
     }
 }

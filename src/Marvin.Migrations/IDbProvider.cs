@@ -1,5 +1,8 @@
 using System;
+using System.Data;
+using System.Data.Common;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Marvin.Migrations
 {
@@ -18,11 +21,13 @@ namespace Marvin.Migrations
         /// </summary>
         string ConnectionString { get; }
         
+        DbConnection Connection { get; }
+        
         /// <summary>
         /// Name of table with migration history
         /// </summary>
         string MigrationHistoryTableName { get; }
-
+        
         /// <summary>
         /// Open connection to database
         /// </summary>

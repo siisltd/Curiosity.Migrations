@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Marvin.Migrations
 {
@@ -18,7 +19,7 @@ namespace Marvin.Migrations
         /// Provide access to underlying database
         /// </summary>
         protected readonly IDbProvider DbProvider;
-
+        
         /// <inheritdoc />
         protected CodeMigration(
             IDbProvider dbProvider)
@@ -27,9 +28,9 @@ namespace Marvin.Migrations
         }
 
         /// <inheritdoc />
-        public abstract Task UpgradeAsync();
+        public abstract Task UpgradeAsync(CommittableTransaction transaction);
 
         /// <inheritdoc />
-        public abstract Task DowngradeAsync();
+        public abstract Task DowngradeAsync(CommittableTransaction transaction);
     }
 }
