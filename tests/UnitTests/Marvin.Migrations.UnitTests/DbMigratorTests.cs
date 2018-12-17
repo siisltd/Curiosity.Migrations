@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Moq;
 using Xunit;
 
@@ -377,9 +378,9 @@ namespace Marvin.Migrations.UnitTests
             
             Assert.True(result.IsSuccessfully);
             Assert.Equal(targetDbVersion, dbVersionAfterUpdate);
-            firstMigration.Verify(x => x.DowngradeAsync(), Times.Never);
-            secondMigration.Verify(x => x.DowngradeAsync(), Times.Once);
-            thirdMigration.Verify(x => x.DowngradeAsync(), Times.Once);
+            firstMigration.Verify(x => x.DowngradeAsync(It.IsAny<CommittableTransaction>()), Times.Never);
+            secondMigration.Verify(x => x.DowngradeAsync(It.IsAny<CommittableTransaction>()), Times.Once);
+            thirdMigration.Verify(x => x.DowngradeAsync(It.IsAny<CommittableTransaction>()), Times.Once);
         }
         
         [Fact]

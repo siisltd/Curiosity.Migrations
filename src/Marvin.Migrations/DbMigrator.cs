@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -155,9 +156,24 @@ namespace Marvin.Migrations
             
             foreach (var migration in desiredMigrations)
             {
-               _logger?.LogInformation($"Executing pre migration script {migration.Version} ({migration.Comment}) for DB {_dbProvider.DbName}...");
-                await migration.UpgradeAsync();
-                _logger?.LogInformation($"Executing pre migration script {migration.Version} for DB {_dbProvider.DbName}) completed.");
+                using (var transaction = new CommittableTransaction(
+                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+                {
+                    try
+                    {
+                        _logger?.LogInformation(
+                            $"Executing pre migration script {migration.Version} ({migration.Comment}) for DB {_dbProvider.DbName}...");
+                        await migration.UpgradeAsync(transaction);
+                        _logger?.LogInformation(
+                            $"Executing pre migration script {migration.Version} for DB {_dbProvider.DbName}) completed.");
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        _logger?.LogError(e, $"Error while executing pre migration to {migration.Version}: {e.Message}");
+                        throw;
+                    }
+                }
             }
         }
 
@@ -184,12 +200,28 @@ namespace Marvin.Migrations
                 {
                     throw new MigrationException(MigrationError.PolicyError, $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
-                _logger?.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName})...");
-                await migration.UpgradeAsync();
-                await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
-                lastMigrationVersion = migration.Version;
-                currentDbVersion = migration.Version;
-                _logger?.LogInformation($"Upgrading to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+
+                using (var transaction = new CommittableTransaction(
+                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+                {
+                    try
+                    {
+                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName})...");
+                        await migration.UpgradeAsync(transaction);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
+                        lastMigrationVersion = migration.Version;
+                        currentDbVersion = migration.Version;
+                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                        
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        _logger?.LogError(e, $"Error while upgrade to {migration.Version}: {e.Message}");
+                        throw;
+                    }
+                }
             }
             
             if (lastMigrationVersion != targetVersion) throw new MigrationException(
@@ -232,29 +264,50 @@ namespace Marvin.Migrations
                 .OrderByDescending(x => x.Version)
                 .ToList();
             if (desiredMigrations.Count == 0 || desiredMigrations.Count == 1) return;
-            
-            var lastMigrationVersion = new DbVersion(0,0);
+
+            var lastMigrationVersion = new DbVersion(0, 0);
             var currentDbVersion = actualVersion;
             for (var i = 0; i < desiredMigrations.Count - 1; ++i)
             {
                 var targetLocalVersion = desiredMigrations[i + 1].Version;
                 var migration = desiredMigrations[i];
-                
-                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, targetLocalVersion), _downgradePolicy))
+
+                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, targetLocalVersion),
+                    _downgradePolicy))
                 {
-                    throw new MigrationException(MigrationError.PolicyError, $"Policy restrict downgrade to {targetLocalVersion}. Migration comment: {migration.Comment}");
+                    throw new MigrationException(MigrationError.PolicyError,
+                        $"Policy restrict downgrade to {targetLocalVersion}. Migration comment: {migration.Comment}");
                 }
-                _logger?.LogInformation($"Downgrade to {desiredMigrations[i+1].Version} (DB {_dbProvider.DbName})...");
-                await desiredMigrations[i].DowngradeAsync();
-                await _dbProvider.UpdateCurrentDbVersionAsync(targetLocalVersion);
-                lastMigrationVersion = targetLocalVersion;
-                currentDbVersion = targetLocalVersion;
-                _logger?.LogInformation($"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
+
+                using (var transaction = new CommittableTransaction(
+                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+                {
+                    try
+                    {
+                        _logger?.LogInformation(
+                            $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
+                        await desiredMigrations[i].DowngradeAsync(transaction);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(targetLocalVersion);
+                        lastMigrationVersion = targetLocalVersion;
+                        currentDbVersion = targetLocalVersion;
+                        _logger?.LogInformation(
+                            $"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
+                        
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        _logger?.LogError(e, $"Error while downgrade to {migration.Version}: {e.Message}");
+                        throw;
+                    }
+                }
             }
-            
-            if (lastMigrationVersion != targetVersion) throw new MigrationException(
-                MigrationError.MigratingError, 
-                $"Can not downgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
+
+            if (lastMigrationVersion != targetVersion)
+                    throw new MigrationException(
+                        MigrationError.MigratingError,
+                        $"Can not downgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
 
         /// <inheritdoc />

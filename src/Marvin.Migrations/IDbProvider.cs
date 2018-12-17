@@ -1,5 +1,8 @@
 using System;
+using System.Data;
+using System.Data.Common;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Marvin.Migrations
 {
@@ -19,10 +22,15 @@ namespace Marvin.Migrations
         string ConnectionString { get; }
         
         /// <summary>
+        /// Opened connection to Database. Can be null if method <see cref="OpenConnectionAsync"/> does not called or if <see cref="CloseConnectionAsync"/> was called
+        /// </summary>
+        DbConnection Connection { get; }
+        
+        /// <summary>
         /// Name of table with migration history
         /// </summary>
         string MigrationHistoryTableName { get; }
-
+        
         /// <summary>
         /// Open connection to database
         /// </summary>

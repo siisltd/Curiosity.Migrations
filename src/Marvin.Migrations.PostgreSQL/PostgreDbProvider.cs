@@ -1,8 +1,10 @@
 using System;
 using System.Data;
+using System.Data.Common;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using Npgsql;
 
 namespace Marvin.Migrations.PostgreSQL
@@ -29,11 +31,13 @@ namespace Marvin.Migrations.PostgreSQL
         public string ConnectionString { get; }
 
         /// <inheritdoc />
+        public DbConnection Connection { get; private set; }
+
+        /// <inheritdoc />
         public string MigrationHistoryTableName { get; }
 
         private readonly string _connectionStringWithoutInitialCatalog;
 
-        private NpgsqlConnection _connection;
 
         private readonly PostgreDbProviderOptions _options;
         
@@ -64,13 +68,16 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task OpenConnectionAsync()
         {
-            if (_connection != null && _connection.State != ConnectionState.Closed && _connection.State != ConnectionState.Broken)
+            if (Connection != null && Connection.State != ConnectionState.Closed && Connection.State != ConnectionState.Broken)
                 throw new InvalidOperationException("Connection have already opened");
             
             try
             {
-                _connection = new NpgsqlConnection(ConnectionString);
-                await _connection.OpenAsync();
+                var connection = new NpgsqlConnection(ConnectionString);
+                
+                await connection.OpenAsync();
+
+                Connection = connection;
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -114,7 +121,7 @@ namespace Marvin.Migrations.PostgreSQL
                     return DbState.NotCreated;
                 }
 
-                AssertConnection(_connection);
+                AssertConnection(Connection);
                 var dbVersion = await InternalGetDbVersionAsync()
                     .ConfigureAwait(false);
                 if (dbVersion == null) return DbState.Outdated;
@@ -253,7 +260,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
-        private void AssertConnection(NpgsqlConnection connection)
+        private void AssertConnection(IDbConnection connection)
         {
             if (connection == null || connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken)
                 throw new InvalidOperationException($"Connection is not opened. Use {nameof(OpenConnectionAsync)}");
@@ -279,7 +286,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task CreateHistoryTableIfNotExistsAsync()
         {
-            AssertConnection(_connection);
+            AssertConnection(Connection);
             
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
                          + @"( 
@@ -290,7 +297,7 @@ namespace Marvin.Migrations.PostgreSQL
                         ); ";
             try
             {
-                await InternalExecuteScriptAsync(_connection, script);
+                await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -326,7 +333,7 @@ namespace Marvin.Migrations.PostgreSQL
         public async Task<bool> CheckIfTableExistsAsync(string tableName)
         {
             if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
-            AssertConnection(_connection);
+            AssertConnection(Connection);
             
             try
             {
@@ -335,7 +342,7 @@ namespace Marvin.Migrations.PostgreSQL
                                                        FROM   information_schema.tables "
                                                + $" WHERE  table_schema = '{GetSchemeNameFromConnectionString()}'"
                                                + $" AND    table_name = '{tableName}');";
-                var result = await InternalExecuteScalarScriptAsync(_connection, checkTableExistenceQuery);
+                var result = await InternalExecuteScalarScriptAsync(Connection as NpgsqlConnection, checkTableExistenceQuery);
                 return result != null && (result is int i && i == 1 || result is bool b && b);
             }
             catch (PostgresException e)
@@ -394,7 +401,7 @@ namespace Marvin.Migrations.PostgreSQL
         {
             var query = $"SELECT * FROM public.\"{_options.MigrationHistoryTableName}\" LIMIT 1;";
 
-            var command = _connection.CreateCommand();
+            var command = (Connection as NpgsqlConnection).CreateCommand();
             command.CommandText = query;
 
             using (var reader = await command.ExecuteReaderAsync())
@@ -416,7 +423,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task UpdateCurrentDbVersionAsync(DbVersion version)
         {
-            AssertConnection(_connection);
+            AssertConnection(Connection);
             
             var script = $"DELETE FROM public.\"{_options.MigrationHistoryTableName}\"; "
                          + $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\"("
@@ -425,7 +432,7 @@ namespace Marvin.Migrations.PostgreSQL
 
             try
             {
-                await InternalExecuteScriptAsync(_connection, script);
+                await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -459,11 +466,11 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task ExecuteScriptAsync(string script)
         {
-            AssertConnection(_connection);
+            AssertConnection(Connection);
             
             try
             {
-                await InternalExecuteScriptAsync(_connection, script);
+                await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("08")
@@ -497,11 +504,11 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptAsync(string script)
         {
-            AssertConnection(_connection);
+            AssertConnection(Connection);
             
             try
             {
-                var result = await InternalExecuteScalarScriptAsync(_connection, script);
+                var result = await InternalExecuteScalarScriptAsync(Connection as NpgsqlConnection, script);
                 return result;
             }
             catch (PostgresException e)
@@ -623,9 +630,10 @@ namespace Marvin.Migrations.PostgreSQL
         { 
             try
             {
-                if (_connection.State == ConnectionState.Closed) return Task.CompletedTask;
+                if (Connection.State == ConnectionState.Closed) return Task.CompletedTask;
                 
-                _connection.Close();
+                Connection.Close();
+                Connection = null;
                 
                 return Task.CompletedTask;
 
@@ -658,7 +666,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public void Dispose()
         {
-            _connection?.Dispose();
+            Connection?.Dispose();
         }
     }
 }
