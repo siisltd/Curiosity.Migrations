@@ -30,6 +30,7 @@ namespace Marvin.Migrations.PostgreSQL
         /// <inheritdoc />
         public string ConnectionString { get; }
 
+        /// <inheritdoc />
         public DbConnection Connection { get; private set; }
 
         /// <inheritdoc />
@@ -632,6 +633,7 @@ namespace Marvin.Migrations.PostgreSQL
                 if (Connection.State == ConnectionState.Closed) return Task.CompletedTask;
                 
                 Connection.Close();
+                Connection = null;
                 
                 return Task.CompletedTask;
 

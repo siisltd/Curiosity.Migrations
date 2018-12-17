@@ -21,6 +21,9 @@ namespace Marvin.Migrations
         /// </summary>
         string ConnectionString { get; }
         
+        /// <summary>
+        /// Opened connection to Database. Can be null if method <see cref="OpenConnectionAsync"/> does not called or if <see cref="CloseConnectionAsync"/> was called
+        /// </summary>
         DbConnection Connection { get; }
         
         /// <summary>
