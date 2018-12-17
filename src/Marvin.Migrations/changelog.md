@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.11] - 2018-12-17
+
+### Added
+
+- Each migration executed in transaction
+
 ## [0.2.10] - 2018-11-30
 
 ### Fixed
