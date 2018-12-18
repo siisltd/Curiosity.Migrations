@@ -156,20 +156,23 @@ namespace Marvin.Migrations
             
             foreach (var migration in desiredMigrations)
             {
-                using (var transaction = new CommittableTransaction(
-                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+               await _dbProvider.CloseConnectionAsync();
+                await _dbProvider.OpenConnectionAsync();
+                using (var transaction = _dbProvider.Connection.BeginTransaction())
                 {
                     try
                     {
                         _logger?.LogInformation(
                             $"Executing pre migration script {migration.Version} ({migration.Comment}) for DB {_dbProvider.DbName}...");
                         await migration.UpgradeAsync(transaction);
+                        
+                        transaction.Commit();
+                        
                         _logger?.LogInformation(
                             $"Executing pre migration script {migration.Version} for DB {_dbProvider.DbName}) completed.");
                     }
                     catch (Exception e)
                     {
-                        transaction.Rollback();
                         _logger?.LogError(e, $"Error while executing pre migration to {migration.Version}: {e.Message}");
                         throw;
                     }
@@ -200,9 +203,13 @@ namespace Marvin.Migrations
                 {
                     throw new MigrationException(MigrationError.PolicyError, $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
-
-                using (var transaction = new CommittableTransaction(
-                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+                
+                // sometimes transactions fails without reopening connection
+                //todo fix it later
+                await _dbProvider.CloseConnectionAsync();
+                await _dbProvider.OpenConnectionAsync();
+                
+                using (var transaction = _dbProvider.Connection.BeginTransaction())
                 {
                     try
                     {
@@ -211,13 +218,15 @@ namespace Marvin.Migrations
                         await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
                         lastMigrationVersion = migration.Version;
                         currentDbVersion = migration.Version;
-                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
                         
+                        // Commit transaction if all commands succeed, transaction will auto-rollback
+                        // when disposed if either commands fails
                         transaction.Commit();
+                        
+                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
                     }
                     catch (Exception e)
                     {
-                        transaction.Rollback();
                         _logger?.LogError(e, $"Error while upgrade to {migration.Version}: {e.Message}");
                         throw;
                     }
@@ -278,9 +287,14 @@ namespace Marvin.Migrations
                     throw new MigrationException(MigrationError.PolicyError,
                         $"Policy restrict downgrade to {targetLocalVersion}. Migration comment: {migration.Comment}");
                 }
+                
+                
+                // sometimes transactions fails without reopening connection
+                //todo fix it later
+                await _dbProvider.CloseConnectionAsync();
+                await _dbProvider.OpenConnectionAsync();
 
-                using (var transaction = new CommittableTransaction(
-                    new TransactionOptions {IsolationLevel = IsolationLevel.ReadCommitted}))
+                using (var transaction = _dbProvider.Connection.BeginTransaction())
                 {
                     try
                     {
@@ -290,14 +304,17 @@ namespace Marvin.Migrations
                         await _dbProvider.UpdateCurrentDbVersionAsync(targetLocalVersion);
                         lastMigrationVersion = targetLocalVersion;
                         currentDbVersion = targetLocalVersion;
+                        
+                        // Commit transaction if all commands succeed, transaction will auto-rollback
+                        // when disposed if either commands fails
+                        transaction.Commit();
+                        
                         _logger?.LogInformation(
                             $"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
                         
-                        transaction.Commit();
                     }
                     catch (Exception e)
                     {
-                        transaction.Rollback();
                         _logger?.LogError(e, $"Error while downgrade to {migration.Version}: {e.Message}");
                         throw;
                     }

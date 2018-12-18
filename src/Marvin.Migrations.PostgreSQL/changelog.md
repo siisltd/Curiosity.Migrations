@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.14] - 2018-12-17
+
+### Changed
+
+- Fixing incorrect cotnracts in package
+
+## [0.2.13] - 2018-12-17
+
+### Changed
+
+- Using `DbTransaction` instead `ComittableTransaction`
+
 ## [0.2.12] - 2018-12-17
 
 ### Added

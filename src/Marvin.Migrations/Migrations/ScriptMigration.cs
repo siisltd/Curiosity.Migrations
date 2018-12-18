@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -45,13 +46,13 @@ namespace Marvin.Migrations
         }
 
         /// <inheritdoc />
-        public Task UpgradeAsync(CommittableTransaction transaction)
+        public Task UpgradeAsync(DbTransaction transaction)
         {
             return _dbProvider.ExecuteScriptAsync(UpScript);
         }
 
         /// <inheritdoc />
-        public Task DowngradeAsync(CommittableTransaction transaction)
+        public Task DowngradeAsync(DbTransaction transaction)
         {
             if (String.IsNullOrWhiteSpace(DownScript)) return Task.CompletedTask;
             
