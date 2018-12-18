@@ -88,8 +88,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -157,8 +158,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -244,8 +246,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -307,8 +310,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -353,8 +357,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -442,8 +447,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -480,7 +486,7 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
+                      || e.SqlState == "0P000"
                       || e.SqlState.StartsWith("42"))
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
@@ -519,8 +525,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -562,8 +569,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -604,8 +612,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
@@ -646,8 +655,9 @@ namespace Marvin.Migrations.PostgreSQL
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
-                      || e.SqlState == "OP000"
-                      || e.SqlState.StartsWith("42"))
+                      || e.SqlState == "0P000"
+                      || e.SqlState == "42501"
+                      || e.SqlState == "42000")
             {
                 throw new MigrationException(MigrationError.AuthorizationError,
                     $"Invalid authorization specification for {DbName}", e);
