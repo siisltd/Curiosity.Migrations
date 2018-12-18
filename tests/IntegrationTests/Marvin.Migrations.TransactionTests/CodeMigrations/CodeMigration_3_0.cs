@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
 
         public override string Comment { get; } = "Migration using multiple EF context with one connection";
 
-        public override async Task UpgradeAsync(CommittableTransaction transaction)
+        public override async Task UpgradeAsync(DbTransaction transaction)
         {
             var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
             tempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
@@ -27,8 +28,9 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
             using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
             using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))
             {
-                tempContext.Database.EnlistTransaction(transaction);
-                anotherContext.Database.EnlistTransaction(transaction);
+                tempContext.Database.UseTransaction(transaction);
+                anotherContext.Database.UseTransaction(transaction);
+                
                 var request1 = new BackgroundProcessorRequestEntity
                 {
                     CreatedUtc = DateTime.Now,
@@ -58,7 +60,7 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
             }
         }
 
-        public override Task DowngradeAsync(CommittableTransaction transaction)
+        public override Task DowngradeAsync(DbTransaction transaction)
         {
             return Task.CompletedTask;
         }

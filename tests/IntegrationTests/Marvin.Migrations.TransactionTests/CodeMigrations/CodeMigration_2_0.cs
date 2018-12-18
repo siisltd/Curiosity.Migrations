@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -13,12 +14,12 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
 
         public override string Comment { get; } = "Correct script via provider";
         
-        public override async Task UpgradeAsync(CommittableTransaction transaction)
+        public override async Task UpgradeAsync(DbTransaction transaction)
         {
             await DbProvider.ExecuteScriptAsync("select 1;");
         }
 
-        public override Task DowngradeAsync(CommittableTransaction transaction)
+        public override Task DowngradeAsync(DbTransaction transaction)
         {
             return Task.CompletedTask;
         }
