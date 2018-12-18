@@ -25,10 +25,12 @@ namespace Marvin.Migrations
         /// </summary>
         /// <param name="assembly">Assembly to scan</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void FromAssembly(Assembly assembly)
+        public CodeMigrationsProvider FromAssembly(Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
             _assemblies.Add(assembly);
+
+            return this;
         }
         
         /// <summary>
@@ -36,7 +38,7 @@ namespace Marvin.Migrations
         /// </summary>
         /// <param name="assembly">Assembly to scan</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void FromAssembly<T>(Assembly assembly)
+        public CodeMigrationsProvider FromAssembly<T>(Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
             
@@ -48,6 +50,8 @@ namespace Marvin.Migrations
             }
 
             _typedAssemblies[migrationType].Add(assembly);
+
+            return this;
         }
 
         /// <inheritdoc />

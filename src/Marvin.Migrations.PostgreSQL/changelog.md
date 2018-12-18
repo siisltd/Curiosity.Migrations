@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.15] - 2018-12-18
+
+### Changed
+
+- `varchar(10)` instaed `text` for `version` column in history table
+
+### Fixed
+
+- Incorrect error message on script error
+
 ## [0.2.14] - 2018-12-17
 
 ### Changed
