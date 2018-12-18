@@ -1,4 +1,5 @@
 using System;
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -28,9 +29,9 @@ namespace Marvin.Migrations
         }
 
         /// <inheritdoc />
-        public abstract Task UpgradeAsync(CommittableTransaction transaction);
+        public abstract Task UpgradeAsync(DbTransaction transaction);
 
         /// <inheritdoc />
-        public abstract Task DowngradeAsync(CommittableTransaction transaction);
+        public abstract Task DowngradeAsync(DbTransaction transaction);
     }
 }

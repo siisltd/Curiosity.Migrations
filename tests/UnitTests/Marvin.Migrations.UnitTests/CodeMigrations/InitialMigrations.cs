@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 
@@ -13,12 +14,12 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
         }
 
 
-        public override Task UpgradeAsync(CommittableTransaction transaction)
+        public override Task UpgradeAsync(DbTransaction transaction)
         {
             return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript);
         }
 
-        public override Task DowngradeAsync(CommittableTransaction transaction)
+        public override Task DowngradeAsync(DbTransaction transaction)
         {
             return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript);
         }
