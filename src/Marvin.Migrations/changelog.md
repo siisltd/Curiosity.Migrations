@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.15] - 2018-12-18
+
+### Fixed
+
+- Returned `UseScriptPreMigrations`
+
 ## [0.2.14] - 2018-12-18
 
 ### Added
