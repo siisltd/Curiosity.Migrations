@@ -8,6 +8,6 @@ namespace Marvin.Migrations
         /// <summary>
         /// Regex patterns for scanning files
         /// </summary>
-        public static readonly string MigrationFileNamePattern = @"^(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
+        public static readonly string MigrationFileNamePattern = @"(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
     }
 }

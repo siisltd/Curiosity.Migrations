@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Support script migrations embedded into specified assembly
+- FluentAPI style for migrations providers
+- Script migrations providers supports many directories as targets
+
+
+
 ## [0.2.13] - 2018-12-17
 
 ### Changed
