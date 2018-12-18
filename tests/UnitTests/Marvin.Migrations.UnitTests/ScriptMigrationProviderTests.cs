@@ -13,7 +13,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var migrationsProvider = new ScriptMigrationsProvider();
+            var migrationsProvider = new ScriptMigrationsFromFileProvider();
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
             migrationsProvider.FromDirectory(path);
 

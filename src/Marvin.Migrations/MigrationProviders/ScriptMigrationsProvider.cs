@@ -1,49 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Marvin.Migrations
 {
-    /// <summary>
-    /// Class for providing migration that uses raq sql scripts
-    /// </summary>
-    public class ScriptMigrationsProvider : IMigrationsProvider
+    internal static class ScriptMigrationsProvider
     {
-        /// <summary>
-        /// Regex patterns for scanning files
-        /// </summary>
-        private const string MigrationFileNamePattern = @"^(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
-
-        private string _absolutePath;
+        private static readonly Regex regex;
         
-        /// <summary>
-        /// Setup directory to scan for migrations
-        /// </summary>
-        /// <param name="absolutePath"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void FromDirectory(string absolutePath)
+        static ScriptMigrationsProvider()
         {
-            if (String.IsNullOrEmpty(absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
-
-            _absolutePath = absolutePath;
+            regex = new Regex(MigrationConstants.MigrationFileNamePattern, RegexOptions.IgnoreCase);
         }
-
-        /// <inheritdoc />
-        public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
+        
+        public static ICollection<IMigration> GetMigrations(
+            IEnumerable<string> fileNames,
+            Func<string, string> sqlScriptReadFunc,
+            IDbProvider dbProvider)
         {
-            if (String.IsNullOrEmpty(_absolutePath)) throw new ArgumentNullException(nameof(_absolutePath));
+            if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
+            if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
+            if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
             
-            if (!Directory.Exists(_absolutePath)) throw new ArgumentException("Directory does not exists");
-
-            var fileNames = Directory.GetFiles(_absolutePath);
-
-            var regex = new Regex(MigrationFileNamePattern, RegexOptions.IgnoreCase);
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
+
             foreach (var fileName in fileNames)
             {
-                var match = regex.Match(Path.GetFileName(fileName));
+                var match = regex.Match(fileName);
                 if (!match.Success) continue;
 
                 var majorVersion = match.Groups[1];
@@ -55,7 +39,7 @@ namespace Marvin.Migrations
                 }
                 var scriptInfo = scripts[version];
 
-                var script = File.ReadAllText(fileName);
+                var script = sqlScriptReadFunc.Invoke(fileName);
                 if (match.Groups[4].Success)
                 {
                     if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript)) throw new InvalidOperationException($"There is more than one downgrade script with version {version}");
@@ -71,7 +55,7 @@ namespace Marvin.Migrations
                         : null;
                 }
             }
-
+            
             var migrations = new List<IMigration>(scripts.Count);
             foreach (var scriptInfo in scripts)
             {
@@ -85,7 +69,7 @@ namespace Marvin.Migrations
             }
 
             return migrations.OrderBy(x => x.Version).ToList();
-        }
+        } 
         
         /// <summary>
         /// Internal class for analysis sql script files
