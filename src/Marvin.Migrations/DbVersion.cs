@@ -102,31 +102,67 @@ namespace Marvin.Migrations
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator ==(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) == 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator !=(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) != 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator <(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) < 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator >(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) > 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator <=(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) <= 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="version1"></param>
+        /// <param name="version2"></param>
+        /// <returns></returns>
         public static bool operator >=(DbVersion version1, DbVersion version2)
         {
             return version1.CompareTo(version2) >= 0;
