@@ -44,6 +44,17 @@ namespace Marvin.Migrations
         }
         
         /// <summary>
+        /// Allow to add <see cref="ScriptMigration"/> migrations from sql files that will be executed before main migration
+        /// </summary>
+        /// <returns>Provider of <see cref="ScriptMigration"/></returns>
+        public ScriptMigrationsProvider UseScriptPreMigrations()
+        {
+            var scriptMigrationProvider = new ScriptMigrationsProvider();
+            _preMigrationsProviders.Add(scriptMigrationProvider);
+            return scriptMigrationProvider;
+        }
+        
+        /// <summary>
         /// Allow to add <see cref="CodeMigration"/> migrations from assembly
         /// </summary>
         /// <returns>Provider of <see cref="CodeMigration"/></returns>
