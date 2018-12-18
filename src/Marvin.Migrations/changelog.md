@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.14] - 2018-12-18
 
 ### Added
 
