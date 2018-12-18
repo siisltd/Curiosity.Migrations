@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `varchar(10)` instaed `text` for `version` column in history table
+
 ## [0.2.14] - 2018-12-17
 
 ### Changed

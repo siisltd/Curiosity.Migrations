@@ -289,9 +289,8 @@ namespace Marvin.Migrations.PostgreSQL
             AssertConnection(Connection);
             
             var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
-                         + @"( 
-                         version text 
-                        ) 
+                        + "( \"version\" varchar(10) NULL )"
+                        + @" 
                         WITH ( 
                           OIDS=FALSE 
                         ); ";
