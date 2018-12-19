@@ -24,11 +24,12 @@ namespace Marvin.Migrations
             // usually only one item will be added
             _assembliesWithPrefix = new Dictionary<Assembly, string>(1);
         }
-        
+
         /// <summary>
         /// Setup directory to scan for migrations
         /// </summary>
         /// <param name="path">Path to directory where scripts are located. Can be relative and absolute.</param>
+        /// <param name="prefix">Specific part of name or path. If no prefix specified provider will process only files without any prefix</param>
         /// <exception cref="ArgumentNullException"></exception>
         public ScriptMigrationsProvider FromDirectory(string path, string prefix = null)
         {
@@ -40,11 +41,12 @@ namespace Marvin.Migrations
             
             return this;
         }
-        
+
         /// <summary>
         /// Setup assembly where script migrations embedded
         /// </summary>
         /// <param name="assembly"></param>
+        /// <param name="prefix">Specific part of name or namespace part. If no prefix specified provider will process only files without any prefix</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public ScriptMigrationsProvider FromAssembly(Assembly assembly, string prefix = null)
