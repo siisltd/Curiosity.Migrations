@@ -13,32 +13,30 @@ namespace Marvin.Migrations
     public class ScriptMigrationsProvider : IMigrationsProvider
     {
 
-        private readonly List<string> _absoluteDirectoriesPath;
-        private readonly List<Assembly> _assemblies;
+        private readonly Dictionary<string, string> _absoluteDirectoriesPathWithPrefix;
+        private readonly Dictionary<Assembly, string> _assembliesWithPrefix;
         
-        private readonly Regex _regex;
-
         /// <inheritdoc />
         public ScriptMigrationsProvider()
         {
             // usually only one item will be added
-            _absoluteDirectoriesPath = new List<string>(1);
+            _absoluteDirectoriesPathWithPrefix = new Dictionary<string, string>(1);
             // usually only one item will be added
-            _assemblies = new List<Assembly>(1);
-            
-            _regex = new Regex(MigrationConstants.MigrationFileNamePattern, RegexOptions.IgnoreCase);
+            _assembliesWithPrefix = new Dictionary<Assembly, string>(1);
         }
         
         /// <summary>
         /// Setup directory to scan for migrations
         /// </summary>
-        /// <param name="absolutePath"></param>
+        /// <param name="path">Path to directory where scripts are located. Can be relative and absolute.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromDirectory(string absolutePath)
+        public ScriptMigrationsProvider FromDirectory(string path, string prefix = null)
         {
-            if (String.IsNullOrEmpty(absolutePath)) throw new ArgumentNullException(nameof(_absoluteDirectoriesPath));
+            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
-            _absoluteDirectoriesPath.Add(absolutePath);
+            var innerPath = Path.IsPathRooted(path) ? path : Path.Combine(Directory.GetCurrentDirectory(), path);
+            
+            _absoluteDirectoriesPathWithPrefix[innerPath] = prefix;
             
             return this;
         }
@@ -49,10 +47,10 @@ namespace Marvin.Migrations
         /// <param name="assembly"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromAssembly(Assembly assembly)
+        public ScriptMigrationsProvider FromAssembly(Assembly assembly, string prefix = null)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-            _assemblies.Add(assembly);
+            _assembliesWithPrefix[assembly] = prefix;
 
             return this;
         }
@@ -60,11 +58,15 @@ namespace Marvin.Migrations
         /// <inheritdoc />
         public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
         {
-            if (_absoluteDirectoriesPath.Count == 0 && _assemblies.Count == 0) throw new InvalidOperationException($"No directories or assemblies specified. First use method {nameof(FromDirectory)} or {nameof(FromAssembly)}");
+            if (_absoluteDirectoriesPathWithPrefix.Count == 0 && _assembliesWithPrefix.Count == 0) throw new InvalidOperationException($"No directories or assemblies specified. First use method {nameof(FromDirectory)} or {nameof(FromAssembly)}");
+            
             
             var migrations = new List<IMigration>();
-            foreach (var directoryPath in _absoluteDirectoriesPath)
+            foreach (var keyValuePair in _absoluteDirectoriesPathWithPrefix)
             {
+                var directoryPath = keyValuePair.Key;
+                var prefix = keyValuePair.Value;
+                
                 if (String.IsNullOrEmpty(directoryPath)) throw new ArgumentNullException(nameof(directoryPath));
             
                 if (!Directory.Exists(directoryPath)) throw new ArgumentException($"Directory {directoryPath} does not exists");
@@ -74,15 +76,19 @@ namespace Marvin.Migrations
                 var directoryMigrations = GetMigrations(
                     fileNames, 
                     File.ReadAllText, 
-                    dbProvider);
+                    dbProvider,
+                    prefix);
                 
                 if (directoryMigrations == null || directoryMigrations.Count == 0) continue;
                 
                 migrations.AddRange(directoryMigrations);
             }
             
-            foreach (var assembly in _assemblies)
+            foreach (var keyValuePair in _assembliesWithPrefix)
             {
+                var assembly = keyValuePair.Key;
+                var prefix = keyValuePair.Value;
+                
                 var resourceFileNames = assembly.GetManifestResourceNames();
 
                 var assemblyMigrations = GetMigrations(
@@ -95,7 +101,8 @@ namespace Marvin.Migrations
                             return reader.ReadToEnd();
                         }
                     },
-                    dbProvider);
+                    dbProvider,
+                    prefix);
 
                 
                 if (assemblyMigrations == null || assemblyMigrations.Count == 0) continue;
@@ -109,7 +116,8 @@ namespace Marvin.Migrations
           private ICollection<IMigration> GetMigrations(
             IEnumerable<string> fileNames,
             Func<string, string> sqlScriptReadFunc,
-            IDbProvider dbProvider)
+            IDbProvider dbProvider,
+            string prefix)
         {
             if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
             if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
@@ -117,9 +125,12 @@ namespace Marvin.Migrations
             
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
 
+            var regex = String.IsNullOrWhiteSpace(prefix)
+                ? new Regex($"[./]{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
+                    : new Regex($"{prefix}[-.]{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
             foreach (var fileName in fileNames)
             {
-                var match = _regex.Match(fileName);
+                var match = regex.Match(fileName);
                 if (!match.Success) continue;
 
                 var majorVersion = match.Groups[1];
