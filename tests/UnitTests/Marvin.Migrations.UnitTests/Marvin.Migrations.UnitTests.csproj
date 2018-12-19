@@ -36,21 +36,25 @@
       <None Update="Scripts\1.3.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Scripts\prefix-0.1.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="ScriptAsResources\Main\1.0.down-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.0.up-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.1.down.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.1.up.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.2-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.3.sql" />
+      <EmbeddedResource Include="ScriptAsResources\PreMigration\2.0.sql" />
       <None Remove="ScriptAsResources\1.0.down-comment.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.0.down-comment.sql" />
       <None Remove="ScriptAsResources\1.0.up-comment.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.0.up-comment.sql" />
       <None Remove="ScriptAsResources\1.1.down.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.1.down.sql" />
       <None Remove="ScriptAsResources\1.1.up.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.1.up.sql" />
       <None Remove="ScriptAsResources\1.2-comment.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.2-comment.sql" />
       <None Remove="ScriptAsResources\1.3.sql" />
-      <EmbeddedResource Include="ScriptAsResources\1.3.sql" />
     </ItemGroup>
 
 </Project>

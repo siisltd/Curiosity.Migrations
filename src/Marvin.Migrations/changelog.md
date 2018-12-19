@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] 
+
+### Added
+
+- Supports bath absolute and relative path for directories in code migrations provider
+- Supports prefix for code migration provider
+
 ## [0.2.15] - 2018-12-18
 
 ### Fixed
