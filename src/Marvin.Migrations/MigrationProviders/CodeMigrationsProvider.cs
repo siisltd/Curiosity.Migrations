@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Marvin.Migrations
 {
@@ -13,9 +14,12 @@ namespace Marvin.Migrations
         private readonly List<Assembly> _assemblies;
         private readonly Dictionary<Type, List<Assembly>> _typedAssemblies;
 
+        private readonly IServiceCollection _services;
+        
         /// <inheritdoc />
-        public CodeMigrationsProvider()
+        public CodeMigrationsProvider(IServiceCollection services)
         {
+            _services = services ?? throw new ArgumentNullException(nameof(services));
             _assemblies = new List<Assembly>();
             _typedAssemblies = new Dictionary<Type, List<Assembly>>();
         }
@@ -59,13 +63,12 @@ namespace Marvin.Migrations
         {
             var migrations = new List<IMigration>();
             var migratorType = typeof(CodeMigration);
+            var migrationsToResolve = new List<Type>();
             foreach (var assembly in _assemblies)
             {
-                migrations.AddRange(assembly
+                migrationsToResolve.AddRange(assembly
                     .GetTypes()
-                    .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
-                    .Select(x => GetMigration(x, dbProvider))
-                    .ToList());
+                    .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract));
             }
 
             foreach (var keyValue in _typedAssemblies)
@@ -82,14 +85,27 @@ namespace Marvin.Migrations
 
                 foreach (var assembly in keyValue.Value)
                 { 
-                    migrations.AddRange(assembly
+                    migrationsToResolve.AddRange(assembly
                     .GetTypes()
                     .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
-                    .Where(selector)
-                    .Select(x => GetMigration(x, dbProvider))
-                    .ToList());
+                    .Where(selector));
                 }
             }
+
+            foreach (var migrationType in migrationsToResolve)
+            {
+                _services.AddTransient(migrationType);
+            }
+
+            var serviceProvider = _services.BuildServiceProvider();
+            foreach (var migrationToResolve in migrationsToResolve)
+            {
+                if (!(serviceProvider.GetRequiredService(migrationToResolve) is CodeMigration migration)) 
+                    throw new InvalidOperationException($"{migrationToResolve.GetType()} no created");
+                migration.Init(dbProvider);
+                migrations.Add(migration);
+            }
+            
             var  migrationCheckMap = new HashSet<DbVersion>();
             foreach (var migration in migrations)
             {
@@ -101,11 +117,6 @@ namespace Marvin.Migrations
             }
 
             return migrations.OrderBy(x => x.Version).ToList();
-        }
-        
-        private IMigration GetMigration(Type type, IDbProvider dbProvider)
-        {
-            return (CodeMigration)Activator.CreateInstance(type, dbProvider);
         }
     }
 }

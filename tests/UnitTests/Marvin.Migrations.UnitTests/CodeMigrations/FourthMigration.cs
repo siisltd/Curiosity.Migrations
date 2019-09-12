@@ -6,10 +6,6 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
     public class FourthMigration : CustomBaseCodeMigration
     {
-        public FourthMigration(IDbProvider dbProvider) : base(dbProvider)
-        {
-        }
-
         public override DbVersion Version { get; } = new DbVersion(1,3);
         
         public override string Comment { get; } = "comment";

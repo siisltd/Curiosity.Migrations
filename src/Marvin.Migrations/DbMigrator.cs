@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -208,7 +209,8 @@ namespace Marvin.Migrations
                 //todo fix it later
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
-                
+
+                var a = new DbTransaction();
                 using (var transaction = _dbProvider.Connection.BeginTransaction())
                 {
                     try

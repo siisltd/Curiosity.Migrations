@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Marvin.Migrations.UnitTests.CodeMigrations;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -15,7 +16,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider();
+            var provider = new CodeMigrationsProvider(new ServiceCollection());
             
             provider.FromAssembly(Assembly.GetExecutingAssembly());
 
@@ -47,7 +48,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider();
+            var provider = new CodeMigrationsProvider(new ServiceCollection());
             
             provider.FromAssembly<CustomBaseCodeMigration>(Assembly.GetExecutingAssembly());
 
@@ -66,7 +67,7 @@ namespace Marvin.Migrations.UnitTests
         {
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider();
+            var provider = new CodeMigrationsProvider(new ServiceCollection());
             
             provider.FromAssembly<ISpecificCodeMigrations>(Assembly.GetExecutingAssembly());
 

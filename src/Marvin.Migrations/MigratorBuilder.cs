@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -22,9 +23,12 @@ namespace Marvin.Migrations
 
         private ILogger _logger;
 
+        private readonly IServiceCollection _services;
+
         /// <inheritdoc />
-        public MigratorBuilder()
+        public MigratorBuilder(IServiceCollection services = null)
         {
+            _services = services ?? new ServiceCollection();
             _migrationsProviders = new List<IMigrationsProvider>();
             _preMigrationsProviders = new List<IMigrationsProvider>();
             _upgradePolicy = MigrationPolicy.All;
@@ -60,7 +64,7 @@ namespace Marvin.Migrations
         /// <returns>Provider of <see cref="CodeMigration"/></returns>
         public CodeMigrationsProvider UseCodeMigrations()
         {
-            var codeMigrationProvider = new CodeMigrationsProvider();
+            var codeMigrationProvider = new CodeMigrationsProvider(_services);
             _migrationsProviders.Add(codeMigrationProvider);
             return codeMigrationProvider;
         }
@@ -71,7 +75,7 @@ namespace Marvin.Migrations
         /// <returns>Provider of <see cref="CodeMigration"/></returns>
         public CodeMigrationsProvider UseCodePreMigrations()
         {
-            var codeMigrationProvider = new CodeMigrationsProvider();
+            var codeMigrationProvider = new CodeMigrationsProvider(_services);
             _preMigrationsProviders.Add(codeMigrationProvider);
             return codeMigrationProvider;
         }

@@ -19,10 +19,13 @@ namespace Marvin.Migrations
         /// <summary>
         /// Provide access to underlying database
         /// </summary>
-        protected readonly IDbProvider DbProvider;
+        protected IDbProvider DbProvider;
         
-        /// <inheritdoc />
-        protected CodeMigration(
+        /// <summary>
+        /// Sets up <see cref="IDbProvider"/> for code migration
+        /// </summary>
+        /// <param name="dbProvider"></param>
+        internal void Init(
             IDbProvider dbProvider)
         {
             DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));

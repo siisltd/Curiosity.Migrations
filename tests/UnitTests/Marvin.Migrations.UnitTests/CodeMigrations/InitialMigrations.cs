@@ -9,10 +9,6 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
         public override DbVersion Version { get; } = new DbVersion(1,0);
         public override string Comment { get; } = "comment";
         
-        public InitialMigration(IDbProvider dbProvider) : base(dbProvider)
-        {
-        }
-
 
         public override Task UpgradeAsync(DbTransaction transaction)
         {
