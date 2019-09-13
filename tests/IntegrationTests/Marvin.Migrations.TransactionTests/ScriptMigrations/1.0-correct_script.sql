@@ -19,4 +19,4 @@ CREATE TABLE public.background_processor_requests
 );
 
 ALTER TABLE public.background_processor_requests
-    OWNER to postgres;
+    OWNER to %USER%;
