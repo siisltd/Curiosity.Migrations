@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +19,7 @@ namespace Marvin.Migrations.UnitTests
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
             migrationsProvider.FromDirectory(path);
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider).ToList();
+            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(4, migrations.Count);
             
@@ -58,7 +59,7 @@ namespace Marvin.Migrations.UnitTests
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
             migrationsProvider.FromDirectory(path, "prefix");
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider).ToList();
+            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(1, migrations.Count);
             
@@ -77,7 +78,7 @@ namespace Marvin.Migrations.UnitTests
             var migrationsProvider = new ScriptMigrationsProvider();
             migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly());
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider).ToList();
+            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(5, migrations.Count);
             
@@ -123,7 +124,7 @@ namespace Marvin.Migrations.UnitTests
             var migrationsProvider = new ScriptMigrationsProvider();
             migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly(), "PreMigration");
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider).ToList();
+            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(1, migrations.Count);
             

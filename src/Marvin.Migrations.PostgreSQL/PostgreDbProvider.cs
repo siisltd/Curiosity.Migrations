@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
@@ -40,6 +41,14 @@ namespace Marvin.Migrations.PostgreSQL
 
 
         private readonly PostgreDbProviderOptions _options;
+
+        /// <summary>
+        /// Dictionary with default variables from connection string and DB connection
+        /// </summary>
+        /// <remarks>
+        /// Key - variable name, value - variable value
+        /// </remarks>
+        private readonly Dictionary<string, string> _defaultVariables;
         
         /// <summary>
         /// Provide access to Postgre database
@@ -63,6 +72,12 @@ namespace Marvin.Migrations.PostgreSQL
             _connectionStringWithoutInitialCatalog = tempConnectionBuilder.ConnectionString;
             
             _options = options;
+
+            _defaultVariables = new Dictionary<string, string>
+            {
+                [DefaultVariables.User] = tempConnectionBuilder.Username,
+                [DefaultVariables.DbName] = tempConnectionBuilder.Database
+            };
         }
 
         /// <inheritdoc />
@@ -670,6 +685,12 @@ namespace Marvin.Migrations.PostgreSQL
             {
                 throw new MigrationException(MigrationError.MigratingError, "Can not execute script", e);
             }
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, string> GetDefaultVariables()
+        {
+            return _defaultVariables;
         }
 
         /// <inheritdoc />

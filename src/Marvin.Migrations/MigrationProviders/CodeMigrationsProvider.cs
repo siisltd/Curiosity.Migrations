@@ -55,8 +55,13 @@ namespace Marvin.Migrations
         }
 
         /// <inheritdoc />
-        public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
+        public ICollection<IMigration> GetMigrations(
+            IDbProvider dbProvider,
+            IReadOnlyDictionary<string, string> variables)
         {
+            if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
+            if (variables == null) throw new ArgumentNullException(nameof(variables));
+            
             var migrations = new List<IMigration>();
             var migratorType = typeof(CodeMigration);
             foreach (var assembly in _assemblies)

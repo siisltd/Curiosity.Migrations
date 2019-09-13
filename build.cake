@@ -5,12 +5,6 @@
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 
-//////////////////////////////////////////////////////////////////////
-// EXTERNAL NUGET TOOLS
-//////////////////////////////////////////////////////////////////////
-
-#Tool "xunit.runner.console"
-
 var artifactsDir = Directory("./artifacts");
 var solutionPath = "./Marvin.Migrations.sln";
 var framework = "netstandard2.0";

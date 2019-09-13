@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -6,7 +7,7 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
     public class ThirdMigration : CodeMigration, ISpecificCodeMigrations
     {
-        public ThirdMigration(IDbProvider dbProvider) : base(dbProvider)
+        public ThirdMigration(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
         {
         }
 

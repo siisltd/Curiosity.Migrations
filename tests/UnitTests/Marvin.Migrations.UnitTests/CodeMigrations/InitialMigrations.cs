@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -9,7 +10,7 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
         public override DbVersion Version { get; } = new DbVersion(1,0);
         public override string Comment { get; } = "comment";
         
-        public InitialMigration(IDbProvider dbProvider) : base(dbProvider)
+        public InitialMigration(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
         {
         }
 
