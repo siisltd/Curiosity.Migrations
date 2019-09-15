@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Moq;
 using Xunit;
+using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Marvin.Migrations.UnitTests
 {
@@ -22,6 +23,10 @@ namespace Marvin.Migrations.UnitTests
             provider
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
+
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
 
             var migrations = new List<IMigration>(0);
             
@@ -67,6 +72,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -120,6 +129,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -163,6 +176,10 @@ namespace Marvin.Migrations.UnitTests
             
             var provider = new Mock<IDbProvider>();
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
                 .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
@@ -233,6 +250,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -287,6 +308,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -347,6 +372,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -404,6 +433,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -465,6 +498,10 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
+            provider
+                .Setup(x => x.BeginTransaction())
+                .Returns(() => new MockTransaction());
+            
             var firstMigration = new Mock<IMigration>();
             firstMigration
                 .Setup(x => x.Version)
@@ -505,5 +542,20 @@ namespace Marvin.Migrations.UnitTests
             Assert.Equal(MigrationError.PolicyError, result.Error.Value);
             Assert.Equal(thirdMigration.Object.Version, dbVersionAfterUpdate);
         }
+        
+        private class MockTransaction : DbTransaction
+        {
+            public override void Commit()
+            {
+            }
+
+            public override void Rollback()
+            {
+            }
+
+            protected override DbConnection DbConnection { get; }
+            public override IsolationLevel IsolationLevel { get; }
+        }
     }
+    
 }

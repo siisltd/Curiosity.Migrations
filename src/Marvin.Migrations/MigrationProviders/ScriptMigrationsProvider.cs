@@ -58,8 +58,13 @@ namespace Marvin.Migrations
         }
 
         /// <inheritdoc />
-        public ICollection<IMigration> GetMigrations(IDbProvider dbProvider)
+        public ICollection<IMigration> GetMigrations(
+            IDbProvider dbProvider,
+            IReadOnlyDictionary<string, string> variables)
         {
+            if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
+            if (variables == null) throw new ArgumentNullException(nameof(variables));
+            
             if (_absoluteDirectoriesPathWithPrefix.Count == 0 && _assembliesWithPrefix.Count == 0) throw new InvalidOperationException($"No directories or assemblies specified. First use method {nameof(FromDirectory)} or {nameof(FromAssembly)}");
             
             
@@ -79,7 +84,8 @@ namespace Marvin.Migrations
                     fileNames, 
                     File.ReadAllText, 
                     dbProvider,
-                    prefix);
+                    prefix,
+                    variables);
                 
                 if (directoryMigrations == null || directoryMigrations.Count == 0) continue;
                 
@@ -104,7 +110,8 @@ namespace Marvin.Migrations
                         }
                     },
                     dbProvider,
-                    prefix);
+                    prefix,
+                    variables);
 
                 
                 if (assemblyMigrations == null || assemblyMigrations.Count == 0) continue;
@@ -114,22 +121,23 @@ namespace Marvin.Migrations
 
             return migrations.OrderBy(x => x.Version).ToList();
         }
-        
-          private ICollection<IMigration> GetMigrations(
+
+        private ICollection<IMigration> GetMigrations(
             IEnumerable<string> fileNames,
             Func<string, string> sqlScriptReadFunc,
             IDbProvider dbProvider,
-            string prefix)
+            string prefix,
+            IReadOnlyDictionary<string, string> variables)
         {
             if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
             if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
-            
+
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
 
             var regex = String.IsNullOrWhiteSpace(prefix)
                 ? new Regex($"[./]{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
-                    : new Regex($"{prefix}[-.]{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
+                : new Regex($"{prefix}[-.]{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
             foreach (var fileName in fileNames)
             {
                 var match = regex.Match(fileName);
@@ -142,35 +150,71 @@ namespace Marvin.Migrations
                 {
                     scripts[version] = new ScriptInfo(version);
                 }
+
                 var scriptInfo = scripts[version];
 
                 var script = sqlScriptReadFunc.Invoke(fileName);
                 if (match.Groups[4].Success)
                 {
-                    if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript)) throw new InvalidOperationException($"There is more than one downgrade script with version {version}");
+                    if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript))
+                        throw new InvalidOperationException(
+                            $"There is more than one downgrade script with version {version}");
                     scriptInfo.DownScript = script;
                 }
                 else
                 {
-                    if (!String.IsNullOrWhiteSpace(scriptInfo.UpScript)) throw new InvalidOperationException($"There is more than one upgrade script with version {version}");
+                    if (!String.IsNullOrWhiteSpace(scriptInfo.UpScript))
+                        throw new InvalidOperationException(
+                            $"There is more than one upgrade script with version {version}");
                     scriptInfo.UpScript = script;
                     var comment = match.Groups[7];
-                    scriptInfo.Comment = comment.Success 
+                    scriptInfo.Comment = comment.Success
                         ? comment.Value
                         : null;
                 }
             }
+
+            return scripts
+                .Select(scriptInfo =>
+                CreateScriptMigration(
+                    scriptInfo.Key,
+                    scriptInfo.Value,
+                    dbProvider,
+                    variables))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Creates script migration. Replace variables placeholders with real values
+        /// </summary>
+        /// <param name="dbVersion"></param>
+        /// <param name="scriptInfo"></param>
+        /// <param name="dbProvider"></param>
+        /// <param name="variables"></param>
+        /// <returns></returns>
+        private IMigration CreateScriptMigration(
+            DbVersion dbVersion,
+            ScriptInfo scriptInfo,
+            IDbProvider dbProvider,
+            IReadOnlyDictionary<string, string> variables)
+        {
+            var upScript = scriptInfo.UpScript;
+            var downScript = scriptInfo.DownScript;
+
+            foreach (var keyValuePair in variables)
+            {
+                upScript = upScript.Replace(keyValuePair.Key, keyValuePair.Value);
+                downScript = downScript?.Replace(keyValuePair.Key, keyValuePair.Value);
+            }
             
-            return scripts.Select(scriptInfo => 
-                    new ScriptMigration(
-                        dbProvider,
-                        scriptInfo.Key,
-                        scriptInfo.Value.UpScript,
-                        scriptInfo.Value.DownScript,
-                        scriptInfo.Value.Comment) 
-                    as IMigration).ToList();
-        } 
-        
+            return new ScriptMigration(
+                dbProvider,
+                dbVersion,
+                upScript,
+                downScript,
+                scriptInfo.Comment);
+        }
+
         /// <summary>
         /// Internal class for analysis sql script files
         /// </summary>

@@ -22,6 +22,14 @@ namespace Marvin.Migrations
 
         private ILogger _logger;
 
+        /// <summary>
+        /// Dictionary with variables
+        /// </summary>
+        /// <remarks>
+        /// Key = variable name, value - variable value
+        /// </remarks>
+        private readonly Dictionary<string, string> _variables;
+
         /// <inheritdoc />
         public MigratorBuilder()
         {
@@ -30,6 +38,7 @@ namespace Marvin.Migrations
             _upgradePolicy = MigrationPolicy.All;
             _downgradePolicy = MigrationPolicy.All;
             _targetVersion = default(DbVersion?);
+            _variables = new Dictionary<string, string>();
         }
         
         /// <summary>
@@ -148,6 +157,16 @@ namespace Marvin.Migrations
             return this;
         }
 
+        public MigratorBuilder UseVariable(string name, string value)
+        {
+            if (String.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
+
+            _variables[name] = value ?? throw new ArgumentNullException(nameof(value));
+
+            return this;
+        }
+
         /// <summary>
         /// Build migrator
         /// </summary>
@@ -160,23 +179,32 @@ namespace Marvin.Migrations
             
             var dbProvider = _dbProviderFactory.CreateDbProvider();
             
+            var providerVariables = dbProvider.GetDefaultVariables();
+            foreach (var kvp in providerVariables)
+            {
+                // we should not override the variables set manually
+                if (_variables.ContainsKey(kvp.Key)) continue;
+
+                _variables[kvp.Key] = kvp.Value;
+            }
+            
             var migrations = new List<IMigration>();
             foreach (var migrationsProvider in _migrationsProviders)
             {
-                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider));
+                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
             }
             
             var preMigrations = new List<IMigration>();
             foreach (var migrationsProvider in _preMigrationsProviders)
             {
-                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider));
+                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
             }
             
             return new DbMigrator(
                 dbProvider, 
                 migrations, 
                 _upgradePolicy, 
-                _downgradePolicy, 
+                _downgradePolicy,
                 preMigrations,
                 _targetVersion, 
                 _logger);

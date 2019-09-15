@@ -14,6 +14,7 @@
         <Description>Migration tool for .NET: supports sql script migrations and custom migrations by C#</Description>
         <PackageReleaseNotes>https://github.com/MarvinBand/Migrations/blob/master/src/Marvin.Migrations/changelog.md</PackageReleaseNotes>
         <PackageTags>migrations, migration, migrator, versioning, migration-tool, .net-core, .netstandard, database</PackageTags>
+        <LangVersion>7.3</LangVersion>
         
     </PropertyGroup>
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -30,6 +31,7 @@ namespace Marvin.Migrations
         /// <param name="migrations">Main migrations for changing database</param>
         /// <param name="upgradePolicy">Policy for upgrading database</param>
         /// <param name="downgradePolicy">Policy for downgrading database</param>
+        /// <param name="variables">Variables for template substitution</param>
         /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
         /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version</param>
         /// <param name="logger">Optional logger</param>
@@ -158,7 +160,7 @@ namespace Marvin.Migrations
             {
                await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -209,7 +211,7 @@ namespace Marvin.Migrations
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
                 
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -294,7 +296,7 @@ namespace Marvin.Migrations
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
 
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
