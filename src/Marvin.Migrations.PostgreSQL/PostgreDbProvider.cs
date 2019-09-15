@@ -124,6 +124,12 @@ namespace Marvin.Migrations.PostgreSQL
             }
         }
 
+        /// <inheritdoc />
+        public DbTransaction BeginTransaction()
+        {
+            return Connection.BeginTransaction();
+        }
+
 
         /// <inheritdoc />
         public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion)

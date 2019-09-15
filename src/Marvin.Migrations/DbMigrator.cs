@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -159,7 +160,7 @@ namespace Marvin.Migrations
             {
                await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -210,7 +211,7 @@ namespace Marvin.Migrations
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
                 
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -295,7 +296,7 @@ namespace Marvin.Migrations
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
 
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {

@@ -37,6 +37,15 @@ namespace Marvin.Migrations
         /// </summary>
         /// <returns></returns>
         Task OpenConnectionAsync();
+
+        /// <summary>
+        /// Begins new DB transaction
+        /// </summary>
+        /// <returns>DB transaction</returns>
+        /// <remarks>
+        /// This method was created for easy unit testing
+        /// </remarks>
+        DbTransaction BeginTransaction();
         
         /// <summary>
         /// Returns actual DB state
