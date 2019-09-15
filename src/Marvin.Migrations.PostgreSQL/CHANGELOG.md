@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added 
+
+- Variables for scripts with auto substitution to script migrations 
+
 ## [0.2.15] - 2018-12-18
 
 ### Changed
