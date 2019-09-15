@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using FluentAssertions;
 using Moq;
 using Xunit;
 
 namespace Marvin.Migrations.UnitTests
 {
-    public class ScriptMigrationsProviderTests
+    /// <summary>
+    /// Unit tests for <see cref="ScriptMigrationsProvider"/>
+    /// </summary>
+    public class ScriptMigrationsProvider_Should
     {
         [Fact]
         public void GetMigrations_FromDirectory_WithoutPrefix_Ok()
@@ -21,7 +25,7 @@ namespace Marvin.Migrations.UnitTests
 
             var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
-            Assert.Equal(4, migrations.Count);
+            Assert.Equal(5, migrations.Count);
             
             Assert.True(migrations[0] is ScriptMigration);
             Assert.Equal(new DbVersion(1,0), migrations[0].Version);
@@ -133,6 +137,32 @@ namespace Marvin.Migrations.UnitTests
             Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
             Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScript);
             Assert.True(String.IsNullOrEmpty(((ScriptMigration)migrations[0]).DownScript));
+        }
+        
+        [Fact]
+        public void SubstituteVariableToTemplate()
+        {
+            // arrange
+            var dbProvider = Mock.Of<IDbProvider>();
+
+            var migrationsProvider = new ScriptMigrationsProvider();
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
+            migrationsProvider.FromDirectory(path);
+
+            var userName = "user";
+            var variables = new Dictionary<string, string>
+            {
+                {DefaultVariables.User, userName}
+            };
+            
+            // act
+            var migrations = migrationsProvider.GetMigrations(dbProvider, variables).ToList();
+            
+            // assert
+            migrations.Count.Should().Be(5, "because we have 5 migrations in scripts directory");
+
+            ((ScriptMigration) migrations[4]).UpScript.Should()
+                .BeEquivalentTo(userName, "because script contains only template");
         }
     }
 }
