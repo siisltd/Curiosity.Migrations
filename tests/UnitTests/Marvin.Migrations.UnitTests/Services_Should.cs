@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
+using Marvin.Migrations.UnitTests.CodeMigrations;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -27,6 +28,7 @@ namespace Marvin.Migrations.UnitTests
                 .Returns(provider.Object);
             
             var services = new ServiceCollection();
+            services.AddTransient<DependencyService>();
             services.AddMigrations(options =>
             {
                 options
@@ -59,7 +61,9 @@ namespace Marvin.Migrations.UnitTests
                 .Setup(x => x.CreateDbProvider())
                 .Returns(provider.Object);
             
-            var services = new ServiceCollection();
+            var services = new ServiceCollection();      
+            services.AddTransient<DependencyService>();
+
             services.AddMigrations(options =>
             {
                 options

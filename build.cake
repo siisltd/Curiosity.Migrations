@@ -94,6 +94,7 @@ Task("IntegrationTests")
      
 Task("Default")
     .IsDependentOn("Build")
-    .IsDependentOn("UnitTests");
+    .IsDependentOn("UnitTests")
+    .IsDependentOn("IntegrationTests");
     
 RunTarget(target);

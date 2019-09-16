@@ -6,3 +6,5 @@ dotnet: 2.2
 sudo: required
 script:
 - ./build.sh
+services:
+  - docker
