@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.1] - 2019-09-16
+
+### Fixed 
+
+- Passing variables to code migrations
+
 ## [0.3] - 2019-09-16
 
 ### Added 
