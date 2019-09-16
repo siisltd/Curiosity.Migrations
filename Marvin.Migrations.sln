@@ -13,22 +13,15 @@ ProjectSection(SolutionItems) = preProject
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
-ProjectSection(SolutionItems) = preProject
-	tests\run_tests.sh = tests\run_tests.sh
-EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations", "src\Marvin.Migrations\Marvin.Migrations.csproj", "{E2F484A1-607F-4193-9592-341EFE7890BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marvin.Migrations.PostgreSQL", "src\Marvin.Migrations.PostgreSQL\Marvin.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{8DB6C739-ACB4-47CD-B72E-A5180C22B84F}"
-ProjectSection(SolutionItems) = preProject
-	tests\UnitTests\build.cake = tests\UnitTests\build.cake
-EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{98A180F1-B3B9-41F0-9974-2333B4F03390}"
 ProjectSection(SolutionItems) = preProject
-	tests\IntegrationTests\build.cake = tests\IntegrationTests\build.cake
 	tests\IntegrationTests\env-compose.yml = tests\IntegrationTests\env-compose.yml
 EndProjectSection
 EndProject
