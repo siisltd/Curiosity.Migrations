@@ -72,10 +72,6 @@ namespace Marvin.Migrations.UnitTests
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
             
             provider
-                .Setup(x => x.OpenConnectionAsync())
-                .Callback(() => {})
-
-            provider
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
             

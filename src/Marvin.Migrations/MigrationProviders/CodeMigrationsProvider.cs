@@ -107,7 +107,7 @@ namespace Marvin.Migrations
             {
                 if (!(serviceProvider.GetRequiredService(migrationToResolve) is CodeMigration migration)) 
                     throw new InvalidOperationException($"{migrationToResolve.GetType()} no created");
-                migration.Init(dbProvider);
+                migration.Init(dbProvider, variables);
                 migrations.Add(migration);
             }
             
