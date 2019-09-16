@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Marvin.Migrations.UnitTests.CodeMigrations;
@@ -20,7 +21,7 @@ namespace Marvin.Migrations.UnitTests
             
             provider.FromAssembly(Assembly.GetExecutingAssembly());
 
-            var migrations = provider.GetMigrations(dbProvider).ToList();
+            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(4, migrations.Count);
             
@@ -52,7 +53,7 @@ namespace Marvin.Migrations.UnitTests
             
             provider.FromAssembly<CustomBaseCodeMigration>(Assembly.GetExecutingAssembly());
 
-            var migrations = provider.GetMigrations(dbProvider).ToList();
+            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Single(migrations);
             
@@ -71,7 +72,7 @@ namespace Marvin.Migrations.UnitTests
             
             provider.FromAssembly<ISpecificCodeMigrations>(Assembly.GetExecutingAssembly());
 
-            var migrations = provider.GetMigrations(dbProvider).ToList();
+            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
             Assert.Equal(2, migrations.Count);
             

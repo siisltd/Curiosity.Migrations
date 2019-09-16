@@ -159,7 +159,7 @@ namespace Marvin.Migrations
             {
                await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -209,9 +209,8 @@ namespace Marvin.Migrations
                 //todo fix it later
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
-
-                var a = new DbTransaction();
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
@@ -296,7 +295,7 @@ namespace Marvin.Migrations
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync();
 
-                using (var transaction = _dbProvider.Connection.BeginTransaction())
+                using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {

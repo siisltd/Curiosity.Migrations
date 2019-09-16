@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -36,6 +37,15 @@ namespace Marvin.Migrations
         /// </summary>
         /// <returns></returns>
         Task OpenConnectionAsync();
+
+        /// <summary>
+        /// Begins new DB transaction
+        /// </summary>
+        /// <returns>DB transaction</returns>
+        /// <remarks>
+        /// This method was created for easy unit testing
+        /// </remarks>
+        DbTransaction BeginTransaction();
         
         /// <summary>
         /// Returns actual DB state
@@ -109,5 +119,11 @@ namespace Marvin.Migrations
         /// </summary>
         /// <returns></returns>
         Task CloseConnectionAsync();
+
+        /// <summary>
+        /// Returns default variables from connection string and DB connection
+        /// </summary>
+        /// <returns>Dictionary with variables. Key - variable name, value - variable value</returns>
+        IReadOnlyDictionary<string, string> GetDefaultVariables();
     }
 }

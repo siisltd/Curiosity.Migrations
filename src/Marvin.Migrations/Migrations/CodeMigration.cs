@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -22,6 +23,15 @@ namespace Marvin.Migrations
         protected IDbProvider DbProvider;
         
         /// <summary>
+        /// User defined variables
+        /// </summary>
+        public IReadOnlyDictionary<string, string> Variables { get; }
+        
+        /// <inheritdoc />
+        protected CodeMigration(
+            IDbProvider dbProvider,
+            IReadOnlyDictionary<string, string> variables)
+        /// <summary>
         /// Sets up <see cref="IDbProvider"/> for code migration
         /// </summary>
         /// <param name="dbProvider"></param>
@@ -29,6 +39,7 @@ namespace Marvin.Migrations
             IDbProvider dbProvider)
         {
             DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+            Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         }
 
         /// <inheritdoc />

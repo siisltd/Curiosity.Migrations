@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+        <PackageReference Include="FluentAssertions" Version="5.9.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
         <PackageReference Include="Moq" Version="4.10.0" />
         <PackageReference Include="xunit" Version="2.3.1" />
@@ -38,6 +39,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Scripts\prefix-0.1.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.4-with_templates.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -5,12 +5,6 @@
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 
-//////////////////////////////////////////////////////////////////////
-// EXTERNAL NUGET TOOLS
-//////////////////////////////////////////////////////////////////////
-
-#Tool "xunit.runner.console"
-
 var artifactsDir = Directory("./artifacts");
 var solutionPath = "./Marvin.Migrations.sln";
 var framework = "netstandard2.0";
@@ -75,6 +69,7 @@ Task("IntegrationTests")
 		
         Information("Running docker...");
         StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml up -d");
+		Information("Running docker completed");
 		
         var projects = GetFiles("./tests/IntegrationTests/**/*csproj");
         foreach(var project in projects)
@@ -92,8 +87,9 @@ Task("IntegrationTests")
     })
     .Finally(() =>
     {  
-        Information("Stopping docker task...");
+        Information("Stopping docker...");
         StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml down");
+        Information("Stopping docker completed");
     });  
      
 Task("Default")
