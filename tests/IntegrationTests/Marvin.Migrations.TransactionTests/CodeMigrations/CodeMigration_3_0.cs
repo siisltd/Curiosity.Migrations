@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
 {
     public class CodeMigration_3_0 : CodeMigration
     {
-        public CodeMigration_3_0(IDbProvider dbProvider) : base(dbProvider)
+        public CodeMigration_3_0(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
         {
         }
 
