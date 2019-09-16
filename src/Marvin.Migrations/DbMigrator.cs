@@ -31,7 +31,6 @@ namespace Marvin.Migrations
         /// <param name="migrations">Main migrations for changing database</param>
         /// <param name="upgradePolicy">Policy for upgrading database</param>
         /// <param name="downgradePolicy">Policy for downgrading database</param>
-        /// <param name="variables">Variables for template substitution</param>
         /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
         /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version</param>
         /// <param name="logger">Optional logger</param>
