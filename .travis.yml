@@ -2,7 +2,7 @@ language: csharp
 os:
 - linux
 mono: none
-dotnet: 2.1
+dotnet: 2.2
 sudo: required
 script:
 - ./build.sh
