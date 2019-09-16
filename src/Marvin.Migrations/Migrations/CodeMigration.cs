@@ -20,15 +20,19 @@ namespace Marvin.Migrations
         /// <summary>
         /// Provide access to underlying database
         /// </summary>
-        protected readonly IDbProvider DbProvider;
+        protected IDbProvider DbProvider { get; private set; }
         
         /// <summary>
         /// User defined variables
         /// </summary>
-        public IReadOnlyDictionary<string, string> Variables { get; }
-        
-        /// <inheritdoc />
-        protected CodeMigration(
+        protected IReadOnlyDictionary<string, string> Variables { get; private set; }
+
+        /// <summary>
+        /// Initializes migration 
+        /// </summary>
+        /// <param name="dbProvider">Provider for DB access</param>
+        /// <param name="variables">Variables for migrations</param>
+        internal void Init(
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables)
         {

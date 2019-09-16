@@ -18,8 +18,7 @@ namespace Marvin.Migrations.UnitTests
             var policy = MigrationPolicy.Major | MigrationPolicy.Minor;
             
             var provider = new Mock<IDbProvider>();
-
-
+            
             provider
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
@@ -71,7 +70,7 @@ namespace Marvin.Migrations.UnitTests
             provider
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
-
+            
             provider
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());

@@ -7,10 +7,6 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
     public class ThirdMigration : CodeMigration, ISpecificCodeMigrations
     {
-        public ThirdMigration(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
-        {
-        }
-
         public override DbVersion Version { get; } = new DbVersion(1,2);
         
         public override string Comment { get; } = "comment";
