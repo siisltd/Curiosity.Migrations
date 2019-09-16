@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using FluentAssertions;
 using Marvin.Migrations.UnitTests.CodeMigrations;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -10,19 +10,28 @@ using Xunit;
 namespace Marvin.Migrations.UnitTests
 {
     
-    public class CodeMigrationsProviderTests
+    /// <summary>
+    /// Unit tests for <see cref="CodeMigrationsProvider"/>
+    /// </summary>
+    public class CodeMigrationsProvider_Should
     {
+        /// <summary>
+        /// Check if provider returns code migrations from specified assembly
+        /// </summary>
         [Fact]
-        public void GetMigrations_AllFromAssembly_Ok()
+        public void ReturnMigrationsFromAssembly()
         {
+            // arrange
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider(new ServiceCollection());
+            var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly(Assembly.GetExecutingAssembly());
 
+            // act 
             var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
+            // assert
             Assert.Equal(4, migrations.Count);
             
             Assert.True(migrations[0] is CodeMigration);
@@ -43,18 +52,32 @@ namespace Marvin.Migrations.UnitTests
             Assert.Equal(new DbVersion(1,3), migrations[3].Version);
             Assert.Equal("comment", migrations[3].Comment);
         }
-        
-        [Fact]
-        public void GetMigrations_CustomByClassFromAssembly_Ok()
+
+        private IServiceCollection GetServiceCollection()
         {
+            var services = new ServiceCollection();
+            services.AddTransient<DependencyService>();
+
+            return services;
+        }
+        
+        /// <summary>
+        /// Checks if provider returns only code migrations from specified assembly that inherited from desired base class
+        /// </summary>
+        [Fact]
+        public void ReturnCodeMigrationsFromAssemblyByBaseClass()
+        {
+            // arrange
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider(new ServiceCollection());
+            var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly<CustomBaseCodeMigration>(Assembly.GetExecutingAssembly());
 
+            // act
             var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
+            // assert
             Assert.Single(migrations);
             
             Assert.True(migrations[0] is CodeMigration);
@@ -63,17 +86,24 @@ namespace Marvin.Migrations.UnitTests
             
         }
         
+        
+        /// <summary>
+        /// Checks if provider returns only code migrations from specified assembly that implemented desired interface
+        /// </summary>
         [Fact]
-        public void GetMigrations_CustomByInterfaceFromAssembly_Ok()
+        public void ReturnCodeMigrationsFromAssemblyByInterface()
         {
+            // arrange
             var dbProvider = Mock.Of<IDbProvider>();
 
-            var provider = new CodeMigrationsProvider(new ServiceCollection());
+            var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly<ISpecificCodeMigrations>(Assembly.GetExecutingAssembly());
 
+            // act
             var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
             
+            // assert
             Assert.Equal(2, migrations.Count);
             
             Assert.True(migrations[0] is CodeMigration);
@@ -84,6 +114,27 @@ namespace Marvin.Migrations.UnitTests
             Assert.Equal(new DbVersion(1,2), migrations[1].Version);
             Assert.Equal("comment", migrations[1].Comment);
             
+        }
+
+        [Fact]
+        public void ReturnCodeMigrationWithDependenciesFromIoC()
+        {
+            // arrange
+            var dbProvider = Mock.Of<IDbProvider>();
+
+            var provider = new CodeMigrationsProvider(GetServiceCollection());
+            
+            provider.FromAssembly(Assembly.GetExecutingAssembly());
+
+            // act
+            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            
+            // assert
+
+            migrations.Count.Should().Be(4, "because we have only 4 code migrations");
+            var typedMigration = migrations[3] as FourthMigrationWithDependency;
+            typedMigration.Should().NotBeNull();
+            typedMigration.DependencyService.Should().NotBeNull("because IoC should create dependency");
         }
     }
 }

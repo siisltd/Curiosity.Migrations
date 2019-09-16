@@ -1,15 +1,24 @@
+using System;
 using System.Data.Common;
 using System.Threading.Tasks;
 using System.Transactions;
 
 namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
-    public class FourthMigration : CustomBaseCodeMigration
+    public class FourthMigrationWithDependency : CustomBaseCodeMigration
     {
+        public DependencyService DependencyService { get; }
+
         public override DbVersion Version { get; } = new DbVersion(1,3);
         
         public override string Comment { get; } = "comment";
-        
+
+        public FourthMigrationWithDependency(DependencyService dependencyService)
+        {
+            DependencyService = dependencyService ?? throw new ArgumentNullException(nameof(dependencyService));
+        }
+
+
         public override Task UpgradeAsync(DbTransaction transaction)
         {
             return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript);

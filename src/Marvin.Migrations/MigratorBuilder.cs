@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -190,7 +191,7 @@ namespace Marvin.Migrations
             
             var dbProvider = _dbProviderFactory.CreateDbProvider();
             
-            var providerVariables = dbProvider.GetDefaultVariables();
+            var providerVariables = dbProvider.GetDefaultVariables() ?? new Dictionary<string, string>();
             foreach (var kvp in providerVariables)
             {
                 // we should not override the variables set manually
