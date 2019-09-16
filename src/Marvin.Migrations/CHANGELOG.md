@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added 
+
+- [#13](https://github.com/MarvinBand/Migrations/issues/13) Creating code migration from service collection
+- Extension method `AddMigration` to easy configure migration
+
 ## [0.3.1] - 2019-09-16
 
 ### Fixed 
