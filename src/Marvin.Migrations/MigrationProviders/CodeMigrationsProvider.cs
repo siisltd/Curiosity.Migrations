@@ -69,7 +69,7 @@ namespace Marvin.Migrations
                 migrations.AddRange(assembly
                     .GetTypes()
                     .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
-                    .Select(x => GetMigration(x, dbProvider))
+                    .Select(x => GetMigration(x, dbProvider, variables))
                     .ToList());
             }
 
@@ -91,7 +91,7 @@ namespace Marvin.Migrations
                     .GetTypes()
                     .Where(x => x.IsSubclassOf(migratorType) && !x.IsAbstract)
                     .Where(selector)
-                    .Select(x => GetMigration(x, dbProvider))
+                    .Select(x => GetMigration(x, dbProvider, variables))
                     .ToList());
                 }
             }
@@ -108,9 +108,9 @@ namespace Marvin.Migrations
             return migrations.OrderBy(x => x.Version).ToList();
         }
         
-        private IMigration GetMigration(Type type, IDbProvider dbProvider)
+        private IMigration GetMigration(Type type, IDbProvider dbProvider, IReadOnlyDictionary<string, string> variables)
         {
-            return (CodeMigration)Activator.CreateInstance(type, dbProvider);
+            return (CodeMigration)Activator.CreateInstance(type, dbProvider, variables);
         }
     }
 }

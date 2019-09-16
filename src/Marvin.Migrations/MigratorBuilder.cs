@@ -157,6 +157,13 @@ namespace Marvin.Migrations
             return this;
         }
 
+        /// <summary>
+        /// Add specified variables that will be passed to code migrations and auto substitute to script migrations
+        /// </summary>
+        /// <param name="name">Variable name</param>
+        /// <param name="value">Variable value</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">If any of arguments is <see langword="null"/> or empty</exception>
         public MigratorBuilder UseVariable(string name, string value)
         {
             if (String.IsNullOrWhiteSpace(name))
