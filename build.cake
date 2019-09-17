@@ -1,3 +1,14 @@
+#tool "nuget:?package=coveralls.io&version=1.4.2"
+#addin Cake.Git
+// #addin nuget:?package=Nuget.Core
+#addin "nuget:?package=Cake.Coveralls&version=0.9.0"
+
+
+#addin nuget:?package=Cake.Coverlet&version=2.1.2
+#tool nuget:?package=ReportGenerator&version=4.0.4
+
+// using NuGet;
+
 ///////////////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 ///////////////////////////////////////////////////////////////////////////////
@@ -5,12 +16,25 @@
 var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 
-var artifactsDir = Directory("./artifacts");
+var coverageResultsFileName = "coverage.xml";
+// var currentBranch = Argument<string>("currentBranch", GitBranchCurrent("./").FriendlyName);
+// var isReleaseBuild = string.Equals(currentBranch, "master", StringComparison.OrdinalIgnoreCase);
+var nugetApiKey = Argument<string>("nugetApiKey", null);
+var coverallsToken = Argument<string>("coverallsToken", null);
+var nugetSource = "https://api.nuget.org/v3/index.json";
+
+var artifactsDir = "./artifacts/";
 var solutionPath = "./Marvin.Migrations.sln";
 var framework = "netstandard2.0";
 
-var isMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master",
-    BuildSystem.TravisCI.Environment.Build.Branch);
+/*  Change the output artifacts and their configuration here. */
+var parentDirectory = Directory("..");
+var coverageDirectory = parentDirectory + Directory("code_coverage");
+var cuberturaFileName = "results";
+var cuberturaFileExtension = ".cobertura.xml";
+var reportTypes = "HtmlInline_AzurePipelines"; // Use "Html" value locally for performance and files' size.
+var coverageFilePath = coverageDirectory + File(cuberturaFileName + cuberturaFileExtension);
+var jsonFilePath = coverageDirectory + File(cuberturaFileName + ".json");
 
 Task("Clean")
     .Does(() => 
@@ -55,8 +79,13 @@ Task("UnitTests")
                 new DotNetCoreTestSettings()
                 {
                     Configuration = configuration,
-                    NoBuild = false
+                    NoBuild = false,
+                    ArgumentCustomization = args => args
+                        .Append("/p:CollectCoverage=true")
+                        .Append("/p:CoverletOutputFormat=opencover")
                 });
+                
+//             MoveFile(project.GetDirectory().FullPath + coverageResultsFileName, artifactsDir + coverageResultsFileName);
         }
     });
      
