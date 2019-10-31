@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -18,12 +19,15 @@ namespace Marvin.Migrations.UnitTests
         public void GetMigrations_FromDirectory_WithoutPrefix_Ok()
         {
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
             migrationsProvider.FromDirectory(path);
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = migrationsProvider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             Assert.Equal(5, migrations.Count);
             
@@ -58,12 +62,15 @@ namespace Marvin.Migrations.UnitTests
         public void GetMigrations_FromDirectory_WithPrefix_Ok()
         {
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
             migrationsProvider.FromDirectory(path, "prefix");
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = migrationsProvider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             Assert.Equal(1, migrations.Count);
             
@@ -78,11 +85,14 @@ namespace Marvin.Migrations.UnitTests
         public void GetMigrations_FromAssembly_WithoutPrefix_Ok()
         {
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
             migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly());
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = migrationsProvider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             Assert.Equal(5, migrations.Count);
             
@@ -124,11 +134,14 @@ namespace Marvin.Migrations.UnitTests
         public void GetMigrations_FromAssembly_WithPrefix_Ok()
         {
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
             migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly(), "PreMigration");
 
-            var migrations = migrationsProvider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = migrationsProvider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             Assert.Equal(1, migrations.Count);
             
@@ -144,6 +157,7 @@ namespace Marvin.Migrations.UnitTests
         {
             // arrange
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
@@ -156,7 +170,9 @@ namespace Marvin.Migrations.UnitTests
             };
             
             // act
-            var migrations = migrationsProvider.GetMigrations(dbProvider, variables).ToList();
+            var migrations = migrationsProvider
+                .GetMigrations(dbProvider, variables, logger)
+                .ToList();
             
             // assert
             migrations.Count.Should().Be(5, "because we have 5 migrations in scripts directory");

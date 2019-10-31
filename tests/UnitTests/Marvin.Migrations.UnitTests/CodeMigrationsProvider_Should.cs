@@ -4,6 +4,7 @@ using System.Reflection;
 using FluentAssertions;
 using Marvin.Migrations.UnitTests.CodeMigrations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -23,13 +24,16 @@ namespace Marvin.Migrations.UnitTests
         {
             // arrange
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly(Assembly.GetExecutingAssembly());
 
             // act 
-            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = provider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             // assert
             Assert.Equal(4, migrations.Count);
@@ -69,13 +73,16 @@ namespace Marvin.Migrations.UnitTests
         {
             // arrange
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly<CustomBaseCodeMigration>(Assembly.GetExecutingAssembly());
 
             // act
-            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = provider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             // assert
             Assert.Single(migrations);
@@ -96,12 +103,15 @@ namespace Marvin.Migrations.UnitTests
             // arrange
             var dbProvider = Mock.Of<IDbProvider>();
 
+            var logger = Mock.Of<ILogger>();
             var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly<ISpecificCodeMigrations>(Assembly.GetExecutingAssembly());
 
             // act
-            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = provider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             // assert
             Assert.Equal(2, migrations.Count);
@@ -121,13 +131,16 @@ namespace Marvin.Migrations.UnitTests
         {
             // arrange
             var dbProvider = Mock.Of<IDbProvider>();
+            var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());
             
             provider.FromAssembly(Assembly.GetExecutingAssembly());
 
             // act
-            var migrations = provider.GetMigrations(dbProvider, new Dictionary<string, string>()).ToList();
+            var migrations = provider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
             
             // assert
 

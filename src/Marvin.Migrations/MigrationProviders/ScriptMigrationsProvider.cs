@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
 {
@@ -60,7 +61,8 @@ namespace Marvin.Migrations
         /// <inheritdoc />
         public ICollection<IMigration> GetMigrations(
             IDbProvider dbProvider,
-            IReadOnlyDictionary<string, string> variables)
+            IReadOnlyDictionary<string, string> variables,
+            ILogger migrationLogger)
         {
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
             if (variables == null) throw new ArgumentNullException(nameof(variables));
