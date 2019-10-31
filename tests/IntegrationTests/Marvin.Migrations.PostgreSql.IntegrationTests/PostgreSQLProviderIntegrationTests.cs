@@ -51,7 +51,17 @@ namespace Marvin.Migrations.PostgreSql.IntegrationTests
                 provider.ExecuteScalarScriptWithoutInitialCatalogAsync(
                     $"SELECT 1 AS result FROM pg_database WHERE datname='{provider.DbName}'");
             Assert.True(result is int i && i == 1 || result is bool b && !b);
+
+            await provider.ExecuteScriptAsync("CREATE TABLE dummy (id bigint, val varchar);");
+            for (var idx = 0; idx < 10; idx++)
+            {
+                var inserted = await provider.ExecuteNonQueryScriptAsync($"INSERT INTO dummy(id, val) VALUES ({idx}, '{idx}_text')");
+                Assert.True(inserted == 1);
+            }
             
+            var updated = await provider.ExecuteNonQueryScriptAsync("UPDATE dummy SET val = NULL WHERE id > 6");
+            Assert.True(updated == 3);
+
             await provider.CloseConnectionAsync();
         }
     }
