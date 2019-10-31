@@ -203,13 +203,13 @@ namespace Marvin.Migrations
             var migrations = new List<IMigration>();
             foreach (var migrationsProvider in _migrationsProviders)
             {
-                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
+                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables, _logger));
             }
             
             var preMigrations = new List<IMigration>();
             foreach (var migrationsProvider in _preMigrationsProviders)
             {
-                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
+                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables, _logger));
             }
             
             return new DbMigrator(

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
 {
@@ -61,7 +62,8 @@ namespace Marvin.Migrations
         /// <inheritdoc />
         public ICollection<IMigration> GetMigrations(
             IDbProvider dbProvider,
-            IReadOnlyDictionary<string, string> variables)
+            IReadOnlyDictionary<string, string> variables,
+            ILogger migrationLogger)
         {
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
             if (variables == null) throw new ArgumentNullException(nameof(variables));
@@ -107,7 +109,7 @@ namespace Marvin.Migrations
             {
                 if (!(serviceProvider.GetRequiredService(migrationToResolve) is CodeMigration migration)) 
                     throw new InvalidOperationException($"{migrationToResolve.GetType()} no created");
-                migration.Init(dbProvider, variables);
+                migration.Init(dbProvider, variables, migrationLogger);
                 migrations.Add(migration);
             }
             
