@@ -7,6 +7,12 @@
 - [#13](https://github.com/MarvinBand/Migrations/issues/13) Creating code migration from service collection
 - Extension method `AddMigration` to easy configure migration
 
+## [0.3.2] - 2019-10-31
+
+### Added 
+
+- Added method `ExecuteNonQueryScriptAsync` to `IDbProvider`
+
 ## [0.3.1] - 2019-09-16
 
 ### Fixed 
