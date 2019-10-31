@@ -4,8 +4,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         
         <PackageId>Marvin.Migrations</PackageId>
-        <Version>0.3.1</Version>
-        <Authors>Maxim Markelow, Kirill Lutsenko</Authors>
+        <Version>0.3.2</Version>
+        <Authors>Maxim Markelow, Kirill Lutsenko, Andrey Vinogradov</Authors>
         <Company>Marvin</Company>
         <PackageLicenseUrl>https://github.com/MarvinBand/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/MarvinBand/Migrations</PackageProjectUrl>
