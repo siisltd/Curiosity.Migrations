@@ -100,6 +100,14 @@ namespace Marvin.Migrations
         /// <param name="script">SQL script with DDL or DML commands</param>
         /// <exception cref="MigrationException"></exception>
         Task ExecuteScriptAsync(string script);
+
+        /// <summary>
+        /// Execute non-query sql script and return number of modified rows
+        /// </summary>
+        /// <param name="script">SQL script with DDL or DML commands</param>
+        /// <returns>Number of modified rows</returns>
+        /// <exception cref="MigrationException"></exception>
+        Task<int> ExecuteNonQueryScriptAsync(string script);
         
         /// <summary>
         /// Execute sql script and return scalar value

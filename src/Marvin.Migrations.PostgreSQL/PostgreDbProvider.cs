@@ -337,6 +337,25 @@ namespace Marvin.Migrations.PostgreSQL
                 await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script);
             }, MigrationError.MigratingError, "Can not execute script");
         }
+        
+        public async Task<int> ExecuteNonQueryScriptAsync(string script)
+        {
+            AssertConnection(Connection);
+            return await TryExecute(
+                async () =>
+                {
+                    var result = await InternalExecuteNonQueryScriptAsync(Connection as NpgsqlConnection, script);
+                    return result;
+                },
+                MigrationError.MigratingError, "Can not execute non-query script");
+        }
+
+        private Task<int> InternalExecuteNonQueryScriptAsync(NpgsqlConnection connection, string query)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = query;
+            return command.ExecuteNonQueryAsync();
+        }
 
         /// <inheritdoc />
         public async Task<object> ExecuteScalarScriptAsync(string script)
