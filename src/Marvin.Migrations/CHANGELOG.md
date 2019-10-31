@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2019-10-31
+
+### Added 
+
+- Added method `ExecuteNonQueryScriptAsync` to `IDbProvider`
+
 ## [0.3.1] - 2019-09-16
 
 ### Fixed 

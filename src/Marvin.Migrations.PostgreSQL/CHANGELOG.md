@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.1] - 2019-10-31
+
+### Added 
+
+- Added implementation of `ExecuteNonQueryScriptAsync` method from `IDbProvider`
+
+### Changed
+
+- Reduced code duplication on query execution
+
 ## [0.3] - 2019-09-16
 
 ### Added 
