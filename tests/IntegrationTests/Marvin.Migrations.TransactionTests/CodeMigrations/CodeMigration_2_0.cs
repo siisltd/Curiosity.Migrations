@@ -7,7 +7,7 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
 {
     public class CodeMigration_2_0 : CodeMigration
     {
-        public CodeMigration_2_0(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
+        public CodeMigration_2_0(IDbProvider dbProvider, IReadOnlyDictionary<string, string> variables) : base(dbProvider, variables)
         {
         }
 

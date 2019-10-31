@@ -7,7 +7,7 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
     public class SecondMigration : CodeMigration, ISpecificCodeMigrations
     {
-        public SecondMigration(IDbProvider dbProvider) : base(dbProvider, new Dictionary<string, string>())
+        public SecondMigration(IDbProvider dbProvider, IReadOnlyDictionary<string, string> variables) : base(dbProvider, variables)
         {
         }
 
