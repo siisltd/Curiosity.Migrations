@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4] - 2019-10-31
+
+### Changed 
+
+- Upgraded with main packages
+
+### Changed
+
+- Reduced code duplication on query execution
+
 ## [0.3.1] - 2019-10-31
 
 ### Added 

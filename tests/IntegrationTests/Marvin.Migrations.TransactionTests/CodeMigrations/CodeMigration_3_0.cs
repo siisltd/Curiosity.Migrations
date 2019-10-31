@@ -10,10 +10,6 @@ namespace Marvin.Migrations.TransactionTests.CodeMigrations
 {
     public class CodeMigration_3_0 : CodeMigration
     {
-        public CodeMigration_3_0(IDbProvider dbProvider, IReadOnlyDictionary<string, string> variables) : base(dbProvider, variables)
-        {
-        }
-
         public override DbVersion Version { get; } = new DbVersion(3, 0);
 
         public override string Comment { get; } = "Migration using multiple EF context with one connection";

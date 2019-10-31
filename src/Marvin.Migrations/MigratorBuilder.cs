@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Marvin.Migrations
@@ -30,9 +32,12 @@ namespace Marvin.Migrations
         /// </remarks>
         private readonly Dictionary<string, string> _variables;
 
+        private readonly IServiceCollection _services;
+
         /// <inheritdoc />
-        public MigratorBuilder()
+        public MigratorBuilder(IServiceCollection services = null)
         {
+            _services = services ?? new ServiceCollection();
             _migrationsProviders = new List<IMigrationsProvider>();
             _preMigrationsProviders = new List<IMigrationsProvider>();
             _upgradePolicy = MigrationPolicy.All;
@@ -69,7 +74,7 @@ namespace Marvin.Migrations
         /// <returns>Provider of <see cref="CodeMigration"/></returns>
         public CodeMigrationsProvider UseCodeMigrations()
         {
-            var codeMigrationProvider = new CodeMigrationsProvider();
+            var codeMigrationProvider = new CodeMigrationsProvider(_services);
             _migrationsProviders.Add(codeMigrationProvider);
             return codeMigrationProvider;
         }
@@ -80,7 +85,7 @@ namespace Marvin.Migrations
         /// <returns>Provider of <see cref="CodeMigration"/></returns>
         public CodeMigrationsProvider UseCodePreMigrations()
         {
-            var codeMigrationProvider = new CodeMigrationsProvider();
+            var codeMigrationProvider = new CodeMigrationsProvider(_services);
             _preMigrationsProviders.Add(codeMigrationProvider);
             return codeMigrationProvider;
         }
@@ -186,7 +191,7 @@ namespace Marvin.Migrations
             
             var dbProvider = _dbProviderFactory.CreateDbProvider();
             
-            var providerVariables = dbProvider.GetDefaultVariables();
+            var providerVariables = dbProvider.GetDefaultVariables() ?? new Dictionary<string, string>();
             foreach (var kvp in providerVariables)
             {
                 // we should not override the variables set manually
@@ -198,13 +203,13 @@ namespace Marvin.Migrations
             var migrations = new List<IMigration>();
             foreach (var migrationsProvider in _migrationsProviders)
             {
-                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
+                migrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables, _logger));
             }
             
             var preMigrations = new List<IMigration>();
             foreach (var migrationsProvider in _preMigrationsProviders)
             {
-                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables));
+                preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables, _logger));
             }
             
             return new DbMigrator(

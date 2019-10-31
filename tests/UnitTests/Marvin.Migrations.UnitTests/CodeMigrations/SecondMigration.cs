@@ -7,10 +7,6 @@ namespace Marvin.Migrations.UnitTests.CodeMigrations
 {
     public class SecondMigration : CodeMigration, ISpecificCodeMigrations
     {
-        public SecondMigration(IDbProvider dbProvider, IReadOnlyDictionary<string, string> variables) : base(dbProvider, variables)
-        {
-        }
-
         public override DbVersion Version { get; } = new DbVersion(1,1);
         public override string Comment { get; } = "comment";
         

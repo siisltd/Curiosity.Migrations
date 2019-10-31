@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -38,9 +39,12 @@ namespace Marvin.Migrations.UnitTests
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
-                .Setup(x => x.GetMigrations(It.IsAny<IDbProvider>(), It.IsAny<Dictionary<string, string>>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => new List<IMigration>(0));
+                .Setup(x => x.GetMigrations(
+                    It.IsAny<IDbProvider>(), 
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<ILogger>()))
+                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
             builder.UserDbProviderFactory(factoryMock.Object);
@@ -81,9 +85,12 @@ namespace Marvin.Migrations.UnitTests
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
-                .Setup(x => x.GetMigrations(It.IsAny<IDbProvider>(), It.IsAny<Dictionary<string, string>>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => new List<IMigration>(0));
+                .Setup(x => x.GetMigrations(
+                    It.IsAny<IDbProvider>(), 
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<ILogger>()))
+                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
             builder.UserDbProviderFactory(factoryMock.Object);
@@ -125,9 +132,12 @@ namespace Marvin.Migrations.UnitTests
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
-                .Setup(x => x.GetMigrations(It.IsAny<IDbProvider>(), It.IsAny<Dictionary<string, string>>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>>((provider, variables) => new List<IMigration>(0));
+                .Setup(x => x.GetMigrations(
+                    It.IsAny<IDbProvider>(),
+                    It.IsAny<Dictionary<string, string>>(),
+                    It.IsAny<ILogger>()))
+                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
             builder.UserDbProviderFactory(factoryMock.Object);
