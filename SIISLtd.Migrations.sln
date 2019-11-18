@@ -10,7 +10,6 @@ ProjectSection(SolutionItems) = preProject
 	docs\quikstart.md = docs\quikstart.md
 	docs\features.md = docs\features.md
 	docs\index.md = docs\index.md
-	docs\requirements.txt = docs\requirements.txt
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
