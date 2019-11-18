@@ -11,21 +11,21 @@ nav:
   - 'Versioning': 'verisoning.md'
   - 'Usage': 'usage.md'
 
-theme: readthedocs
+#theme: readthedocs
 
-#
-#theme:
-#  name: 'material'
-#  language: 'ru'
-#  font:
-#    text: 'Roboto'
-#    code: 'Roboto Mono'
-#  palette:
-#    primary: 'red'
-#    accent: 'red'
-#
-#markdown_extensions:
-#  - codehilite
-#  - markdown_include.include:
-#      base_path: docs
+
+theme:
+  name: 'material'
+  language: 'ru'
+  font:
+    text: 'Roboto'
+    code: 'Roboto Mono'
+  palette:
+    primary: 'red'
+    accent: 'red'
+
+markdown_extensions:
+  - codehilite
+  - markdown_include.include:
+      base_path: docs
 
