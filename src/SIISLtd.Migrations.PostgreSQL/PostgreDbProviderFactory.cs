@@ -1,0 +1,25 @@
+using System;
+using SIISLtd.Migrations;
+
+namespace SIISLtd.Migrations.PostgreSQL
+{
+    /// <summary>
+    /// Factory for creation <see cref="PostgreDbProvider"/>
+    /// </summary>
+    public class PostgreDbProviderFactory : IDbProviderFactory
+    {
+        private readonly PostgreDbProviderOptions _options;
+
+        /// <inheritdoc />
+        public PostgreDbProviderFactory(PostgreDbProviderOptions options)
+        {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        /// <inheritdoc />
+        public IDbProvider CreateDbProvider()
+        {
+            return new PostgreDbProvider(_options);
+        }
+    }
+}
