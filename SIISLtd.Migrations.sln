@@ -6,10 +6,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0E062AC8-0
 ProjectSection(SolutionItems) = preProject
 	docs\versioning.md = docs\versioning.md
 	docs\usage.md = docs\usage.md
-	docs\home.md = docs\home.md
 	docs\migrations.md = docs\migrations.md
 	docs\quikstart.md = docs\quikstart.md
 	docs\features.md = docs\features.md
+	docs\index.md = docs\index.md
+	docs\requirements.txt = docs\requirements.txt
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
