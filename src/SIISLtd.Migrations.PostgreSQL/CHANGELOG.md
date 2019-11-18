@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0] - 2019-11-18
+
+Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Migrations).
+
 ## [0.4] - 2019-10-31
 
 ### Changed 
