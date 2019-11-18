@@ -11,6 +11,8 @@ nav:
   - 'Versioning': 'verisoning.md'
   - 'Usage': 'usage.md'
 
+theme: readthedocs
+
 #
 #theme:
 #  name: 'material'
