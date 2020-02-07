@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+
+        <PackageId>Curiosity.Migrations.PostgreSQL</PackageId>
+        <Version>1.0</Version>
+        <Authors>Maxim Markelow, Andrey Vinogradov</Authors>
+        <Company>SIIS Ltd</Company>
+        <PackageLicenseUrl>https://github.com/SIIS-Ltd/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/SIIS-Ltd/Migrations</PackageProjectUrl>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <Title>Migration tool for .NET</Title>
+        <Description>PostgreSQL provider for Curiosity.Migration (migration tool for .NET: supports sql script migrations and custom migrations written by C#)</Description>
+        <PackageReleaseNotes>https://github.com/SIIS-Ltd/Migrations/tree/master/src/Curiosity.Migrations.PostgreSQL/CHANGELOG.md</PackageReleaseNotes>
+        <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
+        
+        <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+        <LangVersion>7.3</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\netstandard2.0\Curiosity.Migrations.PostgreSQL.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Npgsql" Version="4.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Curiosity.Migrations\Curiosity.Migrations.csproj" />
+    </ItemGroup>
+
+</Project>

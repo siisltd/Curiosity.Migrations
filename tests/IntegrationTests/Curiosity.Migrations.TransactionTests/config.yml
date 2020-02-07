@@ -1,0 +1,2 @@
+# маска строки подключения к БД. Должно быть указано все, кроме имя БД
+connectionStringMask: "Server=127.0.0.1;Port=5433; Database={0}; User Id=test; Password=test"
