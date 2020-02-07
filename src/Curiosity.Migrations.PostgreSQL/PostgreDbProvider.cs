@@ -234,9 +234,12 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             AssertConnection(Connection);
 
-            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" "
-                         + "( \"version\" varchar(10) NULL )"
-                         + @" 
+            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" " +
+                         $"(id bigserial NOT NULL CONSTRAINT \"{MigrationHistoryTableName}_pkey\" PRIMARY KEY, " +
+                         "created timestamp default timezone('UTC'::text, now()) NOT NULL, " +
+                         "name text, " +
+                         "version varchar(10))" +
+                         @" 
                         WITH ( 
                           OIDS=FALSE 
                         ); ";
@@ -290,36 +293,46 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <inheritdoc />
         public async Task<DbVersion?> GetDbVersionAsync()
         {
-            var query = $"SELECT * FROM public.\"{_options.MigrationHistoryTableName}\" LIMIT 1;";
+            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\" ORDER BY created DESC LIMIT 1;";
 
             var command = (Connection as NpgsqlConnection).CreateCommand();
             command.CommandText = query;
 
-            using (var reader = await command.ExecuteReaderAsync())
+            try
             {
-                if (!reader.HasRows) return default;
-
-                await reader.ReadAsync();
-                var stringVersion = reader.GetString(0);
-
-                if (!DbVersion.TryParse(stringVersion, out var version))
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    throw new InvalidOperationException("Cannot get database version.");
-                }
+                    if (!reader.HasRows) return default;
 
-                return version;
+                    await reader.ReadAsync();
+                    var stringVersion = reader.GetString(0);
+
+                    if (!DbVersion.TryParse(stringVersion, out var version))
+                    {
+                        throw new InvalidOperationException("Cannot get database version.");
+                    }
+
+                    return version;
+                }
+            }
+            catch (PostgresException e)
+            {
+                // Migration table does not exist.
+                if (e.SqlState == "42P01")
+                    return default;
+
+                throw;
             }
         }
 
         /// <inheritdoc />
-        public async Task UpdateCurrentDbVersionAsync(DbVersion version)
+        public async Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version)
         {
             AssertConnection(Connection);
 
-            var script = $"DELETE FROM public.\"{_options.MigrationHistoryTableName}\"; "
-                         + $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\"("
-                         + "version) "
-                         + $" VALUES ('{version.ToString()}'); ";
+            var script = $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\" "
+                         + "(name, version) "
+                         + $"VALUES ('{migrationName}', '{version.ToString()}');";
 
             await TryExecute(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script); },
                 MigrationError.MigratingError, $"Can not update DB {DbName} version");

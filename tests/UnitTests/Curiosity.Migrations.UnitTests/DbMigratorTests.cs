@@ -39,7 +39,7 @@ namespace Curiosity.Migrations.UnitTests
             var result = await migrator.MigrateSafeAsync();
 
             provider
-                .Verify(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()), Times.Never);
+                .Verify(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()), Times.Never);
             
             provider
                 .Verify(x => x.CreateDatabaseIfNotExistsAsync(), Times.Once);
@@ -62,8 +62,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -119,8 +119,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -179,8 +179,8 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => new MockTransaction());
             
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -240,8 +240,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -362,8 +362,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -423,8 +423,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -488,8 +488,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
 
             provider
-                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<DbVersion>()))
-                .Callback<DbVersion>(version => dbVersionAfterUpdate = version)
+                .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>()))
+                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -555,5 +555,4 @@ namespace Curiosity.Migrations.UnitTests
             public override IsolationLevel IsolationLevel { get; }
         }
     }
-    
 }

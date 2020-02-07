@@ -39,7 +39,7 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
             var state = await provider.GetDbStateSafeAsync(desiredDbVersion);
             Assert.Equal(DbState.Outdated, state);
 
-            await provider.UpdateCurrentDbVersionAsync(desiredDbVersion);
+            await provider.UpdateCurrentDbVersionAsync($"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}", desiredDbVersion);
             var currentDbVersion = await provider.GetDbVersionSafeAsync();
             
             Assert.NotNull(currentDbVersion);

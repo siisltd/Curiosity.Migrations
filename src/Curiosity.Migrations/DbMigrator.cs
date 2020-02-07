@@ -210,7 +210,7 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName})...");
                         await migration.UpgradeAsync(transaction);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Version);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version);
                         lastMigrationVersion = migration.Version;
                         currentDbVersion = migration.Version;
 
@@ -295,8 +295,8 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogInformation(
                             $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
-                        await desiredMigrations[i].DowngradeAsync(transaction);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(targetLocalVersion);
+                        await migration.DowngradeAsync(transaction);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, targetLocalVersion);
                         lastMigrationVersion = targetLocalVersion;
                         currentDbVersion = targetLocalVersion;
 

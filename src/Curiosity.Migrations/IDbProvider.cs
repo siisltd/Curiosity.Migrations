@@ -95,7 +95,7 @@ namespace Curiosity.Migrations
         /// Update actual database version in migration history table
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task UpdateCurrentDbVersionAsync(DbVersion version);
+        Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version);
 
         /// <summary>
         /// Execute sql script without return value
