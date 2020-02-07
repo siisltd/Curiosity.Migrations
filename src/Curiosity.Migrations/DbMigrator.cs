@@ -87,7 +87,7 @@ namespace Curiosity.Migrations
             {
                 await _dbProvider.CreateDatabaseIfNotExistsAsync();
                 await _dbProvider.OpenConnectionAsync();
-                var dbVersion = await GetCurrentDbVersion();
+                var dbVersion = await _dbProvider.GetDbVersionAsync() ?? default;
 
                 var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
                 if (targetVersion == dbVersion)
@@ -99,8 +99,7 @@ namespace Curiosity.Migrations
                 if (_migrations.All(x => x.Version != targetVersion))
                     throw new MigrationException(MigrationError.MigrationNotFound,
                         $"Migration {targetVersion} not found");
-
-
+                
                 _logger?.LogInformation($"Executing pre migration scripts for {_dbProvider.DbName}...");
                 await ExecutePreMigrationScriptsAsync();
                 _logger?.LogInformation($"Executing pre migration scripts for{_dbProvider.DbName} completed.");
@@ -108,7 +107,7 @@ namespace Curiosity.Migrations
                 await _dbProvider.CreateHistoryTableIfNotExistsAsync();
 
                 // DB version might change after pre-migration
-                dbVersion = await GetCurrentDbVersion();
+                dbVersion = await _dbProvider.GetDbVersionSafeAsync() ?? default;
 
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
                 if (targetVersion > dbVersion)
@@ -134,12 +133,6 @@ namespace Curiosity.Migrations
                 _logger?.LogError(e, $"Error while migrating database {_dbProvider.DbName}");
                 throw;
             }
-        }
-
-        private async Task<DbVersion> GetCurrentDbVersion()
-        {
-            return await _dbProvider.GetDbVersionSafeAsync() 
-                   ?? new DbVersion(0, 0);
         }
 
         /// <summary>
