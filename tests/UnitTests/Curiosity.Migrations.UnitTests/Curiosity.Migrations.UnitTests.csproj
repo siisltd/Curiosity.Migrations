@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+        <PackageReference Include="FluentAssertions" Version="5.9.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+        <PackageReference Include="Moq" Version="4.10.0" />
+        <PackageReference Include="xunit" Version="2.3.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Scripts\1.0.down-comment.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.0.up-comment.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.1.down.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.1.up.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.2-comment.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.3.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\prefix-0.1.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Scripts\1.4-with_templates.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="ScriptAsResources\Main\1.0.down-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.0.up-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.1.down.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.1.up.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.2-comment.sql" />
+      <EmbeddedResource Include="ScriptAsResources\Main\1.3.sql" />
+      <EmbeddedResource Include="ScriptAsResources\PreMigration\2.0.sql" />
+      <None Remove="ScriptAsResources\1.0.down-comment.sql" />
+      <None Remove="ScriptAsResources\1.0.up-comment.sql" />
+      <None Remove="ScriptAsResources\1.1.down.sql" />
+      <None Remove="ScriptAsResources\1.1.up.sql" />
+      <None Remove="ScriptAsResources\1.2-comment.sql" />
+      <None Remove="ScriptAsResources\1.3.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\Curiosity.Migrations\Curiosity.Migrations.csproj" />
+    </ItemGroup>
+
+</Project>

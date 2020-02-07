@@ -1,4 +1,4 @@
-# Marvin.Migrations
+# Curiosity.Migrations
 
 Migration tool for .NET applications.
 
