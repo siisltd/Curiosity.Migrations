@@ -199,14 +199,14 @@ namespace Curiosity.Migrations
         {
             if (string.IsNullOrWhiteSpace(source))
             {
-                version = default(DbVersion);
+                version = default;
                 return false;
             }
 
             var mainValues = source.Split(VersionNumberSeparator);
             if (mainValues.Length < VersionNumbersCount)
             {
-                version = default(DbVersion);
+                version = default;
                 return false;
             }
 

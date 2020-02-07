@@ -116,7 +116,7 @@ namespace Curiosity.Migrations.PostgreSQL
                 }
 
                 AssertConnection(Connection);
-                var dbVersion = await InternalGetDbVersionAsync()
+                var dbVersion = await GetDbVersionAsync()
                     .ConfigureAwait(false);
                 if (dbVersion == null) return DbState.Outdated;
                 if (dbVersion.Value == desireDbVersion) return DbState.Ok;
@@ -279,7 +279,7 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             try
             {
-                return await InternalGetDbVersionAsync();
+                return await GetDbVersionAsync();
             }
             catch (Exception)
             {
@@ -287,7 +287,8 @@ namespace Curiosity.Migrations.PostgreSQL
             }
         }
 
-        private async Task<DbVersion?> InternalGetDbVersionAsync()
+        /// <inheritdoc />
+        public async Task<DbVersion?> GetDbVersionAsync()
         {
             var query = $"SELECT * FROM public.\"{_options.MigrationHistoryTableName}\" LIMIT 1;";
 
@@ -296,7 +297,7 @@ namespace Curiosity.Migrations.PostgreSQL
 
             using (var reader = await command.ExecuteReaderAsync())
             {
-                if (!reader.HasRows) return default(DbVersion?);
+                if (!reader.HasRows) return default;
 
                 await reader.ReadAsync();
                 var stringVersion = reader.GetString(0);

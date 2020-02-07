@@ -81,9 +81,14 @@ namespace Curiosity.Migrations
         Task<bool> CheckIfTableExistsAsync(string tableName);
 
         /// <summary>
+        /// Returns actual database version from migration history table.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If migration hisotry table has incorrent DB version.</exception>
+        Task<DbVersion?> GetDbVersionAsync();
+
+        /// <summary>
         /// Returns actual database version from migration history table
         /// </summary>
-        /// <exception cref="MigrationException"></exception>
         Task<DbVersion?> GetDbVersionSafeAsync();
 
         /// <summary>
