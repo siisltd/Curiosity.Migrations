@@ -19,6 +19,10 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
             
             provider
+                .Setup(x => x.GetDbVersionAsync())
+                .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
+            
+            provider
                 .Setup(x => x.GetDbVersionSafeAsync())
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
