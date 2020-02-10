@@ -89,7 +89,8 @@ namespace Curiosity.Migrations
                     File.ReadAllText,
                     dbProvider,
                     prefix,
-                    variables);
+                    variables,
+                    migrationLogger);
 
                 if (directoryMigrations == null || directoryMigrations.Count == 0) continue;
 
@@ -115,7 +116,8 @@ namespace Curiosity.Migrations
                     },
                     dbProvider,
                     prefix,
-                    variables);
+                    variables,
+                    migrationLogger);
 
                 if (assemblyMigrations == null || assemblyMigrations.Count == 0) continue;
 
@@ -130,7 +132,8 @@ namespace Curiosity.Migrations
             Func<string, string> sqlScriptReadFunc,
             IDbProvider dbProvider,
             string prefix,
-            IReadOnlyDictionary<string, string> variables)
+            IReadOnlyDictionary<string, string> variables,
+            ILogger migrationLogger)
         {
             if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
             if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
@@ -158,24 +161,43 @@ namespace Curiosity.Migrations
                 var scriptInfo = scripts[version];
 
                 var script = sqlScriptReadFunc.Invoke(fileName);
+                var batches = new List<ScriptMigrationBatch>(0);
+                var batchNameRegex = new Regex(@"--\s*BATCH:\s*(.*)\s*\n(.*)", RegexOptions.IgnoreCase);
+                var batchIndex = 0;
+                
+                // Use positive lookahead to split script into batches.
+                foreach (var batch in Regex.Split(script, @"(?=--\s*BATCH:)"))
+                {
+                    var batchNameMatch = batchNameRegex.Match(batch);
+                    batches.Add(new ScriptMigrationBatch
+                    {
+                        OrderIndex = batchIndex++,
+                        Name = batchNameMatch.Success ? batchNameMatch.Groups[1].Value : null,
+                        Script = batch
+                    });
+                }
+                
                 if (match.Groups[4].Success)
                 {
-                    if (!String.IsNullOrWhiteSpace(scriptInfo.DownScript))
+                    if (scriptInfo.DownScript != null && scriptInfo.DownScript.Count > 0)
                         throw new InvalidOperationException(
                             $"There is more than one downgrade script with version {version}");
-                    scriptInfo.DownScript = script;
+
+                    scriptInfo.DownScript = batches;
                 }
                 else
                 {
-                    if (!String.IsNullOrWhiteSpace(scriptInfo.UpScript))
+                    if (scriptInfo.UpScript != null && scriptInfo.UpScript.Count > 0)
                         throw new InvalidOperationException(
                             $"There is more than one upgrade script with version {version}");
-                    scriptInfo.UpScript = script;
-                    var comment = match.Groups[7];
-                    scriptInfo.Comment = comment.Success
-                        ? comment.Value
-                        : null;
+
+                    scriptInfo.UpScript = batches;
                 }
+                
+                var comment = match.Groups[7];
+                scriptInfo.Comment = comment.Success
+                    ? comment.Value
+                    : null;
             }
 
             return scripts
@@ -184,7 +206,8 @@ namespace Curiosity.Migrations
                         scriptInfo.Key,
                         scriptInfo.Value,
                         dbProvider,
-                        variables))
+                        variables,
+                        migrationLogger))
                 .ToList();
         }
 
@@ -195,23 +218,33 @@ namespace Curiosity.Migrations
         /// <param name="scriptInfo"></param>
         /// <param name="dbProvider"></param>
         /// <param name="variables"></param>
+        /// <param name="migrationLogger"></param>
         /// <returns></returns>
         private IMigration CreateScriptMigration(
             DbVersion dbVersion,
             ScriptInfo scriptInfo,
             IDbProvider dbProvider,
-            IReadOnlyDictionary<string, string> variables)
+            IReadOnlyDictionary<string, string> variables,
+            ILogger migrationLogger)
         {
             var upScript = scriptInfo.UpScript;
             var downScript = scriptInfo.DownScript;
 
             foreach (var keyValuePair in variables)
             {
-                upScript = upScript.Replace(keyValuePair.Key, keyValuePair.Value);
-                downScript = downScript?.Replace(keyValuePair.Key, keyValuePair.Value);
+                foreach (var batch in upScript)
+                {
+                    batch.Script = batch.Script.Replace(keyValuePair.Key, keyValuePair.Value);
+                }
+
+                foreach (var batch in downScript)
+                {
+                    batch.Script = batch.Script.Replace(keyValuePair.Key, keyValuePair.Value);
+                }
             }
 
             return new ScriptMigration(
+                migrationLogger,
                 dbProvider,
                 dbVersion,
                 upScript,
@@ -233,9 +266,9 @@ namespace Curiosity.Migrations
 
             public string Comment { get; set; }
 
-            public string UpScript { get; set; }
+            public List<ScriptMigrationBatch> UpScript { get; set; } = new List<ScriptMigrationBatch>(0);
 
-            public string DownScript { get; set; }
+            public List<ScriptMigrationBatch> DownScript { get; set; } = new List<ScriptMigrationBatch>(0);
         }
     }
 }
