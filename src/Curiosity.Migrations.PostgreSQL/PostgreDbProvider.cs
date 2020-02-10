@@ -242,7 +242,9 @@ namespace Curiosity.Migrations.PostgreSQL
                          @" 
                         WITH ( 
                           OIDS=FALSE 
-                        ); ";
+                        ); " +
+
+                        $"ALTER TABLE public.\"{MigrationHistoryTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
             await TryExecute(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script); },
                 MigrationError.CreatingHistoryTable, $"Can not create database {DbName}");
         }
