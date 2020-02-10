@@ -208,7 +208,7 @@ namespace Curiosity.Migrations
                 {
                     try
                     {
-                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName})...");
+                        _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
                         await migration.UpgradeAsync(transaction);
                         await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version);
                         lastMigrationVersion = migration.Version;
