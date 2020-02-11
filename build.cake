@@ -6,7 +6,7 @@ var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 
 var artifactsDir = Directory("./artifacts");
-var solutionPath = "./Marvin.Migrations.sln";
+var solutionPath = "./Curiosity.Migrations.sln";
 var framework = "netstandard2.0";
 
 var isMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master",

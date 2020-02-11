@@ -1,0 +1,31 @@
+site_name: SIISLtd.Migrations docs
+site_url: https://siisltdmigrations.rtfd.io
+site_description: Curiosity.Migrations
+site_author: SIIS Ltd
+copyright: SIIS Ltd © 2020
+
+nav:
+  - 'Intro' : 'index.md'
+  - 'Quick Start': 'quickstart.md'
+  - 'Features': 'features.md'
+  - 'Versioning': 'verisioning.md'
+  - 'Usage': 'usage.md'
+
+#theme: readthedocs
+
+
+theme:
+  name: 'material'
+  language: 'ru'
+  font:
+    text: 'Roboto'
+    code: 'Roboto Mono'
+  palette:
+    primary: 'red'
+    accent: 'red'
+
+markdown_extensions:
+  - codehilite
+  - markdown_include.include:
+      base_path: docs
+
