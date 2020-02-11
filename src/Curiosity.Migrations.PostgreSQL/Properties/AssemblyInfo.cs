@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Migration tool for .NET")]
 [assembly: AssemblyCompany("Curiosity")]
 [assembly: AssemblyProduct("Curiosity.Migrations")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright © 2020")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -19,6 +19,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("527ae969-df3b-487c-8032-f3476d793e08")]
 
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.2.10")]
-[assembly: AssemblyFileVersion("0.2.10")]
-
+[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyFileVersion("1.0.0")]

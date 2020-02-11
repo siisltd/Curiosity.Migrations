@@ -1,8 +1,10 @@
 # Changelog
 
-## [1.0] - 2019-11-18
+## [1.0] - 2020-02-11
 
-Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Migrations).
+Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Curiosity.Migrations).
+- [#8](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/8) Migration history table now really contains migrations history.
+- [#9](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/9) Check correctness of current db version before migrations start.
 
 ## [0.4] - 2019-10-31
 

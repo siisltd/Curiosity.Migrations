@@ -1,8 +1,12 @@
 # Changelog
 
-## [1.0] - 2019-11-18
+## [1.0] - 2020-02-11
 
-Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Migrations).
+Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Curiosity.Migrations).
+- [#6](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/6) Added support of batches inside script migrations.
+- [#7](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/7) Added running script migration name to log output.
+- [#8](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/8) Migration history table now really contains migrations history.
+- [#9](https://github.com/SIIS-Ltd/Curiosity.Migrations/issues/9) Check correctness of current db version before migrations start.
 
 ## [0.4] - 2019-10-31
 
