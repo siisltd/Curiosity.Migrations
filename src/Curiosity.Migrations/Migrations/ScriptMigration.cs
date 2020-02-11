@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 
 namespace Curiosity.Migrations
 {
@@ -16,45 +20,57 @@ namespace Curiosity.Migrations
         public string Comment { get; }
 
         /// <summary>
-        /// SQL script to apply migration
+        /// SQL script to apply migration splitted into batches
         /// </summary>
-        public string UpScript { get; }
+        [NotNull]
+        public List<ScriptMigrationBatch> UpScripts { get; }
 
         /// <summary>
-        /// SQL script to undo migration
+        /// SQL script to undo migration splitted into batches
         /// </summary>
-        public string DownScript { get; }
+        [NotNull]
+        public List<ScriptMigrationBatch> DownScripts { get; }
 
+        private readonly ILogger _migrationLogger;
         private readonly IDbProvider _dbProvider;
 
         public ScriptMigration(
+            ILogger migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
-            string upScript,
-            string downScript,
+            List<ScriptMigrationBatch> upScripts,
+            List<ScriptMigrationBatch> downScripts,
             string comment)
         {
+            _migrationLogger = migrationLogger;
             _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
-            if (String.IsNullOrWhiteSpace(upScript)) throw new ArgumentException(nameof(upScript));
+            if (upScripts == null || upScripts.Count == 0) throw new ArgumentException(nameof(upScripts));
 
             Version = version;
-            UpScript = upScript;
-            DownScript = downScript;
+            UpScripts = upScripts;
+            DownScripts = downScripts ?? new List<ScriptMigrationBatch>(0);
             Comment = comment;
         }
 
         /// <inheritdoc />
-        public Task UpgradeAsync(DbTransaction transaction)
+        public async Task UpgradeAsync(DbTransaction transaction)
         {
-            return _dbProvider.ExecuteScriptAsync(UpScript);
+            await RunBatchesAsync(UpScripts);
         }
 
         /// <inheritdoc />
-        public Task DowngradeAsync(DbTransaction transaction)
+        public async Task DowngradeAsync(DbTransaction transaction)
         {
-            if (String.IsNullOrWhiteSpace(DownScript)) return Task.CompletedTask;
+            await RunBatchesAsync(DownScripts);
+        }
 
-            return _dbProvider.ExecuteScriptAsync(DownScript);
+        private async Task RunBatchesAsync(List<ScriptMigrationBatch> batches)
+        {
+            foreach (var batch in batches.OrderBy(b => b.OrderIndex))
+            {
+                _migrationLogger?.LogInformation($"Executing migration's batch #{batch.OrderIndex} \"{batch.Name ?? "No name provided"}\"");
+                await _dbProvider.ExecuteScriptAsync(batch.Script);
+            }
         }
     }
 }
