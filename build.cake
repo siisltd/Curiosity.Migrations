@@ -6,6 +6,7 @@ var target = Argument<string>("target", "Default");
 var configuration = Argument<string>("configuration", "Release");
 
 var artifactsDir = Directory("./artifacts");
+var packages = "./artifacts/packages";
 var solutionPath = "./Curiosity.Migrations.sln";
 var framework = "netstandard2.0";
 
@@ -91,7 +92,20 @@ Task("IntegrationTests")
         StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml down");
         Information("Stopping docker completed");
     });  
-     
+    
+Task("Pack")
+    .Does(() =>
+    {        
+         Information("Packing to nupkg...");
+         var settings = new DotNetCorePackSettings
+          {
+              Configuration = configuration,
+              OutputDirectory = packages
+          };
+         
+          DotNetCorePack(solutionPath, settings);
+    });
+    
 Task("Default")
     .IsDependentOn("Build")
     .IsDependentOn("UnitTests")
