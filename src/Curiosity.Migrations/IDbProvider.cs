@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Curiosity.Migrations
@@ -34,7 +35,7 @@ namespace Curiosity.Migrations
         /// Open connection to database
         /// </summary>
         /// <returns></returns>
-        Task OpenConnectionAsync();
+        Task OpenConnectionAsync(CancellationToken token = default);
 
         /// <summary>
         /// Begins new DB transaction
@@ -49,81 +50,87 @@ namespace Curiosity.Migrations
         /// Returns actual DB state
         /// </summary>
         /// <param name="desiredVersion">Version of the newest migration</param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion);
+        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion, CancellationToken token = default);
 
         /// <summary>
         /// Create database with default schema if not exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task CreateDatabaseIfNotExistsAsync();
+        Task CreateDatabaseIfNotExistsAsync(CancellationToken token = default);
 
         /// <summary>
         /// Check if database already exists
         /// </summary>
         /// <param name="databaseName">Database name</param>
+        /// <param name="token"></param>
         /// <returns><see langword="true"/> if exists, <see langword="false"/> if not</returns>
         /// <exception cref="MigrationException"></exception>
-        Task<bool> CheckIfDatabaseExistsAsync(string databaseName);
+        Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken token = default);
 
         /// <summary>
         /// Create table for storing migration history info no exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task CreateHistoryTableIfNotExistsAsync();
+        Task CreateHistoryTableIfNotExistsAsync(CancellationToken token = default);
 
         /// <summary>
         /// Check if table already exists
         /// </summary>
         /// <param name="tableName">Table name</param>
+        /// <param name="token"></param>
         /// <returns><see langword="true"/> if exists, <see langword="false"/> if not</returns>
         /// <exception cref="MigrationException"></exception>
-        Task<bool> CheckIfTableExistsAsync(string tableName);
+        Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default);
 
         /// <summary>
         /// Returns actual database version from migration history table.
         /// </summary>
         /// <exception cref="InvalidOperationException">If migration hisotry table has incorrent DB version.</exception>
-        Task<DbVersion?> GetDbVersionAsync();
+        Task<DbVersion?> GetDbVersionAsync(CancellationToken token = default);
 
         /// <summary>
         /// Returns actual database version from migration history table
         /// </summary>
-        Task<DbVersion?> GetDbVersionSafeAsync();
+        Task<DbVersion?> GetDbVersionSafeAsync(CancellationToken token = default);
 
         /// <summary>
         /// Update actual database version in migration history table
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version);
+        Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default);
 
         /// <summary>
         /// Execute sql script without return value
         /// </summary>
         /// <param name="script">SQL script with DDL or DML commands</param>
+        /// <param name="token">Cancellation token</param>
         /// <exception cref="MigrationException"></exception>
-        Task ExecuteScriptAsync(string script);
+        Task ExecuteScriptAsync(string script, CancellationToken token = default);
 
         /// <summary>
         /// Execute non-query sql script and return number of modified rows
         /// </summary>
         /// <param name="script">SQL script with DDL or DML commands</param>
+        /// <param name="token">Cancellation token</param>
         /// <returns>Number of modified rows</returns>
         /// <exception cref="MigrationException"></exception>
-        Task<int> ExecuteNonQueryScriptAsync(string script);
+        Task<int> ExecuteNonQueryScriptAsync(string script, CancellationToken token = default);
 
         /// <summary>
         /// Execute sql script and return scalar value
         /// </summary>
         /// <param name="script">SQL script with DDL or DML commands</param>
+        /// <param name="token">Cancellation token</param>
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptAsync(string script);
+        Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
-        Task ExecuteScriptWithoutInitialCatalogAsync(string script);
+        Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script);
+        Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <summary>
         /// Close connection to database

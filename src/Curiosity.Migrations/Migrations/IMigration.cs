@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Curiosity.Migrations
@@ -22,12 +23,12 @@ namespace Curiosity.Migrations
         /// Upgrade database to the version specified in <see cref="Version"/>
         /// </summary>
         /// <returns></returns>
-        Task UpgradeAsync(DbTransaction transaction);
+        Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default);
 
         /// <summary>
         /// Downgrade database to the previous version undoing changes to this migration
         /// </summary>
         /// <returns></returns>
-        Task DowngradeAsync(DbTransaction transaction);
+        Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -63,11 +64,11 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public async Task<MigrationResult> MigrateSafeAsync()
+        public async Task<MigrationResult> MigrateSafeAsync(CancellationToken token = default)
         {
             try
             {
-                await MigrateAsync();
+                await MigrateAsync(token);
                 return MigrationResult.SuccessfullyResult();
             }
             catch (MigrationException e)
@@ -81,13 +82,13 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public async Task MigrateAsync()
+        public async Task MigrateAsync(CancellationToken token = default)
         {
             try
             {
-                await _dbProvider.CreateDatabaseIfNotExistsAsync();
-                await _dbProvider.OpenConnectionAsync();
-                var dbVersion = await _dbProvider.GetDbVersionAsync() ?? default;
+                await _dbProvider.CreateDatabaseIfNotExistsAsync(token);
+                await _dbProvider.OpenConnectionAsync(token);
+                var dbVersion = await _dbProvider.GetDbVersionAsync(token) ?? default;
 
                 var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
                 if (targetVersion == dbVersion)
@@ -104,24 +105,24 @@ namespace Curiosity.Migrations
                 await ExecutePreMigrationScriptsAsync();
                 _logger?.LogInformation($"Executing pre migration scripts for{_dbProvider.DbName} completed.");
 
-                await _dbProvider.CreateHistoryTableIfNotExistsAsync();
+                await _dbProvider.CreateHistoryTableIfNotExistsAsync(token);
 
                 // DB version might change after pre-migration
-                dbVersion = await _dbProvider.GetDbVersionSafeAsync() ?? default;
+                dbVersion = await _dbProvider.GetDbVersionSafeAsync(token) ?? default;
 
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName}...");
                 if (targetVersion > dbVersion)
                 {
                     _logger?.LogInformation(
                         $"Upgrading database {_dbProvider.DbName} from {dbVersion} to {targetVersion}...");
-                    await UpgradeAsync(dbVersion, targetVersion);
+                    await UpgradeAsync(dbVersion, targetVersion, token);
                     _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} completed.");
                 }
                 else
                 {
                     _logger?.LogInformation(
                         $"Downgrading database {_dbProvider.DbName} from {dbVersion} to {targetVersion}...");
-                    await DowngradeAsync(dbVersion, targetVersion);
+                    await DowngradeAsync(dbVersion, targetVersion, token);
                     _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} completed.");
                 }
 
@@ -179,9 +180,10 @@ namespace Curiosity.Migrations
         /// </summary>
         /// <param name="actualVersion"></param>
         /// <param name="targetVersion"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
         /// <exception cref="MigrationException"></exception>
-        private async Task UpgradeAsync(DbVersion actualVersion, DbVersion targetVersion)
+        private async Task UpgradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
         {
             var desiredMigrations = _migrations
                 .Where(x => x.Version > actualVersion && x.Version <= targetVersion)
@@ -193,6 +195,8 @@ namespace Curiosity.Migrations
             var currentDbVersion = actualVersion;
             foreach (var migration in desiredMigrations)
             {
+                token.ThrowIfCancellationRequested();
+                
                 if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _upgradePolicy))
                 {
                     throw new MigrationException(MigrationError.PolicyError,
@@ -202,15 +206,15 @@ namespace Curiosity.Migrations
                 // sometimes transactions fails without reopening connection
                 //todo fix it later
                 await _dbProvider.CloseConnectionAsync();
-                await _dbProvider.OpenConnectionAsync();
+                await _dbProvider.OpenConnectionAsync(token);
 
                 using (var transaction = _dbProvider.BeginTransaction())
                 {
                     try
                     {
                         _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
-                        await migration.UpgradeAsync(transaction);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version);
+                        await migration.UpgradeAsync(transaction, token);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version, token);
                         lastMigrationVersion = migration.Version;
                         currentDbVersion = migration.Version;
 
@@ -260,9 +264,10 @@ namespace Curiosity.Migrations
         /// </summary>
         /// <param name="actualVersion"></param>
         /// <param name="targetVersion"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
         /// <exception cref="MigrationException"></exception>
-        private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion)
+        private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
         {
             var desiredMigrations = _migrations
                 .Where(x => x.Version <= actualVersion && x.Version >= targetVersion)
@@ -274,6 +279,8 @@ namespace Curiosity.Migrations
             var currentDbVersion = actualVersion;
             for (var i = 0; i < desiredMigrations.Count - 1; ++i)
             {
+                token.ThrowIfCancellationRequested();
+                
                 var targetLocalVersion = desiredMigrations[i + 1].Version;
                 var migration = desiredMigrations[i];
 
@@ -287,7 +294,7 @@ namespace Curiosity.Migrations
                 // sometimes transactions fails without reopening connection
                 //todo fix it later
                 await _dbProvider.CloseConnectionAsync();
-                await _dbProvider.OpenConnectionAsync();
+                await _dbProvider.OpenConnectionAsync(token);
 
                 using (var transaction = _dbProvider.BeginTransaction())
                 {
@@ -295,8 +302,8 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogInformation(
                             $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
-                        await migration.DowngradeAsync(transaction);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, targetLocalVersion);
+                        await migration.DowngradeAsync(transaction, token);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, targetLocalVersion, token);
                         lastMigrationVersion = targetLocalVersion;
                         currentDbVersion = targetLocalVersion;
 
