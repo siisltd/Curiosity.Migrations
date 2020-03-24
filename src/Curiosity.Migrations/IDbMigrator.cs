@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Curiosity.Migrations
@@ -11,11 +12,11 @@ namespace Curiosity.Migrations
         /// Execute migration
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task MigrateAsync();
+        Task MigrateAsync(CancellationToken token = default);
 
         /// <summary>
         /// Execute migration without throwing exception
         /// </summary>
-        Task<MigrationResult> MigrateSafeAsync();
+        Task<MigrationResult> MigrateSafeAsync(CancellationToken token = default);
     }
 }
