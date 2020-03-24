@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 
         public override string Comment { get; } = "Migration using multiple EF context with one connection";
 
-        public override async Task UpgradeAsync(DbTransaction transaction)
+        public override async Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
             var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
             tempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
@@ -55,7 +56,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
             }
         }
 
-        public override Task DowngradeAsync(DbTransaction transaction)
+        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
             return Task.CompletedTask;
         }

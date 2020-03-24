@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Curiosity.Migrations.TransactionTests.CodeMigrations
@@ -9,12 +10,12 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 
         public override string Comment { get; } = "Correct script via provider";
         
-        public override async Task UpgradeAsync(DbTransaction transaction)
+        public override async Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
-            await DbProvider.ExecuteScriptAsync("select 1;");
+            await DbProvider.ExecuteScriptAsync("select 1;", token);
         }
 
-        public override Task DowngradeAsync(DbTransaction transaction)
+        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
             return Task.CompletedTask;
         }
