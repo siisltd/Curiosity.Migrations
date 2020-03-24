@@ -68,7 +68,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -125,7 +125,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -185,7 +185,7 @@ namespace Curiosity.Migrations.UnitTests
             
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -246,7 +246,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -368,7 +368,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -429,7 +429,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -494,7 +494,7 @@ namespace Curiosity.Migrations.UnitTests
 
             provider
                 .Setup(x => x.UpdateCurrentDbVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion>((name, version) => dbVersionAfterUpdate = version)
+                .Callback<string, DbVersion, CancellationToken>((name, version, token) => dbVersionAfterUpdate = version)
                 .Returns(() => Task.CompletedTask);
             
             provider
