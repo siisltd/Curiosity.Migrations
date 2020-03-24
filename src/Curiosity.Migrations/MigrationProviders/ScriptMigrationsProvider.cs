@@ -168,6 +168,8 @@ namespace Curiosity.Migrations
                 // Use positive lookahead to split script into batches.
                 foreach (var batch in Regex.Split(script, @"(?=--\s*BATCH:)"))
                 {
+                    if (String.IsNullOrWhiteSpace(batch)) continue;
+
                     var batchNameMatch = batchNameRegex.Match(batch);
                     batches.Add(new ScriptMigrationBatch
                     {

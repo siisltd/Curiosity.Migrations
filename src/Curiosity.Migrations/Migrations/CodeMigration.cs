@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -52,9 +53,9 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public abstract Task UpgradeAsync(DbTransaction transaction);
+        public abstract Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default);
 
         /// <inheritdoc />
-        public abstract Task DowngradeAsync(DbTransaction transaction);
+        public abstract Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default);
     }
 }

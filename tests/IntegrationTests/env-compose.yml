@@ -9,5 +9,6 @@ services:
     environment:
       POSTGRES_USER: test
       POSTGRES_DB: test
+      POSTGRES_PASSWORD: test
     ports:
     - 5433:5432

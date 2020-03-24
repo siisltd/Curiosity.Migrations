@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -53,23 +54,23 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public async Task UpgradeAsync(DbTransaction transaction)
+        public async Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
-            await RunBatchesAsync(UpScripts);
+            await RunBatchesAsync(UpScripts, token);
         }
 
         /// <inheritdoc />
-        public async Task DowngradeAsync(DbTransaction transaction)
+        public async Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
-            await RunBatchesAsync(DownScripts);
+            await RunBatchesAsync(DownScripts, token);
         }
 
-        private async Task RunBatchesAsync(List<ScriptMigrationBatch> batches)
+        private async Task RunBatchesAsync(List<ScriptMigrationBatch> batches, CancellationToken token = default)
         {
             foreach (var batch in batches.OrderBy(b => b.OrderIndex))
             {
                 _migrationLogger?.LogInformation($"Executing migration's batch #{batch.OrderIndex} \"{batch.Name ?? "No name provided"}\"");
-                await _dbProvider.ExecuteScriptAsync(batch.Script);
+                await _dbProvider.ExecuteScriptAsync(batch.Script, token);
             }
         }
     }
