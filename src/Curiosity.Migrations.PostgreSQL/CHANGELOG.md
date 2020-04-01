@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1] - 2020-04-01
+
+### Changed
+
+- Returning tasks instead of await'ing them.
+
 ## [1.1] - 2020-03-24
 
 - Added cancellation token support.

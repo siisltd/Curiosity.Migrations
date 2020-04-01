@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -30,7 +31,7 @@ namespace Curiosity.Migrations.UnitTests
             provider
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
-
+            
             var migrations = new List<IMigration>(0);
             
             var migrator = new DbMigrator(
@@ -50,7 +51,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Verify(x => x.CreateDatabaseIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             provider
-                .Verify(x => x.CreateHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
+                .Verify(x => x.CreateHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Once);
             
             Assert.True(result.IsSuccessfully);
         }

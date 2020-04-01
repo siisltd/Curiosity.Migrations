@@ -87,7 +87,7 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Returns actual database version from migration history table.
         /// </summary>
-        /// <exception cref="InvalidOperationException">If migration hisotry table has incorrent DB version.</exception>
+        /// <exception cref="InvalidOperationException">If migration history table has incorrect DB version.</exception>
         Task<DbVersion?> GetDbVersionAsync(CancellationToken token = default);
 
         /// <summary>
