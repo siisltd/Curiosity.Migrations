@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1] - 2020-04-01
+
+### Added
+- Added extended logging for main migration process.
+- Added cancellation token to pre-migrations.
+
 ## [1.1] - 2020-03-24
 
 - Added cancellation token support.

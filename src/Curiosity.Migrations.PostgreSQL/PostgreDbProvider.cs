@@ -87,7 +87,7 @@ namespace Curiosity.Migrations.PostgreSQL
                 Connection.State != ConnectionState.Broken)
                 throw new InvalidOperationException("Connection have already opened");
 
-            await TryExecute(async () =>
+            await TryExecuteAsync(async () =>
             {
                 var connection = new NpgsqlConnection(ConnectionString);
 
@@ -132,9 +132,9 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task CreateDatabaseIfNotExistsAsync(CancellationToken token = default)
+        public Task CreateDatabaseIfNotExistsAsync(CancellationToken token = default)
         {
-            await TryExecute(async () =>
+            return TryExecuteAsync(async () =>
             {
                 var result =
                     await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName), token);
@@ -142,6 +142,7 @@ namespace Curiosity.Migrations.PostgreSQL
                 {
                     await ExecuteScriptWithoutInitialCatalogAsync(GetCreationDbQuery(), token);
                 }
+
             }, MigrationError.CreatingDbError, $"Can not create database {DbName}");
         }
 
@@ -195,14 +196,14 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken token = default)
+        public Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken token = default)
         {
-            return await TryExecute(async () =>
+            return TryExecuteAsync(async () =>
             {
                 var result =
-                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName), token);
+                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, databaseName), token);
                 return result != null && (result is int i && i == 1 || result is bool b && b);
-            }, MigrationError.Unknown, $"Can not check existence of {DbName} database");
+            }, MigrationError.Unknown, $"Can not check existence of {databaseName} database");
         }
 
         private void AssertConnection(IDbConnection connection)
@@ -244,18 +245,22 @@ namespace Curiosity.Migrations.PostgreSQL
                           OIDS=FALSE 
                         ); " +
 
-                        $"ALTER TABLE public.\"{MigrationHistoryTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
-            await TryExecute(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
-                MigrationError.CreatingHistoryTable, $"Can not create database {DbName}");
+                         $"ALTER TABLE public.\"{MigrationHistoryTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
+            
+            await TryExecuteAsync(
+                async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
+                MigrationError.CreatingHistoryTable,
+                $"Can not create history table \"{MigrationHistoryTableName}\" in database {DbName}");
+            
         }
 
         /// <inheritdoc />
-        public async Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default)
+        public Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default)
         {
             if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
             AssertConnection(Connection);
 
-            return await TryExecute(async () =>
+            return TryExecuteAsync(async () =>
             {
                 var checkTableExistenceQuery = $@"SELECT EXISTS (
                                                        SELECT 1
@@ -328,7 +333,7 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
+        public Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
         {
             AssertConnection(Connection);
 
@@ -336,24 +341,24 @@ namespace Curiosity.Migrations.PostgreSQL
                          + "(name, version) "
                          + $"VALUES ('{migrationName}', '{version.ToString()}');";
 
-            await TryExecute(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
+            return TryExecuteAsync(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
                 MigrationError.MigratingError, $"Can not update DB {DbName} version");
         }
 
         /// <inheritdoc />
-        public async Task ExecuteScriptAsync(string script, CancellationToken token = default)
+        public Task ExecuteScriptAsync(string script, CancellationToken token = default)
         {
             AssertConnection(Connection);
 
-            await TryExecute(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
+            return TryExecuteAsync(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
                 MigrationError.MigratingError, "Can not execute script");
         }
 
         /// <inheritdoc />
-        public async Task<int> ExecuteNonQueryScriptAsync(string script, CancellationToken token = default)
+        public Task<int> ExecuteNonQueryScriptAsync(string script, CancellationToken token = default)
         {
             AssertConnection(Connection);
-            return await TryExecute(
+            return TryExecuteAsync(
                 async () =>
                 {
                     var result = await InternalExecuteNonQueryScriptAsync(Connection as NpgsqlConnection, script);
@@ -370,10 +375,10 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default)
+        public  Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default)
         {
             AssertConnection(Connection);
-            return await TryExecute(async () =>
+            return TryExecuteAsync(async () =>
             {
                 var result = await InternalExecuteScalarScriptAsync(Connection as NpgsqlConnection, script, token);
                 return result;
@@ -388,16 +393,16 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
+        public Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
         {
-            await TryExecute(async () => { await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script, token); },
+            return TryExecuteAsync(async () => { await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script, token); },
                 MigrationError.MigratingError, "Can not execute script");
         }
 
         /// <inheritdoc />
-        public async Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
+        public Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
         {
-            return await TryExecute(async () =>
+            return TryExecuteAsync(async () =>
             {
                 using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
@@ -412,7 +417,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <inheritdoc />
         public Task CloseConnectionAsync()
         {
-            return TryExecute(() =>
+            return TryExecuteAsync(() =>
             {
                 if (Connection.State == ConnectionState.Closed) return Task.CompletedTask;
 
@@ -446,7 +451,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <returns>Result of invoking passed function.</returns>
         /// <exception cref="InvalidOperationException">In case when IOE get cought - it will be rethrown.</exception>
         /// <exception cref="MigrationException">Any exception except IOE will be rethrown as MigrationException.</exception>
-        private async Task<T> TryExecute<T>(Func<Task<T>> action, MigrationError errorType, string errorMessage)
+        private async Task<T> TryExecuteAsync<T>(Func<Task<T>> action, MigrationError errorType, string errorMessage)
         {
             try
             {
@@ -484,14 +489,14 @@ namespace Curiosity.Migrations.PostgreSQL
 
         /// <summary>
         /// Try to execute passed function catching common postgres exceptions.
-        /// All catched exceptions will be processed and re-thrown.
+        /// All caught exceptions will be processed and re-thrown.
         /// </summary>
         /// <param name="action">Code that should be executed and that can cause postgres exceptions.</param>
         /// <param name="errorType">Type for exception that will be thrown if unknown exception occurres.</param>
         /// <param name="errorMessage">Message for exception that will be thrown if unknown exception occurres.</param>
-        /// <exception cref="InvalidOperationException">In case when IOE get cought - it will be rethrown.</exception>
+        /// <exception cref="InvalidOperationException">In case when IOE get caught - it will be rethrown.</exception>
         /// <exception cref="MigrationException">Any exception except IOE will be rethrown as MigrationException.</exception>
-        private async Task TryExecute(Func<Task> action, MigrationError errorType, string errorMessage)
+        private async Task TryExecuteAsync(Func<Task> action, MigrationError errorType, string errorMessage)
         {
             try
             {
