@@ -67,9 +67,14 @@ namespace Curiosity.Migrations
 
         private async Task RunBatchesAsync(List<ScriptMigrationBatch> batches, CancellationToken token = default)
         {
+            var needLogBatches = batches.Count > 1;
             foreach (var batch in batches.OrderBy(b => b.OrderIndex))
             {
-                _migrationLogger?.LogInformation($"Executing migration's batch #{batch.OrderIndex} \"{batch.Name ?? "No name provided"}\"");
+                if (needLogBatches)
+                {
+                    _migrationLogger?.LogInformation(
+                        $"Executing migration's batch #{batch.OrderIndex} \"{batch.Name ?? "No name provided"}\"");
+                }
                 await _dbProvider.ExecuteScriptAsync(batch.Script, token);
             }
         }

@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
 
         <PackageId>Curiosity.Migrations.PostgreSQL</PackageId>
-        <Version>1.1</Version>
+        <Version>1.1.1</Version>
         <Authors>Maxim Markelow, Andrei Vinogradov</Authors>
         <Company>SIIS Ltd</Company>
         <PackageLicenseUrl>https://github.com/SIIS-Ltd/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
