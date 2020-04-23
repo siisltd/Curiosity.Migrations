@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Curiosity.Migrations
 {
@@ -11,6 +12,11 @@ namespace Curiosity.Migrations
     /// </summary>
     public interface IDbProvider : IDisposable
     {
+        /// <summary>
+        /// Use specified logger to log sql queries
+        /// </summary>
+        void UseSqlLogger(ILogger logger);
+        
         /// <summary>
         /// Name of connected database
         /// </summary>
