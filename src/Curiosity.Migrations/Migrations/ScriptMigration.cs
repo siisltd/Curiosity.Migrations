@@ -4,7 +4,6 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Curiosity.Migrations
@@ -23,13 +22,11 @@ namespace Curiosity.Migrations
         /// <summary>
         /// SQL script to apply migration splitted into batches
         /// </summary>
-        [NotNull]
         public List<ScriptMigrationBatch> UpScripts { get; }
 
         /// <summary>
         /// SQL script to undo migration splitted into batches
         /// </summary>
-        [NotNull]
         public List<ScriptMigrationBatch> DownScripts { get; }
 
         private readonly ILogger _migrationLogger;
