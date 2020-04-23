@@ -30,6 +30,11 @@ namespace Curiosity.Migrations
 
         private readonly IServiceCollection _services;
 
+        /// <summary>
+        /// Logger for sql queries
+        /// </summary>
+        private ILogger _sqlLogger;
+
         public MigratorBuilder(IServiceCollection services = null)
         {
             _services = services ?? new ServiceCollection();
@@ -175,6 +180,16 @@ namespace Curiosity.Migrations
         }
 
         /// <summary>
+        /// Use specified logger to log sql queries
+        /// </summary>
+        public MigratorBuilder UseLoggerForSql(ILogger logger)
+        {
+            _sqlLogger = logger;
+            return this;
+        }
+        
+
+        /// <summary>
         /// Build migrator
         /// </summary>
         /// <returns></returns>
@@ -189,7 +204,8 @@ namespace Curiosity.Migrations
                     $"{typeof(IMigrationsProvider)} not set up. Use {nameof(UseScriptMigrations)} or {nameof(UseCodeMigrations)}");
 
             var dbProvider = _dbProviderFactory.CreateDbProvider();
-
+            dbProvider.UseSqlLogger(_sqlLogger);
+            
             var providerVariables = dbProvider.GetDefaultVariables() ?? new Dictionary<string, string>();
             foreach (var kvp in providerVariables)
             {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Curiosity.Migrations.PostgreSQL
@@ -50,6 +51,11 @@ namespace Curiosity.Migrations.PostgreSQL
         private readonly Dictionary<string, string> _defaultVariables;
 
         /// <summary>
+        /// Logger for sql queries
+        /// </summary>
+        private ILogger _sqLogger;
+        
+        /// <summary>
         /// Provide access to Postgre database
         /// </summary>
         /// <param name="options">Options to connect and manage database</param>
@@ -80,6 +86,12 @@ namespace Curiosity.Migrations.PostgreSQL
             };
         }
 
+        /// <inheritdoc />
+        public void UseSqlLogger(ILogger logger)
+        {
+            _sqLogger = logger;
+        }
+        
         /// <inheritdoc />
         public async Task OpenConnectionAsync(CancellationToken token = default)
         {
@@ -227,6 +239,7 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             var command = connection.CreateCommand();
             command.CommandText = script;
+            _sqLogger?.LogInformation(script);
             await command.ExecuteNonQueryAsync(token);
         }
 
@@ -307,6 +320,7 @@ namespace Curiosity.Migrations.PostgreSQL
 
             try
             {
+                _sqLogger?.LogInformation(query);
                 using (var reader = await command.ExecuteReaderAsync(token))
                 {
                     if (!reader.HasRows) return default;
@@ -371,6 +385,7 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             var command = connection.CreateCommand();
             command.CommandText = query;
+            _sqLogger?.LogInformation(query);
             return command.ExecuteNonQueryAsync();
         }
 
@@ -389,6 +404,7 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             var command = connection.CreateCommand();
             command.CommandText = query;
+            _sqLogger?.LogInformation(query);
             return command.ExecuteScalarAsync(token);
         }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0] - 2020-04-23
+
+### Added
+- Added logging of sql queries
+
+### Removed
+
+- Removed dependency from `JetBrains.Annotations`
+
 ## [1.1.1] - 2020-04-01
 
 ### Added
