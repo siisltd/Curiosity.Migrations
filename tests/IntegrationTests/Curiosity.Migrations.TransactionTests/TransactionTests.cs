@@ -31,7 +31,7 @@ namespace Curiosity.Migrations.TransactionTests
             
             var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
             await migrationProvider.OpenConnectionAsync();
-            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync();
+            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(true);
             await migrationProvider.CloseConnectionAsync();
             
             Assert.Equal(new DbVersion(3,0), currentDbVersion);
@@ -69,7 +69,7 @@ namespace Curiosity.Migrations.TransactionTests
 
             var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
             await migrationProvider.OpenConnectionAsync();
-            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync();
+            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(false);
             await migrationProvider.CloseConnectionAsync();
             
             Assert.Equal(new DbVersion(3,0), currentDbVersion);

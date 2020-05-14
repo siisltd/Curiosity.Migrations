@@ -41,7 +41,7 @@ namespace Curiosity.Migrations
             _migrationsProviders = new List<IMigrationsProvider>();
             _preMigrationsProviders = new List<IMigrationsProvider>();
             _upgradePolicy = MigrationPolicy.All;
-            _downgradePolicy = MigrationPolicy.All;
+            _downgradePolicy = MigrationPolicy.Forbidden;
             _targetVersion = default;
             _variables = new Dictionary<string, string>();
         }

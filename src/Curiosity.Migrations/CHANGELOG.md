@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0] - 2020-05-14
+
+### Changed
+
+- Splitted downgrade migrations into another interface for safety reasons.
+- Default `downgrade policy` is `Forbidden`
+- Supports different strategy for migration history table analysis
+
 ## [1.2.0] - 2020-04-23
 
 ### Added

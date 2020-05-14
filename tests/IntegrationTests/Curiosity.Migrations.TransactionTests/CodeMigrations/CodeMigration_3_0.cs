@@ -56,11 +56,6 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
             }
         }
 
-        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
-
         [Table("background_processor_requests")]
         private class BackgroundProcessorRequestEntity
         {

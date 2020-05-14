@@ -14,10 +14,5 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
         {
             await DbProvider.ExecuteScriptAsync("select 1;", token);
         }
-
-        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
-        {
-            return Task.CompletedTask;
-        }
     }
 }
