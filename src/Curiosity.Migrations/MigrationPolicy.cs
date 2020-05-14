@@ -11,7 +11,7 @@ namespace Curiosity.Migrations
         /// <summary>
         /// All migrations are forbidden
         /// </summary>
-        None = 0x0,
+        Forbidden = 0x0,
 
         /// <summary>
         /// Only minor migrations are allowed

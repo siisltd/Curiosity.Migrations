@@ -54,8 +54,5 @@ namespace Curiosity.Migrations
 
         /// <inheritdoc />
         public abstract Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default);
-
-        /// <inheritdoc />
-        public abstract Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default);
     }
 }

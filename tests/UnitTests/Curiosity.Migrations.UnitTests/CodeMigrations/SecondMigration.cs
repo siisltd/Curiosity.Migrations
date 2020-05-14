@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Curiosity.Migrations.UnitTests.CodeMigrations
 {
-    public class SecondMigration : CodeMigration, ISpecificCodeMigrations
+    public class SecondMigration : CodeMigration, ISpecificCodeMigrations, IDowngradeMigration
     {
         public override DbVersion Version { get; } = new DbVersion(1,1);
         public override string Comment { get; } = "comment";
@@ -14,7 +14,7 @@ namespace Curiosity.Migrations.UnitTests.CodeMigrations
             return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript, token);
         }
 
-        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
+        public Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
             return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript, token);
         }

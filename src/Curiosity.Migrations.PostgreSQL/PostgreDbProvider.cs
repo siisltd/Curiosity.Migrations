@@ -116,7 +116,7 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion, CancellationToken token = default)
+        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion, bool isDowngradeEnabled, CancellationToken token = default)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace Curiosity.Migrations.PostgreSQL
                 }
 
                 AssertConnection(Connection);
-                var dbVersion = await GetDbVersionAsync(token)
+                var dbVersion = await GetDbVersionAsync(isDowngradeEnabled, token)
                     .ConfigureAwait(false);
                 if (dbVersion == null) return DbState.Outdated;
                 if (dbVersion.Value == desireDbVersion) return DbState.Ok;
@@ -298,11 +298,11 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbVersion?> GetDbVersionSafeAsync(CancellationToken token = default)
+        public async Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default)
         {
             try
             {
-                return await GetDbVersionAsync(token);
+                return await GetDbVersionAsync(isDowngradeEnabled, token);
             }
             catch (Exception)
             {
@@ -311,8 +311,16 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbVersion?> GetDbVersionAsync(CancellationToken token = default)
+        public Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default)
         {
+            return isDowngradeEnabled
+                ? GetDbVersionWhenDowngradeEnabledAsync(token)
+                : GetDbVersionWhenDowngradeDisabledAsync(token);
+        }  
+        
+        private async Task<DbVersion?> GetDbVersionWhenDowngradeEnabledAsync(CancellationToken token = default)
+        {
+            // actual version is made by last migration because downgrade can decrease version
             var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\" ORDER BY created DESC LIMIT 1;";
 
             var command = (Connection as NpgsqlConnection).CreateCommand();
@@ -334,6 +342,48 @@ namespace Curiosity.Migrations.PostgreSQL
                     }
 
                     return version;
+                }
+            }
+            catch (PostgresException e)
+            {
+                // Migration table does not exist.
+                if (e.SqlState == "42P01")
+                    return default;
+
+                throw;
+            }
+        }   
+        
+        private async Task<DbVersion?> GetDbVersionWhenDowngradeDisabledAsync(CancellationToken token = default)
+        {
+            // we need to analyze all version and find with max number
+            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\";";
+
+            var command = (Connection as NpgsqlConnection).CreateCommand();
+            command.CommandText = query;
+
+            DbVersion? maxVersion = null;
+            try
+            {
+                _sqLogger?.LogInformation(query);
+                using (var reader = await command.ExecuteReaderAsync(token))
+                {
+                    if (!reader.HasRows) return default;
+
+                    while (await reader.ReadAsync(token))
+                    {
+                        var stringVersion = reader.GetString(0);
+
+                        if (!DbVersion.TryParse(stringVersion, out var version))
+                            throw new InvalidOperationException("Cannot get database version.");
+
+                        if (!maxVersion.HasValue || maxVersion < version)
+                        {
+                            maxVersion = version;
+                        }
+                    }
+                    
+                    return maxVersion;
                 }
             }
             catch (PostgresException e)

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Curiosity.Migrations.UnitTests.CodeMigrations
 {
-    public class FourthMigrationWithDependency : CustomBaseCodeMigration
+    public class FourthMigrationWithDependency : CustomBaseCodeMigration, IDowngradeMigration
     {
         public DependencyService DependencyService { get; }
 
@@ -24,7 +24,7 @@ namespace Curiosity.Migrations.UnitTests.CodeMigrations
             return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript, token);
         }
 
-        public override Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
+        public Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
             return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript, token);
         }
