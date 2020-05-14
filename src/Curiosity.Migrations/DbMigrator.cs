@@ -112,10 +112,12 @@ namespace Curiosity.Migrations
                     _logger?.LogInformation($"Creating {_dbProvider.MigrationHistoryTableName} table...");
                     await _dbProvider.CreateHistoryTableIfNotExistsAsync(token);
                     _logger?.LogInformation($"Creating {_dbProvider.MigrationHistoryTableName} table completed.");
-                }                
+                }
+
+                var isDowngradeEnabled = _downgradePolicy != MigrationPolicy.Forbidden;
                 
                 _logger?.LogInformation("Check database version...");
-                var dbVersion = await _dbProvider.GetDbVersionSafeAsync(token) ?? default;
+                var dbVersion = await _dbProvider.GetDbVersionSafeAsync(isDowngradeEnabled, token) ?? default;
 
                 var targetVersion = _targetVersion ?? _migrations.Max(x => x.Version);
                 if (targetVersion == dbVersion)
@@ -140,7 +142,7 @@ namespace Curiosity.Migrations
 
                     // DB version might be changed after pre-migration
                     _logger?.LogInformation("Check database version after pre migration...");
-                    dbVersion = await _dbProvider.GetDbVersionSafeAsync(token) ?? default;   
+                    dbVersion = await _dbProvider.GetDbVersionSafeAsync(isDowngradeEnabled, token) ?? default;   
                     _logger?.LogInformation("Check database version after pre migration...");
                 }
                 else

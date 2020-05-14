@@ -56,9 +56,10 @@ namespace Curiosity.Migrations
         /// Returns actual DB state
         /// </summary>
         /// <param name="desiredVersion">Version of the newest migration</param>
+        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion, CancellationToken token = default);
+        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion, bool isDowngradeEnabled, CancellationToken token = default);
 
         /// <summary>
         /// Create database with default schema if not exist
@@ -93,13 +94,17 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Returns actual database version from migration history table.
         /// </summary>
+        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>   
+        /// <param name="token">Cancellation token</param>
         /// <exception cref="InvalidOperationException">If migration history table has incorrect DB version.</exception>
-        Task<DbVersion?> GetDbVersionAsync(CancellationToken token = default);
+        Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default);
 
         /// <summary>
         /// Returns actual database version from migration history table
         /// </summary>
-        Task<DbVersion?> GetDbVersionSafeAsync(CancellationToken token = default);
+        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
+        /// <param name="token">Cancellation token</param>
+        Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default);
 
         /// <summary>
         /// Update actual database version in migration history table

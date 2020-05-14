@@ -1,8 +1,15 @@
 # Changelog
 
+## [2.0] - 2020-05-14
+
+### Changed
+
+- Supports different strategy for migration history table analysis: is downgrade is enabled use version of last executed migration either max version of executed migrations.
+
 ## [1.2.0] - 2020-04-23
 
 ### Added
+
 - Added logging of sql queries
 
 ## [1.1.1] - 2020-04-01

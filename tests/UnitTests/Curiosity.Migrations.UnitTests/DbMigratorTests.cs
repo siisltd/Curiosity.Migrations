@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -21,11 +20,11 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
             
             provider
-                .Setup(x => x.GetDbVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -73,7 +72,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
             
             provider
@@ -130,7 +129,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -190,7 +189,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             var firstMigration = new Mock<IMigration>();
@@ -251,7 +250,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -309,7 +308,7 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IDbProvider>();
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -373,7 +372,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -434,7 +433,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
@@ -499,7 +498,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetDbVersionSafeAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new DbVersion?(initialDbVersion)));
 
             provider
