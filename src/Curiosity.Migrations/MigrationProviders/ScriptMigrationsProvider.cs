@@ -245,13 +245,20 @@ namespace Curiosity.Migrations
                 }
             }
 
-            return new ScriptMigration(
-                migrationLogger,
-                dbProvider,
-                dbVersion,
-                upScript,
-                downScript,
-                scriptInfo.Comment);
+            return downScript.Count > 0
+                ? new DowngradableScriptMigration(
+                    migrationLogger,
+                    dbProvider,
+                    dbVersion,
+                    upScript,
+                    downScript,
+                    scriptInfo.Comment)
+                : new ScriptMigration(
+                    migrationLogger,
+                    dbProvider,
+                    dbVersion,
+                    upScript,
+                    scriptInfo.Comment);
         }
 
         /// <summary>

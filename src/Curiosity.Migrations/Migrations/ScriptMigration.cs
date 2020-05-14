@@ -13,6 +13,9 @@ namespace Curiosity.Migrations
     /// </summary>
     public class ScriptMigration : IMigration
     {
+        protected readonly ILogger MigrationLogger;
+        protected readonly IDbProvider DbProvider;
+        
         /// <inheritdoc />
         public DbVersion Version { get; }
 
@@ -24,29 +27,19 @@ namespace Curiosity.Migrations
         /// </summary>
         public List<ScriptMigrationBatch> UpScripts { get; }
 
-        /// <summary>
-        /// SQL script to undo migration splitted into batches
-        /// </summary>
-        public List<ScriptMigrationBatch> DownScripts { get; }
-
-        private readonly ILogger _migrationLogger;
-        private readonly IDbProvider _dbProvider;
-
         public ScriptMigration(
             ILogger migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
             List<ScriptMigrationBatch> upScripts,
-            List<ScriptMigrationBatch> downScripts,
             string comment)
         {
-            _migrationLogger = migrationLogger;
-            _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+            MigrationLogger = migrationLogger;
+            DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
             if (upScripts == null || upScripts.Count == 0) throw new ArgumentException(nameof(upScripts));
 
             Version = version;
             UpScripts = upScripts;
-            DownScripts = downScripts ?? new List<ScriptMigrationBatch>(0);
             Comment = comment;
         }
 
@@ -56,23 +49,17 @@ namespace Curiosity.Migrations
             await RunBatchesAsync(UpScripts, token);
         }
 
-        /// <inheritdoc />
-        public async Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
-        {
-            await RunBatchesAsync(DownScripts, token);
-        }
-
-        private async Task RunBatchesAsync(List<ScriptMigrationBatch> batches, CancellationToken token = default)
+        protected async Task RunBatchesAsync(List<ScriptMigrationBatch> batches, CancellationToken token = default)
         {
             var needLogBatches = batches.Count > 1;
             foreach (var batch in batches.OrderBy(b => b.OrderIndex))
             {
                 if (needLogBatches)
                 {
-                    _migrationLogger?.LogInformation(
+                    MigrationLogger?.LogInformation(
                         $"Executing migration's batch #{batch.OrderIndex} \"{batch.Name ?? "No name provided"}\"");
                 }
-                await _dbProvider.ExecuteScriptAsync(batch.Script, token);
+                await DbProvider.ExecuteScriptAsync(batch.Script, token);
             }
         }
     }

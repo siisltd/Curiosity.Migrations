@@ -227,6 +227,9 @@ namespace Curiosity.Migrations
         /// <exception cref="MigrationException"></exception>
         private async Task UpgradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
         {
+            if (_upgradePolicy == MigrationPolicy.Forbidden)
+                throw new MigrationException(MigrationError.PolicyError, "Upgrading is forbidden due to migration upgrade policy");
+            
             var desiredMigrations = _migrations
                 .Where(x => x.Version > actualVersion && x.Version <= targetVersion)
                 .OrderBy(x => x.Version)
@@ -311,12 +314,19 @@ namespace Curiosity.Migrations
         /// <exception cref="MigrationException"></exception>
         private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
         {
+            if (_downgradePolicy == MigrationPolicy.Forbidden)
+                throw new MigrationException(MigrationError.PolicyError, "Downgrading is forbidden due to migration downrgade policy");
+            
             var desiredMigrations = _migrations
                 .Where(x => x.Version <= actualVersion && x.Version >= targetVersion)
                 .OrderByDescending(x => x.Version)
                 .ToList();
             if (desiredMigrations.Count == 0 || desiredMigrations.Count == 1) return;
 
+            var downgradableMigrationsCount = _migrations.Count(x => x is IDowngradeMigration);
+            if (downgradableMigrationsCount != desiredMigrations.Count)
+                throw new MigrationException(MigrationError.MigrationNotFound, $"Found {downgradableMigrationsCount} downgrade migrations but expected {desiredMigrations.Count}");
+            
             var lastMigrationVersion = new DbVersion(0, 0);
             var currentDbVersion = actualVersion;
             for (var i = 0; i < desiredMigrations.Count - 1; ++i)
@@ -325,6 +335,9 @@ namespace Curiosity.Migrations
                 
                 var targetLocalVersion = desiredMigrations[i + 1].Version;
                 var migration = desiredMigrations[i];
+                
+                if (!(migration is IDowngradeMigration downgradeMigration))
+                    throw new MigrationException(MigrationError.MigrationNotFound, $"Migration {migration.Version} doesn't support downgrade");
 
                 if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, targetLocalVersion),
                     _downgradePolicy))
@@ -344,8 +357,8 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogInformation(
                             $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
-                        await migration.DowngradeAsync(transaction, token);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, targetLocalVersion, token);
+                        await downgradeMigration.DowngradeAsync(transaction, token);
+                        await _dbProvider.UpdateCurrentDbVersionAsync(downgradeMigration.Comment, targetLocalVersion, token);
                         lastMigrationVersion = targetLocalVersion;
                         currentDbVersion = targetLocalVersion;
 

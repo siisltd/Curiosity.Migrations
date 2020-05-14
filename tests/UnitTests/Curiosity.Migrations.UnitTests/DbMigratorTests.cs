@@ -380,15 +380,15 @@ namespace Curiosity.Migrations.UnitTests
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
             
-            var firstMigration = new Mock<IMigration>();
+            var firstMigration = new Mock<IDowngradeMigration>();
             firstMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 0));
-            var secondMigration = new Mock<IMigration>();
+            var secondMigration = new Mock<IDowngradeMigration>();
             secondMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 1));
-            var thirdMigration = new Mock<IMigration>();
+            var thirdMigration = new Mock<IDowngradeMigration>();
             thirdMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 2));
@@ -441,19 +441,19 @@ namespace Curiosity.Migrations.UnitTests
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
             
-            var firstMigration = new Mock<IMigration>();
+            var firstMigration = new Mock<IDowngradeMigration>();
             firstMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 0));
-            var secondMigration = new Mock<IMigration>();
+            var secondMigration = new Mock<IDowngradeMigration>();
             secondMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 1));
-            var thirdMigration = new Mock<IMigration>();
+            var thirdMigration = new Mock<IDowngradeMigration>();
             thirdMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 2));
-            var fourthMigration = new Mock<IMigration>();
+            var fourthMigration = new Mock<IDowngradeMigration>();
             fourthMigration 
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(2, 0));
@@ -506,19 +506,19 @@ namespace Curiosity.Migrations.UnitTests
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
             
-            var firstMigration = new Mock<IMigration>();
+            var firstMigration = new Mock<IDowngradeMigration>();
             firstMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 0));
-            var secondMigration = new Mock<IMigration>();
+            var secondMigration = new Mock<IDowngradeMigration>();
             secondMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 1));
-            var thirdMigration = new Mock<IMigration>();
+            var thirdMigration = new Mock<IDowngradeMigration>();
             thirdMigration
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(1, 2));
-            var fourthMigration = new Mock<IMigration>();
+            var fourthMigration = new Mock<IDowngradeMigration>();
             fourthMigration 
                 .Setup(x => x.Version)
                 .Returns(new DbVersion(2, 0));
