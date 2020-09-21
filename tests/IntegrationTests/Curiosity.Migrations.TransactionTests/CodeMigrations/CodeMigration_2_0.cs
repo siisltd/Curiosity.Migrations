@@ -10,7 +10,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 
         public override string Comment { get; } = "Correct script via provider";
         
-        public override async Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
+        public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
             await DbProvider.ExecuteScriptAsync("select 1;", token);
         }

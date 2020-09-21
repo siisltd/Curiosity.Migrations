@@ -14,7 +14,8 @@
         <Description>Migration tool for .NET: supports sql script migrations and custom migrations written by C#</Description>
         <PackageReleaseNotes>https://github.com/SIIS-Ltd/Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
         <PackageTags>migration; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
-        <LangVersion>7.3</LangVersion>
+        <LangVersion>8</LangVersion>
+        <Nullable>enable</Nullable>
         
     </PropertyGroup>
 

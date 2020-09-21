@@ -19,7 +19,7 @@ namespace Curiosity.Migrations.PostgreSQL
         private const string CheckDbExistQueryFormat = "SELECT 1 AS result FROM pg_database WHERE datname='{0}'";
 
         /// <summary>
-        /// 'Postgres' database is garanteed to exist, need to create own db
+        /// 'Postgres' database is guaranteed to exist, need to create own db
         /// </summary>
         /// <remarks>
         /// Can not open connection without specified database name
@@ -33,7 +33,7 @@ namespace Curiosity.Migrations.PostgreSQL
         public string ConnectionString { get; }
 
         /// <inheritdoc />
-        public DbConnection Connection { get; private set; }
+        public DbConnection? Connection { get; private set; } // disable null warning because connection normally is opened after calling required methods 
 
         /// <inheritdoc />
         public string MigrationHistoryTableName { get; }
@@ -53,7 +53,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <summary>
         /// Logger for sql queries
         /// </summary>
-        private ILogger _sqLogger;
+        private ILogger? _sqLogger;
         
         /// <summary>
         /// Provide access to Postgre database
@@ -67,7 +67,7 @@ namespace Curiosity.Migrations.PostgreSQL
 
             MigrationHistoryTableName = options.MigrationHistoryTableName;
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
-            DbName = connectionBuilder.Database;
+            DbName = connectionBuilder.Database ?? throw new ArgumentException($"{nameof(connectionBuilder.Database)} can't be empty");
             ConnectionString = connectionBuilder.ConnectionString;
 
             var tempConnectionBuilder =
@@ -87,7 +87,7 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public void UseSqlLogger(ILogger logger)
+        public void UseSqlLogger(ILogger? logger)
         {
             _sqLogger = logger;
         }
@@ -112,7 +112,9 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <inheritdoc />
         public DbTransaction BeginTransaction()
         {
-            return Connection.BeginTransaction();
+            AssertConnection(Connection);
+            
+            return Connection!.BeginTransaction();
         }
 
         /// <inheritdoc />
@@ -218,7 +220,7 @@ namespace Curiosity.Migrations.PostgreSQL
             }, MigrationError.Unknown, $"Can not check existence of {databaseName} database");
         }
 
-        private void AssertConnection(IDbConnection connection)
+        private void AssertConnection(IDbConnection? connection)
         {
             if (connection == null 
                 || connection.State == ConnectionState.Closed 

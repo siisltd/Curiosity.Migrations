@@ -5,7 +5,7 @@ namespace Curiosity.Migrations
     /// <summary>
     /// Database version
     /// </summary>
-    public struct DbVersion : IComparable, IEquatable<DbVersion>
+    public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     {
         private const char VersionNumberSeparator = '.';
 

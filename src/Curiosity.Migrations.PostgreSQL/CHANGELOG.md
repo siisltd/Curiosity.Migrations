@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1] - 2020-09-21
+
+### Changed
+
+- Upgraded to C# 8.0. 
+
 ## [2.0] - 2020-05-14
 
 ### Changed

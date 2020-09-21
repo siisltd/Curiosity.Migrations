@@ -6,6 +6,10 @@
         <IsPackable>false</IsPackable>
 
         <RootNamespace>Curiosity.Migrations.TransactionTests</RootNamespace>
+
+        <LangVersion>8</LangVersion>
+
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,7 +32,7 @@
       <None Update="ScriptMigrations\1.0-correct_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="ScriptMigrations\4.0-incorrect_script.sql">
+      <None Update="ScriptMigrations\6.0-incorrect_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="config.yml">

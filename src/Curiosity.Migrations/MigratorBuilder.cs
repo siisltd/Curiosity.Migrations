@@ -16,9 +16,9 @@ namespace Curiosity.Migrations
         private readonly ICollection<IMigrationsProvider> _migrationsProviders;
         private readonly ICollection<IMigrationsProvider> _preMigrationsProviders;
 
-        private IDbProviderFactory _dbProviderFactory;
+        private IDbProviderFactory? _dbProviderFactory;
         private DbVersion? _targetVersion;
-        private ILogger _logger;
+        private ILogger? _logger;
 
         /// <summary>
         /// Dictionary with variables
@@ -33,9 +33,9 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Logger for sql queries
         /// </summary>
-        private ILogger _sqlLogger;
+        private ILogger? _sqlLogger;
 
-        public MigratorBuilder(IServiceCollection services = null)
+        public MigratorBuilder(IServiceCollection? services = null)
         {
             _services = services ?? new ServiceCollection();
             _migrationsProviders = new List<IMigrationsProvider>();
