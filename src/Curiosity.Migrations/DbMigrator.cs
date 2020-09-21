@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Curiosity.Migrations
         private readonly ICollection<IMigration> _preMigrations;
         private readonly ICollection<IMigration> _migrations;
 
-        private readonly ILogger _logger;
+        private readonly ILogger? _logger;
         private readonly IDbProvider _dbProvider;
         private readonly DbVersion? _targetVersion;
 
@@ -37,9 +38,9 @@ namespace Curiosity.Migrations
             ICollection<IMigration> migrations,
             MigrationPolicy upgradePolicy,
             MigrationPolicy downgradePolicy,
-            ICollection<IMigration> preMigrations = null,
+            ICollection<IMigration>? preMigrations = null,
             DbVersion? targetVersion = null,
-            ILogger logger = null)
+            ILogger? logger = null)
         {
             if (migrations == null) throw new ArgumentNullException(nameof(migrations));
             _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
@@ -250,32 +251,44 @@ namespace Curiosity.Migrations
                         $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
                 }
 
-                // sometimes transactions fails without reopening connection
-                //todo fix it later
-                await _dbProvider.CloseConnectionAsync();
-                await _dbProvider.OpenConnectionAsync(token);
+                DbTransaction? transaction = null;
 
-                using (var transaction = _dbProvider.BeginTransaction())
+                try
                 {
-                    try
-                    {
-                        _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
-                        await migration.UpgradeAsync(transaction, token);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version, token);
-                        lastMigrationVersion = migration.Version;
-                        currentDbVersion = migration.Version;
+                    // sometimes transactions fails without reopening connection
+                    //todo fix it later
+                    await _dbProvider.CloseConnectionAsync();
+                    await _dbProvider.OpenConnectionAsync(token);
 
-                        // Commit transaction if all commands succeed, transaction will auto-rollback
-                        // when disposed if either commands fails
-                        transaction.Commit();
-
-                        _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
-                    }
-                    catch (Exception e)
+                    if (migration.IsTransactionRequired)
                     {
-                        _logger?.LogError(e, $"Error while upgrade to {migration.Version}: {e.Message}");
-                        throw;
+                        transaction = _dbProvider.BeginTransaction();
                     }
+                    else
+                    {
+                        _logger?.LogWarning($"Transaction is disabled for migration \"{migration.Version}\"");
+                    }
+                    
+                    _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
+                    await migration.UpgradeAsync(transaction, token);
+                    await _dbProvider.UpdateCurrentDbVersionAsync(migration.Comment, migration.Version, token);
+                    lastMigrationVersion = migration.Version;
+                    currentDbVersion = migration.Version;
+
+                    // Commit transaction if all commands succeed, transaction will auto-rollback
+                    // when disposed if either commands fails
+                    transaction?.Commit();
+
+                    _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                }
+                catch (Exception e)
+                {
+                    _logger?.LogError(e, $"Error while upgrade to {migration.Version}: {e.Message}");
+                    throw;
+                }
+                finally
+                {
+                    transaction?.Dispose();
                 }
             }
 
@@ -388,7 +401,7 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public void Dispose()
         {
-            _dbProvider?.Dispose();
+            _dbProvider.Dispose();
         }
     }
 }

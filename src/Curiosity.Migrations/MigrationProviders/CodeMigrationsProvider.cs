@@ -108,7 +108,7 @@ namespace Curiosity.Migrations
             foreach (var migrationToResolve in migrationsToResolve)
             {
                 if (!(serviceProvider.GetRequiredService(migrationToResolve) is CodeMigration migration))
-                    throw new InvalidOperationException($"{migrationToResolve.GetType()} no created");
+                    throw new InvalidOperationException($"{migrationToResolve} no created");
 
                 migration.Init(dbProvider, variables, migrationLogger);
                 migrations.Add(migration);

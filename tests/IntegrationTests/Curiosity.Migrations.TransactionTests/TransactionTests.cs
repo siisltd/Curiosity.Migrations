@@ -36,6 +36,34 @@ namespace Curiosity.Migrations.TransactionTests
             
             Assert.Equal(new DbVersion(3,0), currentDbVersion);
         }
+                
+        [Fact]
+        public async Task Migrate_AllScriptOk_SwitchedOffTransaction()
+        {
+            var config = ConfigProvider.GetConfig();
+            var connectionString = String.Format(config.ConnectionStringMask, "test_without_transactions");
+            
+            
+            var builder = new MigratorBuilder();
+            builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
+            builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+            builder.UsePostgreSQL(connectionString);
+
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.All);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.All);
+            builder.SetUpTargetVersion(new DbVersion(5, 0));
+
+            var migrator = builder.Build();
+
+            await migrator.MigrateAsync();
+            
+            var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
+            await migrationProvider.OpenConnectionAsync();
+            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(true);
+            await migrationProvider.CloseConnectionAsync();
+            
+            Assert.Equal(new DbVersion(5,0), currentDbVersion);
+        }
         
         [Fact]
         public async Task Migrate_AllScriptOk_Rollback()
@@ -51,7 +79,7 @@ namespace Curiosity.Migrations.TransactionTests
 
             builder.UseUpgradeMigrationPolicy(MigrationPolicy.All);
             builder.UseDowngradeMigrationPolicy(MigrationPolicy.All);
-            builder.SetUpTargetVersion(new DbVersion(4, 0));
+            builder.SetUpTargetVersion(new DbVersion(6, 0));
 
             var migrator = builder.Build();
 
@@ -72,7 +100,7 @@ namespace Curiosity.Migrations.TransactionTests
             var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(false);
             await migrationProvider.CloseConnectionAsync();
             
-            Assert.Equal(new DbVersion(3,0), currentDbVersion);
+            Assert.Equal(new DbVersion(5,0), currentDbVersion);
         }
     }
 }

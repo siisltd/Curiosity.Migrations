@@ -19,10 +19,14 @@ namespace Curiosity.Migrations
         /// </summary>
         string Comment { get; }
 
+        bool IsTransactionRequired { get; }
+
         /// <summary>
         /// Upgrade database to the version specified in <see cref="Version"/>
         /// </summary>
-        /// <returns></returns>
-        Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default);
+        /// <param name="transaction">Transaction in which operation must be executed. Optional. Use it when you need attach transaction to Entity Framework data context.</param>
+        /// <param name="token">Cancellation token. Optional.</param>
+        /// <returns>Task associated with upgrade</returns>
+        Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
     }
 }
