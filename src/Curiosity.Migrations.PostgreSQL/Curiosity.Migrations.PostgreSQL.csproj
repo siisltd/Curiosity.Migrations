@@ -9,6 +9,7 @@
         <Company>SIIS Ltd</Company>
         <PackageLicenseUrl>https://github.com/SIIS-Ltd/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
         <PackageProjectUrl>https://github.com/SIIS-Ltd/Migrations</PackageProjectUrl>
+        <PackageIconUrl>https://github.com/SIIS-Ltd/Migrations/raw/master/siisltd.png</PackageIconUrl>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <Title>Migration tool for .NET</Title>
         <Description>PostgreSQL provider for Curiosity.Migration (migration tool for .NET: supports sql script migrations and custom migrations written by C#)</Description>
