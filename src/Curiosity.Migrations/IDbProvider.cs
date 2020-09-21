@@ -15,7 +15,7 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Use specified logger to log sql queries
         /// </summary>
-        void UseSqlLogger(ILogger logger);
+        void UseSqlLogger(ILogger? logger);
         
         /// <summary>
         /// Name of connected database
@@ -30,7 +30,7 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Opened connection to Database. Can be null if method <see cref="OpenConnectionAsync"/> does not called or if <see cref="CloseConnectionAsync"/> was called
         /// </summary>
-        DbConnection Connection { get; }
+        DbConnection? Connection { get; }
 
         /// <summary>
         /// Name of table with migration history

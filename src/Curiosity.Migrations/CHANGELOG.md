@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1] - 2020-09-21
+
+### Added
+
+- Options for each migration. First option is switching of transaction for specific migration.
+```
+--CURIOSITY:Transactions=off
+```
+
+### Changed
+
+- Upgraded to C# 8.0.
+
 ## [2.0] - 2020-05-14
 
 ### Changed
