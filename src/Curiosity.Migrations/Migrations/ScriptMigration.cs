@@ -20,7 +20,10 @@ namespace Curiosity.Migrations
         public DbVersion Version { get; }
 
         /// <inheritdoc />
-        public string Comment { get; }
+        public string? Comment { get; }
+
+        /// <inheritdoc />
+        public bool IsTransactionRequired { get; protected set; }
 
         /// <summary>
         /// SQL script to apply migration splitted into batches
@@ -32,7 +35,8 @@ namespace Curiosity.Migrations
             IDbProvider dbProvider,
             DbVersion version,
             List<ScriptMigrationBatch> upScripts,
-            string comment)
+            string? comment,
+            bool isTransactionRequired = true)
         {
             MigrationLogger = migrationLogger;
             DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
@@ -41,10 +45,11 @@ namespace Curiosity.Migrations
             Version = version;
             UpScripts = upScripts;
             Comment = comment;
+            IsTransactionRequired = isTransactionRequired;
         }
 
         /// <inheritdoc />
-        public async Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
+        public async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
             await RunBatchesAsync(UpScripts, token);
         }

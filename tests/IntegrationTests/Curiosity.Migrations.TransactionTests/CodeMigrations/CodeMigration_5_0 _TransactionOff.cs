@@ -7,11 +7,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 {
-    public class CodeMigration_3_0 : CodeMigration
+    public class CodeMigration_5_0 : CodeMigration
     {
-        public override DbVersion Version { get; } = new DbVersion(3, 0);
+        public override DbVersion Version { get; } = new DbVersion(5, 0);
 
-        public override string Comment { get; } = "Migration using multiple EF context with one connection";
+        public override string Comment { get; } = "Migrations with switched off transactions";
+
+        public CodeMigration_5_0()
+        {
+            IsTransactionRequired = false;
+        }
 
         public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
@@ -24,8 +29,8 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
             using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
             using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))
             {
-                tempContext.Database.UseTransaction(transaction);
-                anotherContext.Database.UseTransaction(transaction);
+                // tempContext.Database.UseTransaction(transaction);
+                // anotherContext.Database.UseTransaction(transaction);
                 
                 var request1 = new BackgroundProcessorRequestEntity
                 {

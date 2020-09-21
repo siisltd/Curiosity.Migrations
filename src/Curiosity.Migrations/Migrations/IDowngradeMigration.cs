@@ -13,6 +13,6 @@ namespace Curiosity.Migrations
         /// Downgrade database to the previous version undoing changes to this migration
         /// </summary>
         /// <returns></returns>
-        Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default);
+        Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
     }
 }

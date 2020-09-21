@@ -21,14 +21,15 @@ namespace Curiosity.Migrations
             IDbProvider dbProvider,
             DbVersion version,
             List<ScriptMigrationBatch> upScripts,
-            List<ScriptMigrationBatch> downScripts,
-            string comment) : base(migrationLogger, dbProvider, version, upScripts, comment)
+            List<ScriptMigrationBatch>? downScripts,
+            string? comment,
+            bool isTransactionRequired = true) : base(migrationLogger, dbProvider, version, upScripts, comment, isTransactionRequired)
         {
-            DownScripts = downScripts ?? new List<ScriptMigrationBatch>(0);
+            DownScripts = downScripts ?? new List<ScriptMigrationBatch>();
         }
         
         /// <inheritdoc />
-        public async Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
+        public async Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
             await RunBatchesAsync(DownScripts, token);
         }

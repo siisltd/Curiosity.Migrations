@@ -18,6 +18,9 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public abstract string Comment { get; }
 
+        /// <inheritdoc />
+        public bool IsTransactionRequired { get; protected set; } = true;
+
         /// <summary>
         /// Provide access to underlying database
         /// </summary>
@@ -53,6 +56,6 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public abstract Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default);
+        public abstract Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
     }
 }

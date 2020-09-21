@@ -13,15 +13,15 @@ namespace Curiosity.Migrations
     /// </summary>
     public class ScriptMigrationsProvider : IMigrationsProvider
     {
-        private readonly Dictionary<string, string> _absoluteDirectoriesPathWithPrefix;
-        private readonly Dictionary<Assembly, string> _assembliesWithPrefix;
+        private readonly Dictionary<string, string?> _absoluteDirectoriesPathWithPrefix;
+        private readonly Dictionary<Assembly, string?> _assembliesWithPrefix;
 
         public ScriptMigrationsProvider()
         {
             // usually only one item will be added
-            _absoluteDirectoriesPathWithPrefix = new Dictionary<string, string>(1);
+            _absoluteDirectoriesPathWithPrefix = new Dictionary<string, string?>(1);
             // usually only one item will be added
-            _assembliesWithPrefix = new Dictionary<Assembly, string>(1);
+            _assembliesWithPrefix = new Dictionary<Assembly, string?>(1);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Curiosity.Migrations
         /// <param name="path">Path to directory where scripts are located. Can be relative and absolute.</param>
         /// <param name="prefix">Specific part of name or path. If no prefix specified provider will process only files without any prefix</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromDirectory(string path, string prefix = null)
+        public ScriptMigrationsProvider FromDirectory(string path, string? prefix = null)
         {
             if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
@@ -50,7 +50,7 @@ namespace Curiosity.Migrations
         /// <param name="prefix">Specific part of name or namespace part. If no prefix specified provider will process only files without any prefix</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromAssembly(Assembly assembly, string prefix = null)
+        public ScriptMigrationsProvider FromAssembly(Assembly assembly, string? prefix = null)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
             _assembliesWithPrefix[assembly] = prefix;
@@ -80,7 +80,7 @@ namespace Curiosity.Migrations
                 if (String.IsNullOrEmpty(directoryPath)) throw new ArgumentNullException(nameof(directoryPath));
 
                 if (!Directory.Exists(directoryPath))
-                    throw new ArgumentException($"Directory {directoryPath} does not exists");
+                    throw new ArgumentException($"Directory \"{directoryPath}\" does not exists");
 
                 var fileNames = Directory.GetFiles(directoryPath);
 
@@ -92,7 +92,7 @@ namespace Curiosity.Migrations
                     variables,
                     migrationLogger);
 
-                if (directoryMigrations == null || directoryMigrations.Count == 0) continue;
+                if (directoryMigrations.Count == 0) continue;
 
                 migrations.AddRange(directoryMigrations);
             }
@@ -108,18 +108,18 @@ namespace Curiosity.Migrations
                     resourceFileNames,
                     resourceName =>
                     {
-                        using (var stream = assembly.GetManifestResourceStream(resourceName))
-                        using (var reader = new StreamReader(stream))
-                        {
-                            return reader.ReadToEnd();
-                        }
+                        using var stream = assembly.GetManifestResourceStream(resourceName);
+                        if (stream == null) throw new InvalidOperationException($"Can't open a stream for resource \"{resourceName}\"");
+                        
+                        using var reader = new StreamReader(stream);
+                        return reader.ReadToEnd();
                     },
                     dbProvider,
                     prefix,
                     variables,
                     migrationLogger);
 
-                if (assemblyMigrations == null || assemblyMigrations.Count == 0) continue;
+                if (assemblyMigrations.Count == 0) continue;
 
                 migrations.AddRange(assemblyMigrations);
             }
@@ -131,7 +131,7 @@ namespace Curiosity.Migrations
             IEnumerable<string> fileNames,
             Func<string, string> sqlScriptReadFunc,
             IDbProvider dbProvider,
-            string prefix,
+            string? prefix,
             IReadOnlyDictionary<string, string> variables,
             ILogger migrationLogger)
         {
@@ -161,7 +161,12 @@ namespace Curiosity.Migrations
                 var scriptInfo = scripts[version];
 
                 var script = sqlScriptReadFunc.Invoke(fileName);
-                var batches = new List<ScriptMigrationBatch>(0);
+                
+                // extract options for current migration
+                scriptInfo.Options = ExtractMigrationOptions(script);
+                
+                // split into batches
+                var batches = new List<ScriptMigrationBatch>();
                 var batchNameRegex = new Regex(@"--\s*BATCH:\s*(.*)\s*\n(.*)", RegexOptions.IgnoreCase);
                 var batchIndex = 0;
                 
@@ -181,19 +186,19 @@ namespace Curiosity.Migrations
                 
                 if (match.Groups[4].Success)
                 {
-                    if (scriptInfo.DownScript != null && scriptInfo.DownScript.Count > 0)
+                    if (scriptInfo.DownScript.Count > 0)
                         throw new InvalidOperationException(
                             $"There is more than one downgrade script with version {version}");
 
-                    scriptInfo.DownScript = batches;
+                    scriptInfo.DownScript.AddRange(batches);
                 }
                 else
                 {
-                    if (scriptInfo.UpScript != null && scriptInfo.UpScript.Count > 0)
+                    if (scriptInfo.UpScript.Count > 0)
                         throw new InvalidOperationException(
                             $"There is more than one upgrade script with version {version}");
 
-                    scriptInfo.UpScript = batches;
+                    scriptInfo.UpScript.AddRange(batches);
                 }
                 
                 var comment = match.Groups[7];
@@ -211,6 +216,42 @@ namespace Curiosity.Migrations
                         variables,
                         migrationLogger))
                 .ToList();
+        }
+
+        private MigrationOptions ExtractMigrationOptions(string sourceScript)
+        {
+            var options = new MigrationOptions();
+
+            var optionsRegex = new Regex(@"--\s*CURIOSITY:\s*(.*)\s*=\s*(.*)\s*\n", RegexOptions.IgnoreCase);
+            foreach (var line in Regex.Split(sourceScript, @"(?=--\s*CURIOSITY:)"))
+            {
+                if (String.IsNullOrWhiteSpace(line)) continue;
+
+                var optionsMatch = optionsRegex.Match(line);
+                if (!optionsMatch.Success) continue;
+
+                switch (optionsMatch.Groups[1].Value.ToUpper())
+                {
+                    case "TRANSACTION":
+                        switch (optionsMatch.Groups[2].Value.ToUpper())
+                        {
+                            case "ON":
+                                options.IsTransactionRequired = true;
+                                break;
+                            case "OFF":
+                                options.IsTransactionRequired = false;
+                                break;
+                            default:
+                                throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
+                        }
+
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Option \"{optionsMatch.Groups[1].Value}\" is unknown");
+                }
+            }
+
+            return options;
         }
 
         /// <summary>
@@ -252,13 +293,15 @@ namespace Curiosity.Migrations
                     dbVersion,
                     upScript,
                     downScript,
-                    scriptInfo.Comment)
+                    scriptInfo.Comment,
+                    scriptInfo.Options.IsTransactionRequired)
                 : new ScriptMigration(
                     migrationLogger,
                     dbProvider,
                     dbVersion,
                     upScript,
-                    scriptInfo.Comment);
+                    scriptInfo.Comment,
+                    scriptInfo.Options.IsTransactionRequired);
         }
 
         /// <summary>
@@ -273,11 +316,18 @@ namespace Curiosity.Migrations
 
             public DbVersion Version { get; }
 
-            public string Comment { get; set; }
+            public string? Comment { get; set; }
 
-            public List<ScriptMigrationBatch> UpScript { get; set; } = new List<ScriptMigrationBatch>(0);
+            public List<ScriptMigrationBatch> UpScript { get; } = new List<ScriptMigrationBatch>();
 
-            public List<ScriptMigrationBatch> DownScript { get; set; } = new List<ScriptMigrationBatch>(0);
+            public List<ScriptMigrationBatch> DownScript { get; } = new List<ScriptMigrationBatch>();
+            
+            public MigrationOptions Options { get; set; }
+        }
+        
+        private class MigrationOptions
+        {
+            public bool IsTransactionRequired { get; set; } = true;
         }
     }
 }
