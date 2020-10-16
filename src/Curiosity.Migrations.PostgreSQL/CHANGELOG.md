@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2] - 2020-10-16
+
+### Fixed
+
+- Exceptions occurred during upgrade or downgrade were logged twice.
+
 ## [2.1] - 2020-09-21
 
 ### Changed
