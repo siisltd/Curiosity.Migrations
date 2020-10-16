@@ -281,11 +281,6 @@ namespace Curiosity.Migrations
 
                     _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
                 }
-                catch (Exception e)
-                {
-                    _logger?.LogError(e, $"Error while upgrade to {migration.Version}: {e.Message}");
-                    throw;
-                }
                 finally
                 {
                     transaction?.Dispose();
@@ -368,27 +363,18 @@ namespace Curiosity.Migrations
 
                 using (var transaction = _dbProvider.BeginTransaction())
                 {
-                    try
-                    {
-                        _logger?.LogInformation(
-                            $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
-                        await downgradeMigration.DowngradeAsync(transaction, token);
-                        await _dbProvider.UpdateCurrentDbVersionAsync(downgradeMigration.Comment, targetLocalVersion, token);
-                        lastMigrationVersion = targetLocalVersion;
-                        currentDbVersion = targetLocalVersion;
+                    _logger?.LogInformation(
+                        $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
+                    await downgradeMigration.DowngradeAsync(transaction, token);
+                    await _dbProvider.UpdateCurrentDbVersionAsync(downgradeMigration.Comment, targetLocalVersion, token);
+                    lastMigrationVersion = targetLocalVersion;
+                    currentDbVersion = targetLocalVersion;
 
-                        // Commit transaction if all commands succeed, transaction will auto-rollback
-                        // when disposed if either commands fails
-                        transaction.Commit();
+                    // Commit transaction if all commands succeed, transaction will auto-rollback
+                    // when disposed if either commands fails
+                    transaction.Commit();
 
-                        _logger?.LogInformation(
-                            $"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
-                    }
-                    catch (Exception e)
-                    {
-                        _logger?.LogError(e, $"Error while downgrade to {migration.Version}: {e.Message}");
-                        throw;
-                    }
+                    _logger?.LogInformation($"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
                 }
             }
 

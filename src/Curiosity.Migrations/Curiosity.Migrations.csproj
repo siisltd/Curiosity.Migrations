@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         
         <PackageId>Curiosity.Migrations</PackageId>
-        <Version>2.1</Version>
+        <Version>2.2</Version>
         <Authors>Maxim Markelow, Kirill Lutsenko, Andrei Vinogradov</Authors>
         <Company>SIIS Ltd</Company>
         <PackageLicenseUrl>https://github.com/SIIS-Ltd/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
