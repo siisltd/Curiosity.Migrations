@@ -135,13 +135,13 @@ namespace Curiosity.Migrations
         /// <param name="script">SQL script with DDL or DML commands</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default);
+        Task<object?> ExecuteScalarScriptAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
         Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
+        Task<object?> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <summary>
         /// Close connection to database
