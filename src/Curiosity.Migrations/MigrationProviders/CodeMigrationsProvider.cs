@@ -61,7 +61,7 @@ namespace Curiosity.Migrations
         public ICollection<IMigration> GetMigrations(
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger)
+            ILogger? migrationLogger)
         {
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
             if (variables == null) throw new ArgumentNullException(nameof(variables));
@@ -124,7 +124,7 @@ namespace Curiosity.Migrations
                 migrationCheckMap.Add(migration.Version);
             }
 
-            return migrations.OrderBy(x => x.Version).ToList();
+            return migrations.OrderBy(x => x.Version).ToArray();
         }
     }
 }

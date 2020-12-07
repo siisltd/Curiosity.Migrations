@@ -186,11 +186,9 @@ namespace Curiosity.Migrations
         {
             var desiredMigrations = _preMigrations
                 .OrderBy(x => x.Version)
-                .ToList();
-            if (desiredMigrations.Count == 0)
-            {
+                .ToArray();
+            if (desiredMigrations.Length == 0)
                 return false;
-            }
 
             foreach (var migration in desiredMigrations)
             {
@@ -236,8 +234,8 @@ namespace Curiosity.Migrations
             var desiredMigrations = _migrations
                 .Where(x => x.Version > actualVersion && x.Version <= targetVersion)
                 .OrderBy(x => x.Version)
-                .ToList();
-            if (desiredMigrations.Count == 0) return;
+                .ToArray();
+            if (desiredMigrations.Length == 0) return;
 
             var lastMigrationVersion = new DbVersion(0, 0);
             var currentDbVersion = actualVersion;
@@ -330,16 +328,16 @@ namespace Curiosity.Migrations
             var desiredMigrations = _migrations
                 .Where(x => x.Version <= actualVersion && x.Version >= targetVersion)
                 .OrderByDescending(x => x.Version)
-                .ToList();
-            if (desiredMigrations.Count == 0 || desiredMigrations.Count == 1) return;
+                .ToArray();
+            if (desiredMigrations.Length == 0 || desiredMigrations.Length == 1) return;
 
             var downgradableMigrationsCount = _migrations.Count(x => x is IDowngradeMigration);
-            if (downgradableMigrationsCount != desiredMigrations.Count)
-                throw new MigrationException(MigrationError.MigrationNotFound, $"Found {downgradableMigrationsCount} downgrade migrations but expected {desiredMigrations.Count}");
+            if (downgradableMigrationsCount != desiredMigrations.Length)
+                throw new MigrationException(MigrationError.MigrationNotFound, $"Found {downgradableMigrationsCount} downgrade migrations but expected {desiredMigrations.Length}");
             
             var lastMigrationVersion = new DbVersion(0, 0);
             var currentDbVersion = actualVersion;
-            for (var i = 0; i < desiredMigrations.Count - 1; ++i)
+            for (var i = 0; i < desiredMigrations.Length - 1; ++i)
             {
                 token.ThrowIfCancellationRequested();
                 

@@ -1,3 +1,4 @@
+// ReSharper disable UnusedMemberInSuper.Global
 namespace Curiosity.Migrations
 {
     /// <summary>

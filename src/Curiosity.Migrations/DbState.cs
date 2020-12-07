@@ -11,7 +11,7 @@ namespace Curiosity.Migrations
         Unknown = 0,
 
         /// <summary>
-        /// Database or history table does not created
+        /// Database or history table is not created
         /// </summary>
         NotCreated = 1,
 
@@ -26,7 +26,7 @@ namespace Curiosity.Migrations
         Newer = 3,
 
         /// <summary>
-        /// Database is actual
+        /// Database state is actual
         /// </summary>
         Ok = 4
     }

@@ -206,7 +206,7 @@ namespace Curiosity.Migrations
             var dbProvider = _dbProviderFactory.CreateDbProvider();
             dbProvider.UseSqlLogger(_sqlLogger);
             
-            var providerVariables = dbProvider.GetDefaultVariables() ?? new Dictionary<string, string>();
+            var providerVariables = dbProvider.GetDefaultVariables();
             foreach (var kvp in providerVariables)
             {
                 // we should not override the variables set manually

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -14,24 +16,24 @@ namespace Curiosity.Migrations
         /// <summary>
         /// SQL script to undo migration splitted into batches
         /// </summary>
-        public List<ScriptMigrationBatch> DownScripts { get; }
+        public IList<ScriptMigrationBatch> DownScripts { get; }
         
         public DowngradableScriptMigration(
             ILogger migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
-            List<ScriptMigrationBatch> upScripts,
-            List<ScriptMigrationBatch>? downScripts,
+            ICollection<ScriptMigrationBatch> upScripts,
+            ICollection<ScriptMigrationBatch>? downScripts,
             string? comment,
             bool isTransactionRequired = true) : base(migrationLogger, dbProvider, version, upScripts, comment, isTransactionRequired)
         {
-            DownScripts = downScripts ?? new List<ScriptMigrationBatch>();
+            DownScripts = downScripts?.ToArray() ?? Array.Empty<ScriptMigrationBatch>();
         }
         
         /// <inheritdoc />
-        public async Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
+        public Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
-            await RunBatchesAsync(DownScripts, token);
+            return RunBatchesAsync(DownScripts, token);
         }
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 namespace Curiosity.Migrations
 {
     /// <summary>
@@ -22,5 +24,18 @@ namespace Curiosity.Migrations
         /// SQL
         /// </summary>
         public string Script { get; set; }
+
+        public ScriptMigrationBatch(
+            int orderIndex,
+            string? name,
+            string script)
+        {
+            if (orderIndex <= 0) throw new ArgumentOutOfRangeException(nameof(orderIndex));
+            if (String.IsNullOrWhiteSpace(script)) throw new ArgumentNullException(nameof(orderIndex));
+            
+            OrderIndex = orderIndex;
+            Name = name;
+            Script = script;
+        }
     }
 }
