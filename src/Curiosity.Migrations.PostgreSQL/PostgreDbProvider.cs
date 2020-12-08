@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -188,7 +189,7 @@ namespace Curiosity.Migrations.PostgreSQL
                 var result =
                     await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, databaseName), token);
                 return result != null && (result is int i && i == 1 || result is bool b && b);
-            }, MigrationError.Unknown, $"Can not check existence of {databaseName} database");
+            }, MigrationError.Unknown, $"Can not check existence of \"{databaseName}\" database");
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
@@ -237,7 +238,7 @@ namespace Curiosity.Migrations.PostgreSQL
             return TryExecuteAsync(
                 () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.CreatingHistoryTable,
-                $"Can not create history table \"{AppliedMigrationsTableName}\" in database {DbName}");
+                $"Can not create history table \"{AppliedMigrationsTableName}\" in database \"{DbName}\"");
             
         }
 
@@ -278,7 +279,7 @@ namespace Curiosity.Migrations.PostgreSQL
         public async Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionAsync(CancellationToken token = default)
         {
             // actual version is made by last migration because downgrade can decrease version
-            var query = $"SELECT version FROM \"{_options.MigrationHistoryTableName}\" ORDER BY created";
+            var query = $"SELECT version FROM \"{_options.MigrationHistoryTableName}\"";
 
             var command = NpgsqlConnection.CreateCommand();
             command.CommandText = query;
@@ -303,7 +304,7 @@ namespace Curiosity.Migrations.PostgreSQL
                         appliedMigrations.Add(version);
                     }
 
-                    return appliedMigrations;
+                    return appliedMigrations.OrderBy(x => x).ToArray();
                 }
             }
             catch (PostgresException e)
@@ -327,7 +328,7 @@ namespace Curiosity.Migrations.PostgreSQL
             return TryExecuteAsync(
                 () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.MigratingError,
-                $"Can not save applied migration version to DB \"{DbName}\" (version = {version})");
+                $"Can not save applied migration version to database \"{DbName}\" (version = {version})");
         }
         
         /// <inheritdoc />
@@ -340,7 +341,7 @@ namespace Curiosity.Migrations.PostgreSQL
             return TryExecuteAsync(
                 () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.MigratingError,
-                $"Can not delete applied migration version from DB \"{DbName}\" (version = {version})");
+                $"Can not delete applied migration version from database \"{DbName}\" (version = {version})");
         }
 
         /// <inheritdoc />
@@ -411,7 +412,7 @@ namespace Curiosity.Migrations.PostgreSQL
 
                     return result;
                 }
-            }, MigrationError.MigratingError, $"Can not execute script");
+            }, MigrationError.MigratingError, "Can not execute script");
         }
 
         /// <inheritdoc />
@@ -463,7 +464,7 @@ namespace Curiosity.Migrations.PostgreSQL
                       || e.SqlState == "3D000"
                       || e.SqlState == "3F000")
             {
-                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to database \"{DbName}\"", e);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
@@ -476,7 +477,7 @@ namespace Curiosity.Migrations.PostgreSQL
             }
             catch (NpgsqlException e)
             {
-                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating DB {DbName}", e);
+                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating database \"{DbName}\"", e);
             }
             catch (InvalidOperationException)
             {
@@ -508,7 +509,7 @@ namespace Curiosity.Migrations.PostgreSQL
                       || e.SqlState == "3D000"
                       || e.SqlState == "3F000")
             {
-                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to database \"{DbName}\"", e);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
@@ -521,7 +522,7 @@ namespace Curiosity.Migrations.PostgreSQL
             }
             catch (NpgsqlException e)
             {
-                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating DB {DbName}", e);
+                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating database \"{DbName}\"", e);
             }
             catch (InvalidOperationException)
             {
