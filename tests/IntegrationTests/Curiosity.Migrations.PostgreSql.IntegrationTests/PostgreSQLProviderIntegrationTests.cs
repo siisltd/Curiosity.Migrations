@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -36,14 +37,13 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
             Assert.True(isTableExist);
 
             var desiredDbVersion = new DbVersion(1, 0);
-            var state = await provider.GetDbStateSafeAsync(desiredDbVersion, false);
-            Assert.Equal(DbState.Outdated, state);
 
             await provider.SaveAppliedMigrationVersionAsync($"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}", desiredDbVersion);
-            var currentDbVersion = await provider.GetAppliedMigrationVersionSafeAsync(false);
+            var actualAppliedMigrations = await provider.GetAppliedMigrationVersionAsync();
             
-            Assert.NotNull(currentDbVersion);
-            Assert.Equal(desiredDbVersion, currentDbVersion.Value);
+            Assert.NotNull(actualAppliedMigrations);
+            Assert.Equal(1, actualAppliedMigrations.Count);
+            Assert.Equal(desiredDbVersion, actualAppliedMigrations.First());
 
             var result = await 
                 provider.ExecuteScalarScriptWithoutInitialCatalogAsync(

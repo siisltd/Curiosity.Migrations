@@ -1,10 +1,16 @@
 # Changelog
 
-## [2.2.1] - 2020-12-07
+## [3.0.0] - 2020-12-08
 
 ### Changed
 
-- Improve performance.
+- Code style fixes.
+- Improved performance.
+
+### Removed
+
+- DB state method.
+- Major and minor migration polices.
 
 ## [2.2] - 2020-10-16
 
