@@ -1,6 +1,10 @@
 # Variable Substitution
 
-`Curiosity.Migrations` supports basic variable substitution, to enable you should register variables when configuring migrator:
+`Curiosity.Migrations` supports basic variable substitution.
+ 
+## How to use
+ 
+To use variable substitution you should register variables when configuring migrator:
 
 ```csharp
 var variableValue = "my_variable";
@@ -21,6 +25,8 @@ Will execute:
 -- my_variable %AnotherVariable%
 SELECT * FROM dbo.my_variable
 ```
+
+## Default variables
 
 All providers by default provide next variables:
  

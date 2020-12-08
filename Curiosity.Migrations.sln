@@ -5,7 +5,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0E062AC8-023E-4D62-A696-8363130215DF}"
 ProjectSection(SolutionItems) = preProject
 	docs\usage.md = docs\usage.md
-	docs\features.md = docs\features.md
 	docs\index.md = docs\index.md
 	docs\quickstart.md = docs\quickstart.md
 	docs\requirements.txt = docs\requirements.txt
@@ -31,6 +30,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.TransactionTests", "tests\IntegrationTests\Curiosity.Migrations.TransactionTests\Curiosity.Migrations.TransactionTests.csproj", "{A37CE3F0-5A47-49F9-A777-D3661607E4D5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{D80331ED-3602-4967-8813-2F38B9D1CCE3}"
+ProjectSection(SolutionItems) = preProject
+	docs\images\siisltd.png = docs\images\siisltd.png
+	docs\images\postgresql.png = docs\images\postgresql.png
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}"
 ProjectSection(SolutionItems) = preProject
@@ -42,6 +45,13 @@ ProjectSection(SolutionItems) = preProject
 	docs\features\journal.md = docs\features\journal.md
 	docs\features\migration_providers.md = docs\features\migration_providers.md
 	docs\features\pre_migrations.md = docs\features\pre_migrations.md
+	docs\features\downgrade.md = docs\features\downgrade.md
+	docs\features\di.md = docs\features\di.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylesheets", "stylesheets", "{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC}"
+ProjectSection(SolutionItems) = preProject
+	docs\stylesheets\extra.css = docs\stylesheets\extra.css
 EndProjectSection
 EndProject
 Global
@@ -59,6 +69,7 @@ Global
 		{A37CE3F0-5A47-49F9-A777-D3661607E4D5} = {98A180F1-B3B9-41F0-9974-2333B4F03390}
 		{D80331ED-3602-4967-8813-2F38B9D1CCE3} = {0E062AC8-023E-4D62-A696-8363130215DF}
 		{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B} = {0E062AC8-023E-4D62-A696-8363130215DF}
+		{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC} = {0E062AC8-023E-4D62-A696-8363130215DF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
