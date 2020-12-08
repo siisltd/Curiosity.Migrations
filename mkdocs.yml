@@ -7,16 +7,23 @@ copyright: SIIS Ltd © 2020
 nav:
   - 'Intro' : 'index.md'
   - 'Quick Start': 'quickstart.md'
-  - 'Features': 'features.md'
-  - 'Versioning': 'verisioning.md'
   - 'Usage': 'usage.md'
+  - 'Features': 'features.md'
+      - 'Script Migration' : 'features/script_migration.md'
+      - 'Code Migration' : 'features/code_migration.md'
+      - 'EntityFramework Integration' : 'features/ef_integration.md'
+      - 'Migration Providers' : 'features/script_providers.md'
+      - 'Variables' : 'features/variables.md'
+      - 'Transactions' : 'features/transactions.md'
+      - 'Pre-migrations' : 'features/pre_migrations.md'
+      - 'Journal' : 'features/journal.md'
 
 #theme: readthedocs
 
 
 theme:
   name: 'material'
-  language: 'ru'
+  language: 'en'
   font:
     text: 'Roboto'
     code: 'Roboto Mono'
