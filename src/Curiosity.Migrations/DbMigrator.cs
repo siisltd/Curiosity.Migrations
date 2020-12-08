@@ -44,7 +44,8 @@ namespace Curiosity.Migrations
         {
             if (migrations == null) throw new ArgumentNullException(nameof(migrations));
             _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
-            
+            _logger = logger;
+
             var migrationMap = new Dictionary<DbVersion, IMigration>();
             foreach (var migration in migrations)
             {
@@ -60,7 +61,6 @@ namespace Curiosity.Migrations
             _upgradePolicy = upgradePolicy;
             _downgradePolicy = downgradePolicy;
             _targetVersion = targetVersion;
-            _logger = logger;
             
             _preMigrations = preMigrations ?? Array.Empty<IMigration>();
             var preMigrationCheckMap = new HashSet<DbVersion>();
@@ -93,10 +93,12 @@ namespace Curiosity.Migrations
             }
             catch (MigrationException e)
             {
+                _logger?.LogError(e, e.Message);
                 return MigrationResult.FailureResult(e.Error, e.Message);
             }
             catch (Exception e)
             {
+                _logger?.LogError(e, $"Error while migrating database {_dbProvider.DbName}. Reason: {e.Message}");
                 return MigrationResult.FailureResult(MigrationError.Unknown, e.Message);
             }
         }
@@ -111,7 +113,7 @@ namespace Curiosity.Migrations
                     _logger?.LogWarning("No migrations were added to migrator. Skip migration");
                     return;
                 }
-                
+
                 // check if database exists and create if not
                 _logger?.LogInformation($"Check Database \"{_dbProvider.DbName}\" existence...");
                 var isDatabaseExist = await _dbProvider.CheckIfDatabaseExistsAsync(_dbProvider.DbName, token);
@@ -125,9 +127,9 @@ namespace Curiosity.Migrations
                     await _dbProvider.CreateDatabaseIfNotExistsAsync(token);
                     _logger?.LogInformation("Creating database completed.");
                 }
-                
+
                 await _dbProvider.OpenConnectionAsync(token);
-                
+
                 // check if applied migrations table exists and create if not 
                 _logger?.LogInformation($"Check \"{_dbProvider.AppliedMigrationsTableName}\" table existence...");
                 var isMigrationTableExists = await _dbProvider.CheckIfTableExistsAsync(_dbProvider.AppliedMigrationsTableName, token);
@@ -150,7 +152,7 @@ namespace Curiosity.Migrations
                     _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
                     return;
                 }
-                
+
                 _logger?.LogInformation($"Executing pre-migration scripts for database \"{_dbProvider.DbName}\"...");
                 var wasPreMigrationExecuted = await ExecutePreMigrationScriptsAsync(token);
                 if (wasPreMigrationExecuted)
@@ -164,36 +166,32 @@ namespace Curiosity.Migrations
                 {
                     _logger?.LogInformation("No pre-migration scripts were found.");
                 }
-                
+
                 if (migrationsToApply.Count == 0)
                 {
                     _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
                     return;
                 }
-                
+
                 _logger?.LogInformation($"Migrating database \"{_dbProvider.DbName}\"...");
-                if (isUpgrade)
-                {
-                    _logger?.LogInformation(
-                        $"Upgrading database {_dbProvider.DbName} from {migrationsToApply} to {targetVersion}...");
-                    await UpgradeAsync(migrationsToApply, targetVersion, token);
-                    _logger?.LogInformation($"Upgrading database {_dbProvider.DbName} completed.");
-                }
-                else
-                {
-                    _logger?.LogInformation(
-                        $"Downgrading database {_dbProvider.DbName} from {migrationsToApply} to {targetVersion}...");
-                    await DowngradeAsync(migrationsToApply, targetVersion, token);
-                    _logger?.LogInformation($"Downgrading database {_dbProvider.DbName} completed.");
-                }
+                var policy = isUpgrade
+                    ? _upgradePolicy
+                    : _downgradePolicy;
+                await MigrateAsync(migrationsToApply, isUpgrade, policy, token);
 
                 await _dbProvider.CloseConnectionAsync();
                 _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed.");
             }
+            catch (MigrationException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                _logger?.LogError(e, $"Error while migrating database {_dbProvider.DbName}");
-                throw;
+                throw new MigrationException(
+                    MigrationError.MigratingError,
+                    $"Error while migrating database {_dbProvider.DbName}. Reason: {e.Message}",
+                    e);
             }
         }
 
@@ -287,27 +285,44 @@ namespace Curiosity.Migrations
 
             foreach (var migration in desiredMigrations)
             {
+                token.ThrowIfCancellationRequested();
+                
+                DbTransaction? transaction = null;
+                
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync(token);
-                using (var transaction = _dbProvider.BeginTransaction())
+
+                try
                 {
-                    try
+                    _logger?.LogInformation(
+                        $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for database \"{_dbProvider.DbName}\"...");
+                    
+                    if (migration.IsTransactionRequired)
                     {
-                        _logger?.LogInformation(
-                            $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for DB \"{_dbProvider.DbName}\"...");
-                        await migration.UpgradeAsync(transaction, token);
-
-                        transaction.Commit();
-
-                        _logger?.LogInformation(
-                            $"Executing pre-migration script {migration.Version} for DB \"{_dbProvider.DbName}\" completed.");
+                        transaction = _dbProvider.BeginTransaction();
                     }
-                    catch (Exception e)
+                    else
                     {
-                        _logger?.LogError(e,
-                            $"Error while executing pre-migration to {migration.Version} for DB \"{_dbProvider.DbName}\": {e.Message}");
-                        throw;
+                        _logger?.LogWarning($"Transaction is disabled for pre-migration {migration.Version}");
                     }
+                    
+                    await migration.UpgradeAsync(transaction, token);
+
+                    transaction?.Commit();
+
+                    _logger?.LogInformation(
+                        $"Executing pre-migration script {migration.Version} for database \"{_dbProvider.DbName}\" completed.");
+                }
+                catch (Exception e)
+                {
+                    throw new MigrationException(
+                        MigrationError.MigratingError,
+                        $"Error while executing pre-migration to {migration.Version} for database \"{_dbProvider.DbName}\": {e.Message}",
+                        e);
+                }
+                finally
+                {
+                    transaction?.Dispose();
                 }
             }
             return true;
@@ -322,23 +337,17 @@ namespace Curiosity.Migrations
             
             var operationName = isUpgrade
                 ? "Upgrade"
-                : "Downgrade;";
-            foreach (var migration in desiredMigrations)
+                : "Downgrade";
+            foreach (var migration in orderedMigrations)
             {
                 token.ThrowIfCancellationRequested();
                 
-                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _upgradePolicy))
-                {
-                    throw new MigrationException(MigrationError.PolicyError,
-                        $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
-                }
-
                 DbTransaction? transaction = null;
 
                 try
                 {
                     // sometimes transactions fails without reopening connection
-                    //todo fix it later
+                    //todo #19: fix it later
                     await _dbProvider.CloseConnectionAsync();
                     await _dbProvider.OpenConnectionAsync(token);
 
@@ -348,197 +357,45 @@ namespace Curiosity.Migrations
                     }
                     else
                     {
-                        _logger?.LogWarning($"Transaction is disabled for migration \"{migration.Version}\"");
+                        _logger?.LogWarning($"Transaction is disabled for migration {migration.Version}");
                     }
                     
-                    _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
-                    await migration.UpgradeAsync(transaction, token);
-                    await _dbProvider.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
-                    lastMigrationVersion = migration.Version;
-                    currentDbVersion = migration.Version;
+                    _logger?.LogInformation($"{operationName} to {migration.Version} ({migration.Comment} for database \"{_dbProvider.DbName}\")...");
+                    
+                    if (isUpgrade)
+                    {
+                        await migration.UpgradeAsync(transaction, token);
+                        await _dbProvider.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
+                    }
+                    else
+                    {
+                        if (!(migration is IDowngradeMigration downgradableMigration))
+                            throw new MigrationException(MigrationError.MigrationNotFound, $"Migration with version {migration.Version} doesn't support downgrade");
+
+                        await downgradableMigration.DowngradeAsync(transaction, token);
+                        await _dbProvider.DeleteAppliedMigrationVersionAsync(migration.Version, token);
+                    }
 
                     // Commit transaction if all commands succeed, transaction will auto-rollback
                     // when disposed if either commands fails
                     transaction?.Commit();
 
-                    _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
+                    _logger?.LogInformation($"{operationName} to {migration.Version} (database \"{_dbProvider.DbName}\") completed.");
+                }
+                catch (Exception e)
+                {
+                    throw new MigrationException(
+                        MigrationError.MigratingError,
+                        $"Error while executing {operationName.ToLower()} migration to {migration.Version} for database \"{_dbProvider.DbName}\": {e.Message}",
+                        e);
                 }
                 finally
                 {
                     transaction?.Dispose();
                 }
             }
-
-            if (lastMigrationVersion != targetVersion)
-                throw new MigrationException(
-                    MigrationError.MigratingError,
-                    $"Can not upgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
         }
         
-        /// <summary>
-        /// Upgrade database to new version
-        /// </summary>
-        /// <param name="actualVersion"></param>
-        /// <param name="targetVersion"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="MigrationException"></exception>
-        private async Task UpgradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
-        {
-            if (_upgradePolicy == MigrationPolicy.Forbidden)
-                throw new MigrationException(MigrationError.PolicyError, "Upgrading is forbidden due to migration upgrade policy");
-            
-            var desiredMigrations = _migrationMap
-                .Where(x => x.Version > actualVersion && x.Version <= targetVersion)
-                .OrderBy(x => x.Version)
-                .ToArray();
-            if (desiredMigrations.Length == 0) return;
-
-            var lastMigrationVersion = new DbVersion(0, 0);
-            var currentDbVersion = actualVersion;
-            foreach (var migration in desiredMigrations)
-            {
-                token.ThrowIfCancellationRequested();
-                
-                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, migration.Version), _upgradePolicy))
-                {
-                    throw new MigrationException(MigrationError.PolicyError,
-                        $"Policy restrict upgrade to {migration.Version}. Migration comment: {migration.Comment}");
-                }
-
-                DbTransaction? transaction = null;
-
-                try
-                {
-                    // sometimes transactions fails without reopening connection
-                    //todo fix it later
-                    await _dbProvider.CloseConnectionAsync();
-                    await _dbProvider.OpenConnectionAsync(token);
-
-                    if (migration.IsTransactionRequired)
-                    {
-                        transaction = _dbProvider.BeginTransaction();
-                    }
-                    else
-                    {
-                        _logger?.LogWarning($"Transaction is disabled for migration \"{migration.Version}\"");
-                    }
-                    
-                    _logger?.LogInformation($"Upgrade to {migration.Version} ({migration.Comment} for DB {_dbProvider.DbName})...");
-                    await migration.UpgradeAsync(transaction, token);
-                    await _dbProvider.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
-                    lastMigrationVersion = migration.Version;
-                    currentDbVersion = migration.Version;
-
-                    // Commit transaction if all commands succeed, transaction will auto-rollback
-                    // when disposed if either commands fails
-                    transaction?.Commit();
-
-                    _logger?.LogInformation($"Upgrade to {migration.Version} (DB {_dbProvider.DbName}) completed.");
-                }
-                finally
-                {
-                    transaction?.Dispose();
-                }
-            }
-
-            if (lastMigrationVersion != targetVersion)
-                throw new MigrationException(
-                    MigrationError.MigratingError,
-                    $"Can not upgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
-        }
-
-        /// <summary>
-        /// Check permission to migrate using specified policy
-        /// </summary>
-        /// <param name="versionDifference"></param>
-        /// <param name="policy"></param>
-        /// <returns></returns>
-        private bool IsMigrationAllowed(DbVersionDifference versionDifference, MigrationPolicy policy)
-        {
-            switch (versionDifference)
-            {
-                case DbVersionDifference.Major:
-                    return policy.HasFlag(MigrationPolicy.Major);
-
-                case DbVersionDifference.Minor:
-                    return policy.HasFlag(MigrationPolicy.Minor);
-
-                default:
-                    return false;
-            }
-        }
-
-        /// <summary>
-        /// Downgrade database to specific version
-        /// </summary>
-        /// <param name="actualVersion"></param>
-        /// <param name="targetVersion"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="MigrationException"></exception>
-        private async Task DowngradeAsync(DbVersion actualVersion, DbVersion targetVersion, CancellationToken token = default)
-        {
-            if (_downgradePolicy == MigrationPolicy.Forbidden)
-                throw new MigrationException(MigrationError.PolicyError, "Downgrading is forbidden due to migration downrgade policy");
-            
-            var desiredMigrations = _migrationMap
-                .Where(x => x.Version <= actualVersion && x.Version >= targetVersion)
-                .OrderByDescending(x => x.Version)
-                .ToArray();
-            if (desiredMigrations.Length == 0 || desiredMigrations.Length == 1) return;
-
-            var downgradableMigrationsCount = _migrationMap.Count(x => x is IDowngradeMigration);
-            if (downgradableMigrationsCount != desiredMigrations.Length)
-                throw new MigrationException(MigrationError.MigrationNotFound, $"Found {downgradableMigrationsCount} downgrade migrations but expected {desiredMigrations.Length}");
-            
-            var lastMigrationVersion = new DbVersion(0, 0);
-            var currentDbVersion = actualVersion;
-            for (var i = 0; i < desiredMigrations.Length - 1; ++i)
-            {
-                token.ThrowIfCancellationRequested();
-                
-                var targetLocalVersion = desiredMigrations[i + 1].Version;
-                var migration = desiredMigrations[i];
-                
-                if (!(migration is IDowngradeMigration downgradeMigration))
-                    throw new MigrationException(MigrationError.MigrationNotFound, $"Migration {migration.Version} doesn't support downgrade");
-
-                if (!IsMigrationAllowed(DbVersion.GetDifference(currentDbVersion, targetLocalVersion),
-                    _downgradePolicy))
-                {
-                    throw new MigrationException(MigrationError.PolicyError,
-                        $"Policy restrict downgrade to {targetLocalVersion}. Migration comment: {migration.Comment}");
-                }
-
-                // sometimes transactions fails without reopening connection
-                //todo fix it later
-                await _dbProvider.CloseConnectionAsync();
-                await _dbProvider.OpenConnectionAsync(token);
-
-                using (var transaction = _dbProvider.BeginTransaction())
-                {
-                    _logger?.LogInformation(
-                        $"Downgrade to {desiredMigrations[i + 1].Version} (DB {_dbProvider.DbName})...");
-                    await downgradeMigration.DowngradeAsync(transaction, token);
-                    await _dbProvider.SaveAppliedMigrationVersionAsync(downgradeMigration.Comment, targetLocalVersion, token);
-                    lastMigrationVersion = targetLocalVersion;
-                    currentDbVersion = targetLocalVersion;
-
-                    // Commit transaction if all commands succeed, transaction will auto-rollback
-                    // when disposed if either commands fails
-                    transaction.Commit();
-
-                    _logger?.LogInformation($"Downgrade to {targetLocalVersion} (DB {_dbProvider.DbName}) completed.");
-                }
-            }
-
-            if (lastMigrationVersion != targetVersion)
-                throw new MigrationException(
-                    MigrationError.MigratingError,
-                    $"Can not downgrade database to version {targetVersion}. Last executed migration is {lastMigrationVersion}");
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {
