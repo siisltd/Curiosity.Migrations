@@ -72,7 +72,7 @@ namespace Curiosity.Migrations
                 preMigrationCheckMap.Add(migration.Version);
             }
 
-            if (targetVersion.HasValue)
+            if (targetVersion.HasValue && migrationMap.Values.Count > 0)
             {
                 var migrationsMaxVersion = _migrationMap.Values.Max(x => x.Version);
                 if (targetVersion > migrationsMaxVersion)
