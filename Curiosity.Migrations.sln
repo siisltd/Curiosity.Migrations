@@ -33,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{D80331
 ProjectSection(SolutionItems) = preProject
 	docs\images\siisltd.png = docs\images\siisltd.png
 	docs\images\postgresql.png = docs\images\postgresql.png
+	docs\images\dark_siisltd.png = docs\images\dark_siisltd.png
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}"
@@ -47,6 +48,7 @@ ProjectSection(SolutionItems) = preProject
 	docs\features\pre_migrations.md = docs\features\pre_migrations.md
 	docs\features\downgrade.md = docs\features\downgrade.md
 	docs\features\di.md = docs\features\di.md
+	docs\features\batches.md = docs\features\batches.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylesheets", "stylesheets", "{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC}"
