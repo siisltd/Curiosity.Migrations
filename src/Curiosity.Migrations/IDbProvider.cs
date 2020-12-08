@@ -35,9 +35,9 @@ namespace Curiosity.Migrations
         DbConnection? Connection { get; }
 
         /// <summary>
-        /// Name of table with migration history
+        /// Name of table with applied migration info.
         /// </summary>
-        string MigrationHistoryTableName { get; }
+        string AppliedMigrationsTableName { get; }
 
         /// <summary>
         /// Open connection to database
@@ -94,25 +94,24 @@ namespace Curiosity.Migrations
         Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default);
 
         /// <summary>
-        /// Returns actual database version from migration history table.
+        /// Returns applied migrations versions.
         /// </summary>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>   
         /// <param name="token">Cancellation token</param>
         /// <exception cref="InvalidOperationException">If migration history table has incorrect DB version.</exception>
-        Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default);
+        /// <returns>Collection of applied migration version ordered ascending by version</returns>
+        Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionAsync(CancellationToken token = default);
 
         /// <summary>
-        /// Returns actual database version from migration history table
-        /// </summary>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
-        /// <param name="token">Cancellation token</param>
-        Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default);
-
-        /// <summary>
-        /// Update actual database version in migration history table
+        /// Add migration info to applied migrations table.
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default);
+        Task SaveAppliedMigrationVersionAsync(string migrationName, DbVersion version, CancellationToken token = default);
+        
+        /// <summary>
+        /// Delete migration info from applied migrations table.
+        /// </summary>
+        /// <exception cref="MigrationException"></exception>
+        Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken token = default);
 
         /// <summary>
         /// Execute sql script without return value

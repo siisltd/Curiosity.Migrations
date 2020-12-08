@@ -27,20 +27,20 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
 
             await provider.OpenConnectionAsync();
             
-            var isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.MigrationHistoryTableName);
+            var isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.AppliedMigrationsTableName);
             Assert.False(isTableExist);
 
             await provider.CreateHistoryTableIfNotExistsAsync();
             
-            isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.MigrationHistoryTableName);
+            isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.AppliedMigrationsTableName);
             Assert.True(isTableExist);
 
             var desiredDbVersion = new DbVersion(1, 0);
             var state = await provider.GetDbStateSafeAsync(desiredDbVersion, false);
             Assert.Equal(DbState.Outdated, state);
 
-            await provider.UpdateCurrentDbVersionAsync($"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}", desiredDbVersion);
-            var currentDbVersion = await provider.GetDbVersionSafeAsync(false);
+            await provider.SaveAppliedMigrationVersionAsync($"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}", desiredDbVersion);
+            var currentDbVersion = await provider.GetAppliedMigrationVersionSafeAsync(false);
             
             Assert.NotNull(currentDbVersion);
             Assert.Equal(desiredDbVersion, currentDbVersion.Value);

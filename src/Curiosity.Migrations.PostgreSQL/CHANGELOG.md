@@ -2,7 +2,7 @@
 
 ## [2.2.1] - 2020-12-07
 
-### Fixed
+### Changed
 
 - Improve performance.
 

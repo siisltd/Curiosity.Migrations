@@ -41,7 +41,7 @@ namespace Curiosity.Migrations.PostgreSQL
         public NpgsqlConnection NpgsqlConnection { get; private set;  }// disable null warning because connection normally is opened after calling required methods
 
         /// <inheritdoc />
-        public string MigrationHistoryTableName { get; }
+        public string AppliedMigrationsTableName { get; }
 
         private readonly string _connectionStringWithoutInitialCatalog;
 
@@ -70,7 +70,7 @@ namespace Curiosity.Migrations.PostgreSQL
             if (String.IsNullOrEmpty(options.ConnectionString))
                 throw new ArgumentNullException(nameof(options.ConnectionString));
 
-            MigrationHistoryTableName = options.MigrationHistoryTableName;
+            AppliedMigrationsTableName = options.MigrationHistoryTableName;
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database ?? throw new ArgumentException($"{nameof(connectionBuilder.Database)} can't be empty");
             ConnectionString = connectionBuilder.ConnectionString;
@@ -250,22 +250,22 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             AssertConnection(NpgsqlConnection);
 
-            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" " +
-                         $"(id bigserial NOT NULL CONSTRAINT \"{MigrationHistoryTableName}_pkey\" PRIMARY KEY, " +
+            var script = $"CREATE TABLE IF NOT EXISTS \"{AppliedMigrationsTableName}\" " +
+                         $"(id bigserial NOT NULL CONSTRAINT \"{AppliedMigrationsTableName}_pkey\" PRIMARY KEY, " +
                          "created timestamp default timezone('UTC'::text, now()) NOT NULL, " +
                          "name text, " +
-                         "version varchar(10))" +
+                         "version text unique)" +
                          @" 
                         WITH ( 
                           OIDS=FALSE 
                         ); " +
 
-                         $"ALTER TABLE public.\"{MigrationHistoryTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
+                         $"ALTER TABLE \"{AppliedMigrationsTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
             
             return TryExecuteAsync(
                 () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.CreatingHistoryTable,
-                $"Can not create history table \"{MigrationHistoryTableName}\" in database {DbName}");
+                $"Can not create history table \"{AppliedMigrationsTableName}\" in database {DbName}");
             
         }
 
@@ -303,30 +303,10 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            try
-            {
-                return await GetDbVersionAsync(isDowngradeEnabled, token);
-            }
-            catch (Exception)
-            {
-                return default;
-            }
-        }
-
-        /// <inheritdoc />
-        public Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            return isDowngradeEnabled
-                ? GetDbVersionWhenDowngradeEnabledAsync(token)
-                : GetDbVersionWhenDowngradeDisabledAsync(token);
-        }  
-        
-        private async Task<DbVersion?> GetDbVersionWhenDowngradeEnabledAsync(CancellationToken token = default)
+        public async Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionAsync(CancellationToken token = default)
         {
             // actual version is made by last migration because downgrade can decrease version
-            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\" ORDER BY created DESC LIMIT 1;";
+            var query = $"SELECT version FROM \"{_options.MigrationHistoryTableName}\" ORDER BY created";
 
             var command = NpgsqlConnection.CreateCommand();
             command.CommandText = query;
@@ -334,84 +314,61 @@ namespace Curiosity.Migrations.PostgreSQL
             try
             {
                 _sqLogger?.LogInformation(query);
+                
+                var appliedMigrations = new List<DbVersion>();
+                
                 using (var reader = await command.ExecuteReaderAsync(token))
                 {
-                    if (!reader.HasRows) return default;
-
-                    await reader.ReadAsync(token);
-                    var stringVersion = reader.GetString(0);
-
-                    if (!DbVersion.TryParse(stringVersion, out var version))
-                        throw new InvalidOperationException("Cannot get database version.");
-
-                    return version;
-                }
-            }
-            catch (PostgresException e)
-            {
-                // Migration table does not exist.
-                if (e.SqlState == "42P01")
-                    return default;
-
-                throw;
-            }
-        }   
-        
-        private async Task<DbVersion?> GetDbVersionWhenDowngradeDisabledAsync(CancellationToken token = default)
-        {
-            // we need to analyze all version and find with max number
-            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\";";
-
-            var command = NpgsqlConnection.CreateCommand();
-            command.CommandText = query;
-
-            DbVersion? maxVersion = null;
-            try
-            {
-                _sqLogger?.LogInformation(query);
-                using (var reader = await command.ExecuteReaderAsync(token))
-                {
-                    if (!reader.HasRows) return default;
+                    if (!reader.HasRows) return Array.Empty<DbVersion>();
 
                     while (await reader.ReadAsync(token))
                     {
                         var stringVersion = reader.GetString(0);
 
                         if (!DbVersion.TryParse(stringVersion, out var version))
-                            throw new InvalidOperationException("Cannot get database version.");
+                            throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
 
-                        if (!maxVersion.HasValue || maxVersion < version)
-                        {
-                            maxVersion = version;
-                        }
+                        appliedMigrations.Add(version);
                     }
-                    
-                    return maxVersion;
+
+                    return appliedMigrations;
                 }
             }
             catch (PostgresException e)
             {
                 // Migration table does not exist.
                 if (e.SqlState == "42P01")
-                    return default;
+                    return Array.Empty<DbVersion>();
 
                 throw;
             }
-        }
+        } 
 
         /// <inheritdoc />
-        public Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
+        public Task SaveAppliedMigrationVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
         {
             AssertConnection(NpgsqlConnection);
 
-            var script = $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\" "
-                         + "(name, version) "
+            var script = $"INSERT INTO \"{_options.MigrationHistoryTableName}\" (name, version) "
                          + $"VALUES ('{migrationName}', '{version.ToString()}');";
 
             return TryExecuteAsync(
                 () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.MigratingError,
-                $"Can not update DB {DbName} version");
+                $"Can not save applied migration version to DB \"{DbName}\" (version = {version})");
+        }
+        
+        /// <inheritdoc />
+        public Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken token = default)
+        {
+            AssertConnection(NpgsqlConnection);
+
+            var script = $"DELETE FROM \"{_options.MigrationHistoryTableName}\" WHERE version = {version.ToString()}";
+
+            return TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
+                MigrationError.MigratingError,
+                $"Can not delete applied migration version from DB \"{DbName}\" (version = {version})");
         }
 
         /// <inheritdoc />

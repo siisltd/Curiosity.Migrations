@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1] - 2020-12-07
+
+### Changed
+
+- Code style fixes.
+- Changed migration applying strategy from sequential to patch. 
+
 ## [2.2] - 2020-10-16
 
 ### Fixed
