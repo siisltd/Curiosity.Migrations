@@ -64,6 +64,12 @@ ProjectSection(SolutionItems) = preProject
 	docs\features\script_migration\index.md = docs\features\script_migration\index.md
 EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changelog", "changelog", "{CFA6702B-0002-4378-B429-CD6B38BE317A}"
+ProjectSection(SolutionItems) = preProject
+	docs\changelog\curiosity.migration.md = docs\changelog\curiosity.migration.md
+	docs\changelog\curiosity.migration.postgres.md = docs\changelog\curiosity.migration.postgres.md
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +88,7 @@ Global
 		{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC} = {0E062AC8-023E-4D62-A696-8363130215DF}
 		{6DF45FCF-7A6A-4D85-A578-1839F3784EAB} = {B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}
 		{A87A1944-DEE3-4B12-B600-63D6C574E3D6} = {B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}
+		{CFA6702B-0002-4378-B429-CD6B38BE317A} = {0E062AC8-023E-4D62-A696-8363130215DF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

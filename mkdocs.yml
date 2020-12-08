@@ -22,6 +22,9 @@ nav:
     - 'Pre-migrations': features/pre_migrations.md
     - 'Journal': features/journal.md
     - 'Downgrade': features/downgrade.md
+  - 'Changelog':
+    - 'Curiosity.Migration': changelog/curiosity.migration.md
+    - 'Curiosity.Migration.PostgreSQL': changelog/curiosity.migration.postgres.md
 
 theme:
   name: material
