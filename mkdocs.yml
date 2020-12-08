@@ -9,22 +9,25 @@ nav:
   - 'Quick Start': quickstart.md
   - 'Usage': usage.md
   - 'Features':
-    - 'Script Migration': features/script_migration.md
-    - 'Code Migration': features/code_migration.md
-    - 'EntityFramework Integration': features/ef_integration.md
+    - 'Script Migration':
+      - 'Script Migration': features/script_migration.md
+      - 'Batches': features/batches.md
+    - 'Code Migration':
+      - 'Code Migration': features/code_migration.md
+      - 'EntityFramework Integration': features/ef_integration.md
+      - 'Dependency Injection': features/di.md
     - 'Migration Providers': features/migration_providers.md
     - 'Variables': features/variables.md
     - 'Transactions': features/transactions.md
     - 'Pre-migrations': features/pre_migrations.md
     - 'Journal': features/journal.md
     - 'Downgrade': features/downgrade.md
-    - 'Dependency Injection': features/di.md
 
 theme:
   name: material
   language: en
   favicon: images/siisltd.png
-  logo: images/siisltd.png
+  logo: images/dark_siisltd.png
   font:
     text: Roboto
     code: Roboto Mono
