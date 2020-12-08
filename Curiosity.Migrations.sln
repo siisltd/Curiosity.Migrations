@@ -38,22 +38,30 @@ EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}"
 ProjectSection(SolutionItems) = preProject
-	docs\features\script_migration.md = docs\features\script_migration.md
-	docs\features\code_migration.md = docs\features\code_migration.md
 	docs\features\transactions.md = docs\features\transactions.md
-	docs\features\ef_integration.md = docs\features\ef_integration.md
 	docs\features\variables.md = docs\features\variables.md
 	docs\features\journal.md = docs\features\journal.md
 	docs\features\migration_providers.md = docs\features\migration_providers.md
 	docs\features\pre_migrations.md = docs\features\pre_migrations.md
 	docs\features\downgrade.md = docs\features\downgrade.md
-	docs\features\di.md = docs\features\di.md
-	docs\features\batches.md = docs\features\batches.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylesheets", "stylesheets", "{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC}"
 ProjectSection(SolutionItems) = preProject
 	docs\stylesheets\extra.css = docs\stylesheets\extra.css
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "code_migration", "code_migration", "{6DF45FCF-7A6A-4D85-A578-1839F3784EAB}"
+ProjectSection(SolutionItems) = preProject
+	docs\features\code_migration\di.md = docs\features\code_migration\di.md
+	docs\features\code_migration\ef_integration.md = docs\features\code_migration\ef_integration.md
+	docs\features\code_migration\index.md = docs\features\code_migration\index.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script_migration", "script_migration", "{A87A1944-DEE3-4B12-B600-63D6C574E3D6}"
+ProjectSection(SolutionItems) = preProject
+	docs\features\script_migration\batches.md = docs\features\script_migration\batches.md
+	docs\features\script_migration\index.md = docs\features\script_migration\index.md
 EndProjectSection
 EndProject
 Global
@@ -72,6 +80,8 @@ Global
 		{D80331ED-3602-4967-8813-2F38B9D1CCE3} = {0E062AC8-023E-4D62-A696-8363130215DF}
 		{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B} = {0E062AC8-023E-4D62-A696-8363130215DF}
 		{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC} = {0E062AC8-023E-4D62-A696-8363130215DF}
+		{6DF45FCF-7A6A-4D85-A578-1839F3784EAB} = {B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}
+		{A87A1944-DEE3-4B12-B600-63D6C574E3D6} = {B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

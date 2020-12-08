@@ -17,11 +17,11 @@ Migrations solve the problem of evolving a database schema for multiple database
 
 `Curiosity.Migration` has a lot of useful features. You can find more information about them at special articles:
 
-- [Script migrations](https://siisltdmigrations.readthedocs.io/features/script_migration.md): write your own DDL SQL scripts
-  - [Batches](https://siisltdmigrations.readthedocs.io/features/script_migration.md): separate a big SQL script into small batches 
-- [Code migrations](https://siisltdmigrations.readthedocs.io/features/code_migration.md): manipulate data from C#, useful for database seeding
-  - [Dependency Injection](https://siisltdmigrations.readthedocs.io/features/di.md): inject dependencies into code migrations
-  - [EntityFramework Integration](https://siisltdmigrations.readthedocs.io/features/ef_integration.md): use `EntityFramework` for data manipulation from code migrations
+- [Script migrations](https://siisltdmigrations.readthedocs.io/features/script_migration/index.md): write your own DDL SQL scripts
+  - [Batches](https://siisltdmigrations.readthedocs.io/features/script_migration/batches.md): separate a big SQL script into small batches 
+- [Code migrations](https://siisltdmigrations.readthedocs.io/features/code_migration/index.md): manipulate data from C#, useful for database seeding
+  - [Dependency Injection](https://siisltdmigrations.readthedocs.io/features/code_migration/di.md): inject dependencies into code migrations
+  - [EntityFramework Integration](https://siisltdmigrations.readthedocs.io/features/code_migration/ef_integration.md): use `EntityFramework` for data manipulation from code migrations
 - [Migration Providers](https://siisltdmigrations.readthedocs.io/features/migration_providers.md): store migrations in a different way (files, embedded resources, etc)
 - [Variable substitutions](https://siisltdmigrations.readthedocs.io/features/variables.md): allows to insert some dynamic data to your migrations
 - [Transactions](https://siisltdmigrations.readthedocs.io/features/transactions.md): you can enable or disable transaction for separate migration
