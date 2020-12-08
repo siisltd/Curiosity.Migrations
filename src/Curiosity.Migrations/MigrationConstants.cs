@@ -6,8 +6,13 @@ namespace Curiosity.Migrations
     public static class MigrationConstants
     {
         /// <summary>
-        /// Regex patterns for scanning files
+        /// Regex pattern for parsing version
         /// </summary>
-        public static readonly string MigrationFileNamePattern = @"(\d+)\.(\d+)(.(down)|.(up))?(-([\w]*))?\.sql$";
+        public static readonly string VersionPattern = @"([\d|-]+)(\.(\d+))*";
+        
+        /// <summary>
+        /// Regex pattern for scanning files
+        /// </summary>
+        public static readonly string MigrationFileNamePattern = $@"({VersionPattern})(.(down)|.(up))?(-([\w]*))?\.sql$";
     }
 }

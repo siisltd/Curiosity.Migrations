@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace Curiosity.Migrations
 {
@@ -7,56 +8,49 @@ namespace Curiosity.Migrations
     /// </summary>
     public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     {
-        private const char VersionNumberSeparator = '.';
-
-        private const int VersionNumbersCount = 2;
+        private static readonly Regex Regex = new Regex(MigrationConstants.VersionPattern, RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Major version
         /// </summary>
-        /// <remarks>
-        /// Change it if you change DB schema (create or drop table, column, relation)
-        /// </remarks>
-        public int Major { get; }
+        public long Major { get; }
 
         /// <summary>
         /// Minor version
         /// </summary>
         /// <remarks>
-        /// Change it if your migration do not change DB schema (cleaning data, inserting new values for existed tables, creating index, etc)
+        /// Useful when combining migrations to a single logical group (eg. 1 step of data manipulation, 2 step and etc.) 
         /// </remarks>
-        public int Minor { get; }
-
-        /// <inheritdoc />
-        public DbVersion(int major, int minor) : this()
+        public short Minor { get; }
+        
+        public DbVersion(long major, short minor = 0) : this()
         {
-            Major = GetCorrectNumber(major);
-            Minor = GetCorrectNumber(minor);
+            AssertMajor(major);
+            AssertMinor(minor);
+            
+            Major = major;
+            Minor = minor;
+        }
+        
+        public DbVersion(string version): this()
+        {
+            if (!TryParse(version, out var validVersion))
+                throw new ArgumentException($"Incorrect version. Version must be parsed by this regexp: {MigrationConstants.VersionPattern}");
+
+            Major = validVersion.Major;
+            Minor = validVersion.Minor;
         }
 
-        private int GetCorrectNumber(int number)
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        private static void AssertMajor(long major)
         {
-            return number < 0
-                ? 0
-                : number;
+            if (major <= 0) throw new ArgumentOutOfRangeException(nameof(major));
         }
-
-        /// <inheritdoc />
-        public DbVersion(string version) : this()
+        
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        private static void AssertMinor(short minor)
         {
-            if (string.IsNullOrWhiteSpace(version))
-            {
-                throw new ArgumentNullException($"{nameof(version)}");
-            }
-
-            var mainValues = version.Split(VersionNumberSeparator);
-            if (mainValues.Length < VersionNumbersCount)
-            {
-                throw new ArgumentException("Incorrect version format. Required is \"Major.Minor\"");
-            }
-
-            Major = GetCorrectNumber(int.Parse(mainValues[0]));
-            Minor = GetCorrectNumber(int.Parse(mainValues[1]));
+            if (minor < 0) throw new ArgumentOutOfRangeException(nameof(minor));
         }
 
         /// <inheritdoc />
@@ -74,7 +68,7 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Major}.{Minor}";
+            return $"{Major:D4}.{Minor:D2}";
         }
 
         /// <inheritdoc />
@@ -96,7 +90,7 @@ namespace Curiosity.Migrations
         {
             unchecked
             {
-                var hashCode = Major;
+                var hashCode = Major.GetHashCode();
                 hashCode = (hashCode * 397) ^ Minor;
                 return hashCode;
             }
@@ -176,23 +170,48 @@ namespace Curiosity.Migrations
         /// <returns>Result of parsing</returns>
         public static bool TryParse(string source, out DbVersion version)
         {
-            if (string.IsNullOrWhiteSpace(source))
-            {
-                version = default;
-                return false;
-            }
+            version = default;
 
-            var mainValues = source.Split(VersionNumberSeparator);
-            if (mainValues.Length < VersionNumbersCount)
-            {
-                version = default;
+            if (String.IsNullOrWhiteSpace(source))
                 return false;
-            }
+            
+            var match = Regex.Match(source);
+            if (!match.Success)
+                return false;
 
             var result = true;
 
-            result &= int.TryParse(mainValues[0], out var major);
-            result &= int.TryParse(mainValues[1], out var minor);
+            // major version may contains '-'
+            result &= long.TryParse(match.Groups[1].Value.Replace("-", ""), out var major);
+            if (!result)
+                return false;
+            
+            try
+            {
+                AssertMajor(major);
+            }
+            catch
+            {
+                return false;
+            }
+            
+            // it's optional
+            short minor = 0;
+            if (!String.IsNullOrEmpty(match.Groups[3].Value))
+            {
+                result &= short.TryParse(match.Groups[3].Value, out minor);
+                if (!result)
+                    return false;
+
+                try
+                {
+                    AssertMinor(minor);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
 
             version = new DbVersion(major, minor);
 
