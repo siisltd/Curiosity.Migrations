@@ -1,17 +1,54 @@
-# Curiosity.Migrations
+# Curiosity.Migrations [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations)
 
-Migration tool for .NET applications.
+Database migration framework for .NET and .NET Core.
 
 |Branch|Build status|
 |---|---|
 |master|[![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations)|
 |develop|[![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=develop)](https://travis-ci.org/MarvinBand/Migrations)|
 
+`Curiosity.Migrations` is a migration framework that uses SQL script and code migration to alter your database schema or seed a data.
+
+Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. 
+Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database). 
+
+# Features
+
+`Curiosity.Migration` has a lot of useful features. You can find more information about them at special articles:
+
+- [Script migrations](https://siisltdmigrations.readthedocs.io/features/script_migration.md): write your own DDL SQL scripts
+- [Code migrations](https://siisltdmigrations.readthedocs.io/features/code_migration.md): manipulate data from C#, useful for database seeding
+- [EntityFramework Integration](https://siisltdmigrations.readthedocs.io/features/ef_integration.md): use `EntityFramework` for data manipulation from `Code Migrations`
+- [Migration Providers](https://siisltdmigrations.readthedocs.io/features/migration_providers.md): store migrations in a different way (files, embedded resources, etc)
+- [Variable substitutions](https://siisltdmigrations.readthedocs.io/features/variables.md): allows to insert some dynamic data to your migrations
+- [Transactions](https://siisltdmigrations.readthedocs.io/features/transactions.md): you can enable or disable transaction for separate migration
+- [Pre-migrations](https://siisltdmigrations.readthedocs.io/features/pre_migrations.md): executes SQL or code before main migration
+- [Journal](https://siisltdmigrations.readthedocs.io/features/journal.md): choose your own table to store migration history
+
+## Supported databases
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png">
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+If you don't find a desired database, you can contribute and add support by yourself.
 
 ## Install
 
-## Philosophy
+`Curiosity.Migrations` is available as a Nuget package.
 
-## Documentation
+| Package | Build Status | Version | Downloads |
+|---------|------------|------------|------------|
+| Curiosity.Migrations | [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
+| Curiosity.Migrations.PostgreSQL | [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
 
-## Contributing
+
+## Getting help
+
+You can find documentation and samples at [siisltdmigrations.readthedocs.io](https://siisltdmigrations.readthedocs.io/).

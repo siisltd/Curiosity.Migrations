@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.0.0] - 2020-12-08
+
+### Changed
+
+- Code style fixes.
+- Changed migration applying strategy from sequential to patch. 
+
+### Removed
+
+- DB state method.
+- Major and minor migration polices.
+
 ## [2.2] - 2020-10-16
 
 ### Fixed

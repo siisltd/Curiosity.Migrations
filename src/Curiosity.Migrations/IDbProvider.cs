@@ -4,6 +4,8 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+// ReSharper disable UnusedMemberInSuper.Global
+// ReSharper disable UnusedMember.Global
 
 namespace Curiosity.Migrations
 {
@@ -33,9 +35,9 @@ namespace Curiosity.Migrations
         DbConnection? Connection { get; }
 
         /// <summary>
-        /// Name of table with migration history
+        /// Name of table with applied migration info.
         /// </summary>
-        string MigrationHistoryTableName { get; }
+        string AppliedMigrationsTableName { get; }
 
         /// <summary>
         /// Open connection to database
@@ -53,15 +55,6 @@ namespace Curiosity.Migrations
         DbTransaction BeginTransaction();
 
         /// <summary>
-        /// Returns actual DB state
-        /// </summary>
-        /// <param name="desiredVersion">Version of the newest migration</param>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion, bool isDowngradeEnabled, CancellationToken token = default);
-
-        /// <summary>
         /// Create database with default schema if not exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
@@ -77,10 +70,10 @@ namespace Curiosity.Migrations
         Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken token = default);
 
         /// <summary>
-        /// Create table for storing migration history info no exist
+        /// Create table for storing applied migrations info if not exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task CreateHistoryTableIfNotExistsAsync(CancellationToken token = default);
+        Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default);
 
         /// <summary>
         /// Check if table already exists
@@ -92,25 +85,24 @@ namespace Curiosity.Migrations
         Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default);
 
         /// <summary>
-        /// Returns actual database version from migration history table.
+        /// Returns applied migrations versions.
         /// </summary>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>   
         /// <param name="token">Cancellation token</param>
         /// <exception cref="InvalidOperationException">If migration history table has incorrect DB version.</exception>
-        Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default);
+        /// <returns>Collection of applied migration version ordered ascending by version</returns>
+        Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionAsync(CancellationToken token = default);
 
         /// <summary>
-        /// Returns actual database version from migration history table
-        /// </summary>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
-        /// <param name="token">Cancellation token</param>
-        Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default);
-
-        /// <summary>
-        /// Update actual database version in migration history table
+        /// Add migration info to applied migrations table.
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default);
+        Task SaveAppliedMigrationVersionAsync(string migrationName, DbVersion version, CancellationToken token = default);
+        
+        /// <summary>
+        /// Delete migration info from applied migrations table.
+        /// </summary>
+        /// <exception cref="MigrationException"></exception>
+        Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken token = default);
 
         /// <summary>
         /// Execute sql script without return value
@@ -135,13 +127,13 @@ namespace Curiosity.Migrations
         /// <param name="script">SQL script with DDL or DML commands</param>
         /// <param name="token">Cancellation token</param>
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default);
+        Task<object?> ExecuteScalarScriptAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
         Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <exception cref="MigrationException"></exception>
-        Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
+        Task<object?> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default);
 
         /// <summary>
         /// Close connection to database

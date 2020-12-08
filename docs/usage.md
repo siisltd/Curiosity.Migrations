@@ -1,3 +1,7 @@
 # Usage
 
-todo: describe all use cases
+## Configuration
+
+## Versioning 
+
+## Policy

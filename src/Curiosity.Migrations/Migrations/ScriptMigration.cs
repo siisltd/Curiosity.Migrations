@@ -28,13 +28,13 @@ namespace Curiosity.Migrations
         /// <summary>
         /// SQL script to apply migration splitted into batches
         /// </summary>
-        public List<ScriptMigrationBatch> UpScripts { get; }
+        public IList<ScriptMigrationBatch> UpScripts { get; }
 
         public ScriptMigration(
             ILogger migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
-            List<ScriptMigrationBatch> upScripts,
+            ICollection<ScriptMigrationBatch> upScripts,
             string? comment,
             bool isTransactionRequired = true)
         {
@@ -43,7 +43,7 @@ namespace Curiosity.Migrations
             if (upScripts == null || upScripts.Count == 0) throw new ArgumentException(nameof(upScripts));
 
             Version = version;
-            UpScripts = upScripts;
+            UpScripts = upScripts.ToArray();
             Comment = comment;
             IsTransactionRequired = isTransactionRequired;
         }
@@ -54,7 +54,7 @@ namespace Curiosity.Migrations
             await RunBatchesAsync(UpScripts, token);
         }
 
-        protected async Task RunBatchesAsync(List<ScriptMigrationBatch> batches, CancellationToken token = default)
+        protected async Task RunBatchesAsync(ICollection<ScriptMigrationBatch> batches, CancellationToken token = default)
         {
             var needLogBatches = batches.Count > 1;
             foreach (var batch in batches.OrderBy(b => b.OrderIndex))

@@ -24,12 +24,12 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Provide access to underlying database
         /// </summary>
-        protected IDbProvider DbProvider { get; private set; }
+        protected IDbProvider DbProvider { get; private set; } = null!;
 
         /// <summary>
         /// User defined variables
         /// </summary>
-        protected IReadOnlyDictionary<string, string> Variables { get; private set; }
+        protected IReadOnlyDictionary<string, string> Variables { get; private set; } = null!;
 
         /// <summary>
         /// Logger for migration
@@ -37,7 +37,7 @@ namespace Curiosity.Migrations
         /// <remarks>
         /// Can be <see langword="null"/> if logger wasn't set up
         /// </remarks>
-        protected ILogger Logger { get; private set; }
+        protected ILogger? Logger { get; private set; }
 
         /// <summary>
         /// Initializes migration 
@@ -48,7 +48,7 @@ namespace Curiosity.Migrations
         internal void Init(
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger)
+            ILogger? migrationLogger)
         {
             DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
             Variables = variables ?? throw new ArgumentNullException(nameof(variables));

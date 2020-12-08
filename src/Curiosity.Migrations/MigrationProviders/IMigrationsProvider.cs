@@ -18,6 +18,6 @@ namespace Curiosity.Migrations
         ICollection<IMigration> GetMigrations(
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger);
+            ILogger? migrationLogger);
     }
 }

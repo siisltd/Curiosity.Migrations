@@ -40,7 +40,7 @@ namespace Curiosity.Migrations
             _services = services ?? new ServiceCollection();
             _migrationsProviders = new List<IMigrationsProvider>();
             _preMigrationsProviders = new List<IMigrationsProvider>();
-            _upgradePolicy = MigrationPolicy.All;
+            _upgradePolicy = MigrationPolicy.Allowed;
             _downgradePolicy = MigrationPolicy.Forbidden;
             _targetVersion = default;
             _variables = new Dictionary<string, string>();
@@ -206,7 +206,7 @@ namespace Curiosity.Migrations
             var dbProvider = _dbProviderFactory.CreateDbProvider();
             dbProvider.UseSqlLogger(_sqlLogger);
             
-            var providerVariables = dbProvider.GetDefaultVariables() ?? new Dictionary<string, string>();
+            var providerVariables = dbProvider.GetDefaultVariables();
             foreach (var kvp in providerVariables)
             {
                 // we should not override the variables set manually
