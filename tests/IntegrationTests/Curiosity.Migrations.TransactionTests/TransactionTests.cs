@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,8 +22,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.All);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.All);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
             builder.SetUpTargetVersion(new DbVersion(3, 0));
 
             var migrator = builder.Build();
@@ -31,10 +32,16 @@ namespace Curiosity.Migrations.TransactionTests
             
             var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
             await migrationProvider.OpenConnectionAsync();
-            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(true);
+            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
             await migrationProvider.CloseConnectionAsync();
             
-            Assert.Equal(new DbVersion(3,0), currentDbVersion);
+            var expectedAppliedMigrations = new HashSet<DbVersion>
+            {
+                new DbVersion(1,0),
+                new DbVersion(2,0),
+                new DbVersion(3,0)
+            };
+            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
         }
                 
         [Fact]
@@ -49,8 +56,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.All);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.All);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
             builder.SetUpTargetVersion(new DbVersion(5, 0));
 
             var migrator = builder.Build();
@@ -59,10 +66,18 @@ namespace Curiosity.Migrations.TransactionTests
             
             var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
             await migrationProvider.OpenConnectionAsync();
-            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(true);
+            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
             await migrationProvider.CloseConnectionAsync();
             
-            Assert.Equal(new DbVersion(5,0), currentDbVersion);
+            var expectedAppliedMigrations = new HashSet<DbVersion>
+            {
+                new DbVersion(1,0),
+                new DbVersion(2,0),
+                new DbVersion(3,0),
+                new DbVersion(4,0),
+                new DbVersion(5,0)
+            };
+            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
         }
         
         [Fact]
@@ -77,8 +92,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.All);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.All);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
             builder.SetUpTargetVersion(new DbVersion(6, 0));
 
             var migrator = builder.Build();
@@ -97,10 +112,19 @@ namespace Curiosity.Migrations.TransactionTests
 
             var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
             await migrationProvider.OpenConnectionAsync();
-            var currentDbVersion = await migrationProvider.GetDbVersionSafeAsync(false);
+            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
             await migrationProvider.CloseConnectionAsync();
             
-            Assert.Equal(new DbVersion(5,0), currentDbVersion);
+            var expectedAppliedMigrations = new HashSet<DbVersion>
+            {
+                new DbVersion(1,0),
+                new DbVersion(2,0),
+                new DbVersion(3,0),
+                new DbVersion(4,0),
+                new DbVersion(5,0)
+            };
+            
+            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
         }
     }
 }

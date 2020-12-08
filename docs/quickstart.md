@@ -1,3 +1,3 @@
-# Quik start
+# Quick start
 
-todo? describe common use cases 
+TBA

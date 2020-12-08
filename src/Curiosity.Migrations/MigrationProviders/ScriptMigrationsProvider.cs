@@ -124,7 +124,7 @@ namespace Curiosity.Migrations
                 migrations.AddRange(assemblyMigrations);
             }
 
-            return migrations.OrderBy(x => x.Version).ToList();
+            return migrations.OrderBy(x => x.Version).ToArray();
         }
 
         private ICollection<IMigration> GetMigrations(
@@ -176,14 +176,12 @@ namespace Curiosity.Migrations
                     if (String.IsNullOrWhiteSpace(batch)) continue;
 
                     var batchNameMatch = batchNameRegex.Match(batch);
-                    batches.Add(new ScriptMigrationBatch
-                    {
-                        OrderIndex = batchIndex++,
-                        Name = batchNameMatch.Success ? batchNameMatch.Groups[1].Value : null,
-                        Script = batch
-                    });
+                    batches.Add(new ScriptMigrationBatch(
+                        batchIndex++,
+                        batchNameMatch.Success ? batchNameMatch.Groups[1].Value : null,
+                        batch));
                 }
-                
+
                 if (match.Groups[4].Success)
                 {
                     if (scriptInfo.DownScript.Count > 0)
@@ -215,7 +213,7 @@ namespace Curiosity.Migrations
                         dbProvider,
                         variables,
                         migrationLogger))
-                .ToList();
+                .ToArray();
         }
 
         private MigrationOptions ExtractMigrationOptions(string sourceScript)
@@ -322,7 +320,7 @@ namespace Curiosity.Migrations
 
             public List<ScriptMigrationBatch> DownScript { get; } = new List<ScriptMigrationBatch>();
             
-            public MigrationOptions Options { get; set; }
+            public MigrationOptions Options { get; set; } = null!;
         }
         
         private class MigrationOptions

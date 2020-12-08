@@ -4,12 +4,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{22DB0148-0BD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{0E062AC8-023E-4D62-A696-8363130215DF}"
 ProjectSection(SolutionItems) = preProject
-	docs\versioning.md = docs\versioning.md
 	docs\usage.md = docs\usage.md
-	docs\migrations.md = docs\migrations.md
-	docs\quikstart.md = docs\quikstart.md
 	docs\features.md = docs\features.md
 	docs\index.md = docs\index.md
+	docs\quickstart.md = docs\quickstart.md
+	docs\requirements.txt = docs\requirements.txt
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
@@ -31,6 +30,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.Postgr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.TransactionTests", "tests\IntegrationTests\Curiosity.Migrations.TransactionTests\Curiosity.Migrations.TransactionTests.csproj", "{A37CE3F0-5A47-49F9-A777-D3661607E4D5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{D80331ED-3602-4967-8813-2F38B9D1CCE3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B}"
+ProjectSection(SolutionItems) = preProject
+	docs\features\script_migration.md = docs\features\script_migration.md
+	docs\features\code_migration.md = docs\features\code_migration.md
+	docs\features\transactions.md = docs\features\transactions.md
+	docs\features\ef_integration.md = docs\features\ef_integration.md
+	docs\features\variables.md = docs\features\variables.md
+	docs\features\journal.md = docs\features\journal.md
+	docs\features\migration_providers.md = docs\features\migration_providers.md
+	docs\features\pre_migrations.md = docs\features\pre_migrations.md
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +57,8 @@ Global
 		{E21F04B2-76AB-4BA9-A85C-2347CAABC0AC} = {8DB6C739-ACB4-47CD-B72E-A5180C22B84F}
 		{3BDC5BA6-1A8B-443D-B3F7-D0983921E3C6} = {98A180F1-B3B9-41F0-9974-2333B4F03390}
 		{A37CE3F0-5A47-49F9-A777-D3661607E4D5} = {98A180F1-B3B9-41F0-9974-2333B4F03390}
+		{D80331ED-3602-4967-8813-2F38B9D1CCE3} = {0E062AC8-023E-4D62-A696-8363130215DF}
+		{B4B7DDC0-9F31-4C24-99EC-0358BE4FDD6B} = {0E062AC8-023E-4D62-A696-8363130215DF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

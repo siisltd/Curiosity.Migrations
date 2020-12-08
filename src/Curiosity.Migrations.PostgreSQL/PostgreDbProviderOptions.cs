@@ -27,7 +27,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <remarks>
         /// Used on database creation.
         /// </remarks>
-        public string DatabaseEncoding { get; }
+        public string? DatabaseEncoding { get; }
 
         /// <summary>
         /// Collation order (LC_COLLATE) to use in the new database. This affects the sort order applied to strings, e.g. in queries with ORDER BY, as well as the order used in indexes on text columns.
@@ -36,7 +36,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <remarks>
         /// Used on database creation
         /// </remarks>
-        public string LC_COLLATE { get; }
+        public string? LC_COLLATE { get; }
 
         /// <summary>
         /// Character classification (LC_CTYPE) to use in the new database. This affects the categorization of characters, e.g. lower, upper and digit. The default is to use the character classification of the template database.
@@ -45,7 +45,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <remarks>
         /// Used on database creation.
         /// </remarks>
-        public string LC_CTYPE { get; }
+        public string? LC_CTYPE { get; }
 
         /// <summary>
         /// How many concurrent connections can be made to this database.
@@ -60,28 +60,28 @@ namespace Curiosity.Migrations.PostgreSQL
         /// The name of the template from which to create the new database.
         /// If <see langword="null"/>, Migrator will use the default template from DB (template1)
         /// </summary>
-        public string Template { get; }
+        public string? Template { get; }
 
         /// <summary>
         /// The name of the tablespace that will be associated with the new database. This tablespace will be the default tablespace used for objects created in this database.
         /// If <see langword="null"/>, Migrator will use default value from db
         /// </summary>
-        public string TableSpace { get; }
+        public string? TableSpace { get; }
 
         public PostgreDbProviderOptions(
             string connectionString,
-            string migrationHistoryTableName = null,
-            string databaseEncoding = null,
-            string lcCollate = null,
-            string lcCtype = null,
+            string? migrationHistoryTableName = null,
+            string? databaseEncoding = null,
+            string? lcCollate = null,
+            string? lcCtype = null,
             int? connectionLimit = null,
-            string template = null,
-            string tableSpace = null)
+            string? template = null,
+            string? tableSpace = null)
         {
             if (String.IsNullOrWhiteSpace(connectionString)) throw new ArgumentNullException(nameof(connectionString));
 
             ConnectionString = connectionString;
-            MigrationHistoryTableName = String.IsNullOrWhiteSpace(migrationHistoryTableName)
+            MigrationHistoryTableName = migrationHistoryTableName == null || String.IsNullOrWhiteSpace(migrationHistoryTableName)
                 ? DefaultMigrationTableName
                 : migrationHistoryTableName;
             DatabaseEncoding = databaseEncoding;

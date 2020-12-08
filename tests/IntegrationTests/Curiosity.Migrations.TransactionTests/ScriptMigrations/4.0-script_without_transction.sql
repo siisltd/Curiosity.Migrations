@@ -17,7 +17,7 @@ CREATE TABLE public.background_processor_requests1
     log text,
     params_data_json text,
     result_data_json text,
-    CONSTRAINT background_processor_requests_pkey PRIMARY KEY (id)
+    CONSTRAINT background_processor_requests1_pkey PRIMARY KEY (id)
 );
 
 ALTER TABLE public.background_processor_requests1

@@ -24,13 +24,13 @@ namespace Curiosity.Migrations.PostgreSQL
         public static MigratorBuilder UsePostgreSQL(
             this MigratorBuilder builder,
             string connectionString,
-            string migrationTableHistoryName = null,
-            string databaseEncoding = null,
-            string lcCollate = null,
-            string lcCtype = null,
+            string? migrationTableHistoryName = null,
+            string? databaseEncoding = null,
+            string? lcCollate = null,
+            string? lcCtype = null,
             int? connectionLimit = null,
-            string template = null,
-            string tableSpace = null)
+            string? template = null,
+            string? tableSpace = null)
         {
             var options = new PostgreDbProviderOptions(
                 connectionString,

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -33,10 +34,15 @@ namespace Curiosity.Migrations.PostgreSQL
         public string ConnectionString { get; }
 
         /// <inheritdoc />
-        public DbConnection? Connection { get; private set; } // disable null warning because connection normally is opened after calling required methods 
+        public DbConnection? Connection { get; private set; } // disable null warning because connection normally is opened after calling required methods
+        
+        /// <summary>
+        /// Npgsql connection to database.
+        /// </summary>
+        public NpgsqlConnection NpgsqlConnection { get; private set;  }// disable null warning because connection normally is opened after calling required methods
 
         /// <inheritdoc />
-        public string MigrationHistoryTableName { get; }
+        public string AppliedMigrationsTableName { get; }
 
         private readonly string _connectionStringWithoutInitialCatalog;
 
@@ -62,10 +68,10 @@ namespace Curiosity.Migrations.PostgreSQL
         public PostgreDbProvider(PostgreDbProviderOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
-            if (string.IsNullOrEmpty(options.ConnectionString))
+            if (String.IsNullOrEmpty(options.ConnectionString))
                 throw new ArgumentNullException(nameof(options.ConnectionString));
 
-            MigrationHistoryTableName = options.MigrationHistoryTableName;
+            AppliedMigrationsTableName = options.MigrationHistoryTableName;
             var connectionBuilder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
             DbName = connectionBuilder.Database ?? throw new ArgumentException($"{nameof(connectionBuilder.Database)} can't be empty");
             ConnectionString = connectionBuilder.ConnectionString;
@@ -84,6 +90,8 @@ namespace Curiosity.Migrations.PostgreSQL
                 [DefaultVariables.User] = tempConnectionBuilder.Username,
                 [DefaultVariables.DbName] = tempConnectionBuilder.Database
             };
+
+            NpgsqlConnection = null!;
         }
 
         /// <inheritdoc />
@@ -91,22 +99,26 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             _sqLogger = logger;
         }
-        
+
         /// <inheritdoc />
-        public async Task OpenConnectionAsync(CancellationToken token = default)
+        public Task OpenConnectionAsync(CancellationToken token = default)
         {
             if (Connection != null && Connection.State != ConnectionState.Closed &&
                 Connection.State != ConnectionState.Broken)
-                throw new InvalidOperationException("Connection have already opened");
+                throw new InvalidOperationException("Connection have been already opened");
 
-            await TryExecuteAsync(async () =>
-            {
-                var connection = new NpgsqlConnection(ConnectionString);
+            return TryExecuteAsync(
+                async () =>
+                {
+                    var connection = new NpgsqlConnection(ConnectionString);
 
-                await connection.OpenAsync(token);
+                    await connection.OpenAsync(token);
 
-                Connection = connection;
-            }, MigrationError.CreatingDbError, $"Can not create database {DbName}");
+                    Connection = connection;
+                    NpgsqlConnection = connection;
+                },
+                MigrationError.CreatingDbError,
+                $"Can not create database {DbName}");
         }
 
         /// <inheritdoc />
@@ -115,34 +127,6 @@ namespace Curiosity.Migrations.PostgreSQL
             AssertConnection(Connection);
             
             return Connection!.BeginTransaction();
-        }
-
-        /// <inheritdoc />
-        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion, bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            try
-            {
-                var result =
-                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName), token)
-                        .ConfigureAwait(false);
-                if (result == null || (Int32) result != 1)
-                {
-                    return DbState.NotCreated;
-                }
-
-                AssertConnection(Connection);
-                var dbVersion = await GetDbVersionAsync(isDowngradeEnabled, token)
-                    .ConfigureAwait(false);
-                if (dbVersion == null) return DbState.Outdated;
-                if (dbVersion.Value == desireDbVersion) return DbState.Ok;
-                return dbVersion.Value < desireDbVersion
-                    ? DbState.Outdated
-                    : DbState.Newer;
-            }
-            catch (Exception)
-            {
-                return DbState.Unknown;
-            }
         }
 
         /// <inheritdoc />
@@ -177,34 +161,22 @@ namespace Curiosity.Migrations.PostgreSQL
             queryBuilder.AppendLine("WITH ");
 
             if (!String.IsNullOrWhiteSpace(_options.DatabaseEncoding))
-            {
                 queryBuilder.AppendLine($"ENCODING = '{_options.DatabaseEncoding}'");
-            }
 
             if (!String.IsNullOrWhiteSpace(_options.LC_COLLATE))
-            {
                 queryBuilder.AppendLine($"LC_COLLATE = '{_options.LC_COLLATE}'");
-            }
 
             if (!String.IsNullOrWhiteSpace(_options.LC_CTYPE))
-            {
                 queryBuilder.AppendLine($"LC_CTYPE = '{_options.LC_CTYPE}'");
-            }
 
             if (!String.IsNullOrWhiteSpace(_options.Template))
-            {
                 queryBuilder.AppendLine($"TEMPLATE = '{_options.Template}'");
-            }
 
             if (!String.IsNullOrWhiteSpace(_options.TableSpace))
-            {
                 queryBuilder.AppendLine($"TABLESPACE = '{_options.TableSpace}'");
-            }
 
             if (_options.ConnectionLimit.HasValue)
-            {
                 queryBuilder.AppendLine($"CONNECTION LIMIT = {_options.ConnectionLimit.Value}");
-            }
 
             return queryBuilder.ToString();
         }
@@ -217,9 +189,10 @@ namespace Curiosity.Migrations.PostgreSQL
                 var result =
                     await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, databaseName), token);
                 return result != null && (result is int i && i == 1 || result is bool b && b);
-            }, MigrationError.Unknown, $"Can not check existence of {databaseName} database");
+            }, MigrationError.Unknown, $"Can not check existence of \"{databaseName}\" database");
         }
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private void AssertConnection(IDbConnection? connection)
         {
             if (connection == null 
@@ -237,35 +210,35 @@ namespace Curiosity.Migrations.PostgreSQL
             }
         }
 
-        private async Task InternalExecuteScriptAsync(NpgsqlConnection connection, string script, CancellationToken token = default)
+        private Task InternalExecuteScriptAsync(NpgsqlConnection connection, string script, CancellationToken token = default)
         {
             var command = connection.CreateCommand();
             command.CommandText = script;
             _sqLogger?.LogInformation(script);
-            await command.ExecuteNonQueryAsync(token);
+            return command.ExecuteNonQueryAsync(token);
         }
 
         /// <inheritdoc />
-        public async Task CreateHistoryTableIfNotExistsAsync(CancellationToken token = default)
+        public Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default)
         {
-            AssertConnection(Connection);
+            AssertConnection(NpgsqlConnection);
 
-            var script = $"CREATE TABLE IF NOT EXISTS public.\"{MigrationHistoryTableName}\" " +
-                         $"(id bigserial NOT NULL CONSTRAINT \"{MigrationHistoryTableName}_pkey\" PRIMARY KEY, " +
+            var script = $"CREATE TABLE IF NOT EXISTS \"{AppliedMigrationsTableName}\" " +
+                         $"(id bigserial NOT NULL CONSTRAINT \"{AppliedMigrationsTableName}_pkey\" PRIMARY KEY, " +
                          "created timestamp default timezone('UTC'::text, now()) NOT NULL, " +
                          "name text, " +
-                         "version varchar(10))" +
+                         "version text unique)" +
                          @" 
                         WITH ( 
                           OIDS=FALSE 
                         ); " +
 
-                         $"ALTER TABLE public.\"{MigrationHistoryTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
+                         $"ALTER TABLE \"{AppliedMigrationsTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
             
-            await TryExecuteAsync(
-                async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
+            return TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
                 MigrationError.CreatingHistoryTable,
-                $"Can not create history table \"{MigrationHistoryTableName}\" in database {DbName}");
+                $"Can not create history table \"{AppliedMigrationsTableName}\" in database \"{DbName}\"");
             
         }
 
@@ -273,19 +246,22 @@ namespace Curiosity.Migrations.PostgreSQL
         public Task<bool> CheckIfTableExistsAsync(string tableName, CancellationToken token = default)
         {
             if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
-            AssertConnection(Connection);
+            AssertConnection(NpgsqlConnection);
 
-            return TryExecuteAsync(async () =>
-            {
-                var checkTableExistenceQuery = $@"SELECT EXISTS (
+            return TryExecuteAsync(
+                async () =>
+                {
+                    var checkTableExistenceQuery = $@"SELECT EXISTS (
                                                        SELECT 1
                                                        FROM   information_schema.tables
                                                 WHERE  table_schema = '{GetSchemeNameFromConnectionString()}'
                                                 AND    table_name = '{tableName}');";
-                var result =
-                    await InternalExecuteScalarScriptAsync(Connection as NpgsqlConnection, checkTableExistenceQuery, token);
-                return result != null && (result is int i && i == 1 || result is bool b && b);
-            }, MigrationError.Unknown, $"Can not check existence of {tableName} table");
+                    var result =
+                        await InternalExecuteScalarScriptAsync(NpgsqlConnection, checkTableExistenceQuery, token);
+                    return result != null && (result is int i && i == 1 || result is bool b && b);
+                },
+                MigrationError.Unknown,
+                $"Can not check existence of {tableName} table");
         }
 
         private string GetSchemeNameFromConnectionString()
@@ -300,137 +276,93 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbVersion?> GetDbVersionSafeAsync(bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            try
-            {
-                return await GetDbVersionAsync(isDowngradeEnabled, token);
-            }
-            catch (Exception)
-            {
-                return default;
-            }
-        }
-
-        /// <inheritdoc />
-        public Task<DbVersion?> GetDbVersionAsync(bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            return isDowngradeEnabled
-                ? GetDbVersionWhenDowngradeEnabledAsync(token)
-                : GetDbVersionWhenDowngradeDisabledAsync(token);
-        }  
-        
-        private async Task<DbVersion?> GetDbVersionWhenDowngradeEnabledAsync(CancellationToken token = default)
+        public async Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionAsync(CancellationToken token = default)
         {
             // actual version is made by last migration because downgrade can decrease version
-            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\" ORDER BY created DESC LIMIT 1;";
+            var query = $"SELECT version FROM \"{_options.MigrationHistoryTableName}\"";
 
-            var command = (Connection as NpgsqlConnection).CreateCommand();
+            var command = NpgsqlConnection.CreateCommand();
             command.CommandText = query;
 
             try
             {
                 _sqLogger?.LogInformation(query);
+                
+                var appliedMigrations = new List<DbVersion>();
+                
                 using (var reader = await command.ExecuteReaderAsync(token))
                 {
-                    if (!reader.HasRows) return default;
-
-                    await reader.ReadAsync(token);
-                    var stringVersion = reader.GetString(0);
-
-                    if (!DbVersion.TryParse(stringVersion, out var version))
-                    {
-                        throw new InvalidOperationException("Cannot get database version.");
-                    }
-
-                    return version;
-                }
-            }
-            catch (PostgresException e)
-            {
-                // Migration table does not exist.
-                if (e.SqlState == "42P01")
-                    return default;
-
-                throw;
-            }
-        }   
-        
-        private async Task<DbVersion?> GetDbVersionWhenDowngradeDisabledAsync(CancellationToken token = default)
-        {
-            // we need to analyze all version and find with max number
-            var query = $"SELECT version FROM public.\"{_options.MigrationHistoryTableName}\";";
-
-            var command = (Connection as NpgsqlConnection).CreateCommand();
-            command.CommandText = query;
-
-            DbVersion? maxVersion = null;
-            try
-            {
-                _sqLogger?.LogInformation(query);
-                using (var reader = await command.ExecuteReaderAsync(token))
-                {
-                    if (!reader.HasRows) return default;
+                    if (!reader.HasRows) return Array.Empty<DbVersion>();
 
                     while (await reader.ReadAsync(token))
                     {
                         var stringVersion = reader.GetString(0);
 
                         if (!DbVersion.TryParse(stringVersion, out var version))
-                            throw new InvalidOperationException("Cannot get database version.");
+                            throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
 
-                        if (!maxVersion.HasValue || maxVersion < version)
-                        {
-                            maxVersion = version;
-                        }
+                        appliedMigrations.Add(version);
                     }
-                    
-                    return maxVersion;
+
+                    return appliedMigrations.OrderBy(x => x).ToArray();
                 }
             }
             catch (PostgresException e)
             {
                 // Migration table does not exist.
                 if (e.SqlState == "42P01")
-                    return default;
+                    return Array.Empty<DbVersion>();
 
                 throw;
             }
-        }
+        } 
 
         /// <inheritdoc />
-        public Task UpdateCurrentDbVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
+        public Task SaveAppliedMigrationVersionAsync(string migrationName, DbVersion version, CancellationToken token = default)
         {
-            AssertConnection(Connection);
+            AssertConnection(NpgsqlConnection);
 
-            var script = $"INSERT INTO public.\"{_options.MigrationHistoryTableName}\" "
-                         + "(name, version) "
+            var script = $"INSERT INTO \"{_options.MigrationHistoryTableName}\" (name, version) "
                          + $"VALUES ('{migrationName}', '{version.ToString()}');";
 
-            return TryExecuteAsync(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
-                MigrationError.MigratingError, $"Can not update DB {DbName} version");
+            return TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
+                MigrationError.MigratingError,
+                $"Can not save applied migration version to database \"{DbName}\" (version = {version})");
+        }
+        
+        /// <inheritdoc />
+        public Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken token = default)
+        {
+            AssertConnection(NpgsqlConnection);
+
+            var script = $"DELETE FROM \"{_options.MigrationHistoryTableName}\" WHERE version = {version.ToString()}";
+
+            return TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
+                MigrationError.MigratingError,
+                $"Can not delete applied migration version from database \"{DbName}\" (version = {version})");
         }
 
         /// <inheritdoc />
         public Task ExecuteScriptAsync(string script, CancellationToken token = default)
         {
-            AssertConnection(Connection);
+            AssertConnection(NpgsqlConnection);
 
-            return TryExecuteAsync(async () => { await InternalExecuteScriptAsync(Connection as NpgsqlConnection, script, token); },
-                MigrationError.MigratingError, "Can not execute script");
+            return TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection,script, token),
+                MigrationError.MigratingError,
+                "Can not execute script");
         }
 
         /// <inheritdoc />
         public Task<int> ExecuteNonQueryScriptAsync(string script, CancellationToken token = default)
         {
-            AssertConnection(Connection);
+            AssertConnection(NpgsqlConnection);
             return TryExecuteAsync(
-                async () =>
-                {
-                    var result = await InternalExecuteNonQueryScriptAsync(Connection as NpgsqlConnection, script);
-                    return result;
-                },
-                MigrationError.MigratingError, "Can not execute non-query script");
+                () => InternalExecuteNonQueryScriptAsync(NpgsqlConnection, script),
+                MigrationError.MigratingError,
+                "Can not execute non-query script");
         }
 
         private Task<int> InternalExecuteNonQueryScriptAsync(NpgsqlConnection connection, string query)
@@ -442,17 +374,16 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public  Task<object> ExecuteScalarScriptAsync(string script, CancellationToken token = default)
+        public Task<object?> ExecuteScalarScriptAsync(string script, CancellationToken token = default)
         {
-            AssertConnection(Connection);
-            return TryExecuteAsync(async () =>
-            {
-                var result = await InternalExecuteScalarScriptAsync(Connection as NpgsqlConnection, script, token);
-                return result;
-            }, MigrationError.MigratingError, $"Can not execute script");
+            AssertConnection(NpgsqlConnection);
+            return TryExecuteAsync(
+                () => InternalExecuteScalarScriptAsync(NpgsqlConnection, script, token),
+                MigrationError.MigratingError,
+                "Can not execute script");
         }
 
-        private Task<object> InternalExecuteScalarScriptAsync(NpgsqlConnection connection, string query, CancellationToken token = default)
+        private Task<object?> InternalExecuteScalarScriptAsync(NpgsqlConnection connection, string query, CancellationToken token = default)
         {
             var command = connection.CreateCommand();
             command.CommandText = query;
@@ -463,12 +394,14 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <inheritdoc />
         public Task ExecuteScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
         {
-            return TryExecuteAsync(async () => { await ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script, token); },
-                MigrationError.MigratingError, "Can not execute script");
+            return TryExecuteAsync(
+                () => ExecuteScriptAsync(_connectionStringWithoutInitialCatalog, script, token),
+                MigrationError.MigratingError,
+                "Can not execute script");
         }
 
         /// <inheritdoc />
-        public Task<object> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
+        public Task<object?> ExecuteScalarScriptWithoutInitialCatalogAsync(string script, CancellationToken token = default)
         {
             return TryExecuteAsync(async () =>
             {
@@ -479,7 +412,7 @@ namespace Curiosity.Migrations.PostgreSQL
 
                     return result;
                 }
-            }, MigrationError.MigratingError, $"Can not execute script");
+            }, MigrationError.MigratingError, "Can not execute script");
         }
 
         /// <inheritdoc />
@@ -487,10 +420,11 @@ namespace Curiosity.Migrations.PostgreSQL
         {
             return TryExecuteAsync(() =>
             {
-                if (Connection.State == ConnectionState.Closed) return Task.CompletedTask;
+                if (NpgsqlConnection.State == ConnectionState.Closed) return Task.CompletedTask;
 
-                Connection.Close();
-                Connection = null;
+                NpgsqlConnection.Close();
+                NpgsqlConnection = null!;
+                Connection = null!;
 
                 return Task.CompletedTask;
             }, MigrationError.MigratingError, "Can not execute script");
@@ -530,7 +464,7 @@ namespace Curiosity.Migrations.PostgreSQL
                       || e.SqlState == "3D000"
                       || e.SqlState == "3F000")
             {
-                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to database \"{DbName}\"", e);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
@@ -543,7 +477,7 @@ namespace Curiosity.Migrations.PostgreSQL
             }
             catch (NpgsqlException e)
             {
-                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating DB {DbName}", e);
+                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating database \"{DbName}\"", e);
             }
             catch (InvalidOperationException)
             {
@@ -575,7 +509,7 @@ namespace Curiosity.Migrations.PostgreSQL
                       || e.SqlState == "3D000"
                       || e.SqlState == "3F000")
             {
-                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to DB {DbName}", e);
+                throw new MigrationException(MigrationError.ConnectionError, $"Can not connect to database \"{DbName}\"", e);
             }
             catch (PostgresException e)
                 when (e.SqlState.StartsWith("28")
@@ -588,7 +522,7 @@ namespace Curiosity.Migrations.PostgreSQL
             }
             catch (NpgsqlException e)
             {
-                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating DB {DbName}", e);
+                throw new MigrationException(MigrationError.MigratingError, $"Error occured while migrating database \"{DbName}\"", e);
             }
             catch (InvalidOperationException)
             {
