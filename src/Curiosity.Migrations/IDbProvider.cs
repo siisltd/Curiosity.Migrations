@@ -55,15 +55,6 @@ namespace Curiosity.Migrations
         DbTransaction BeginTransaction();
 
         /// <summary>
-        /// Returns actual DB state
-        /// </summary>
-        /// <param name="desiredVersion">Version of the newest migration</param>
-        /// <param name="isDowngradeEnabled">Indicates that downgrade is enabled for migrator. Affects how migration history table is analyzed.</param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        Task<DbState> GetDbStateSafeAsync(DbVersion desiredVersion, bool isDowngradeEnabled, CancellationToken token = default);
-
-        /// <summary>
         /// Create database with default schema if not exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
@@ -79,10 +70,10 @@ namespace Curiosity.Migrations
         Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken token = default);
 
         /// <summary>
-        /// Create table for storing migration history info no exist
+        /// Create table for storing applied migrations info if not exist
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task CreateHistoryTableIfNotExistsAsync(CancellationToken token = default);
+        Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default);
 
         /// <summary>
         /// Check if table already exists

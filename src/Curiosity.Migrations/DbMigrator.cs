@@ -140,7 +140,7 @@ namespace Curiosity.Migrations
                 else
                 {
                     _logger?.LogInformation($"Creating \"{_dbProvider.AppliedMigrationsTableName}\" table...");
-                    await _dbProvider.CreateHistoryTableIfNotExistsAsync(token);
+                    await _dbProvider.CreateAppliedMigrationsTableIfNotExistsAsync(token);
                     _logger?.LogInformation($"Creating \"{_dbProvider.AppliedMigrationsTableName}\" table completed.");
                 }
 

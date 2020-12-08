@@ -50,7 +50,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Verify(x => x.CreateDatabaseIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Once);
 
             provider
-                .Verify(x => x.CreateHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Once);
+                .Verify(x => x.CreateAppliedMigrationsTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Once);
             
             Assert.True(result.IsSuccessfully);
         }

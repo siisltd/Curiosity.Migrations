@@ -129,34 +129,6 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public async Task<DbState> GetDbStateSafeAsync(DbVersion desireDbVersion, bool isDowngradeEnabled, CancellationToken token = default)
-        {
-            try
-            {
-                var result =
-                    await ExecuteScalarScriptWithoutInitialCatalogAsync(String.Format(CheckDbExistQueryFormat, DbName), token)
-                        .ConfigureAwait(false);
-                if (result == null || (Int32) result != 1)
-                {
-                    return DbState.NotCreated;
-                }
-
-                AssertConnection(Connection);
-                var dbVersion = await GetDbVersionAsync(isDowngradeEnabled, token)
-                    .ConfigureAwait(false);
-                if (dbVersion == null) return DbState.Outdated;
-                if (dbVersion.Value == desireDbVersion) return DbState.Ok;
-                return dbVersion.Value < desireDbVersion
-                    ? DbState.Outdated
-                    : DbState.Newer;
-            }
-            catch (Exception)
-            {
-                return DbState.Unknown;
-            }
-        }
-
-        /// <inheritdoc />
         public Task CreateDatabaseIfNotExistsAsync(CancellationToken token = default)
         {
             return TryExecuteAsync(async () =>
@@ -246,7 +218,7 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public Task CreateHistoryTableIfNotExistsAsync(CancellationToken token = default)
+        public Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default)
         {
             AssertConnection(NpgsqlConnection);
 

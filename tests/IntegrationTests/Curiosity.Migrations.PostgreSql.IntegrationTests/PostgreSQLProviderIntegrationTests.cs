@@ -30,7 +30,7 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
             var isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.AppliedMigrationsTableName);
             Assert.False(isTableExist);
 
-            await provider.CreateHistoryTableIfNotExistsAsync();
+            await provider.CreateAppliedMigrationsTableIfNotExistsAsync();
             
             isTableExist = await provider.CheckIfTableExistsAsync(_fixture.DbProvider.AppliedMigrationsTableName);
             Assert.True(isTableExist);
