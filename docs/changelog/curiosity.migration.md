@@ -1,0 +1,1 @@
+../../src/Curiosity.Migrations/CHANGELOG.md
