@@ -1,38 +1,41 @@
-site_name: SIISLtd.Migrations docs
+site_name: Curiosity.Migrations Documention
 site_url: https://siisltdmigrations.rtfd.io
-site_description: Curiosity.Migrations
+site_description: Curiosity.Migrations - Database migration framework for .NET and .NET Core
 site_author: SIIS Ltd
-copyright: SIIS Ltd © 2020
+copyright: <a href="https://survey-studio.com">SIIS Ltd</a> © 2020
 
 nav:
-  - 'Intro' : 'index.md'
-  - 'Quick Start': 'quickstart.md'
-  - 'Usage': 'usage.md'
-  - 'Features': 'features.md'
-      - 'Script Migration' : 'features/script_migration.md'
-      - 'Code Migration' : 'features/code_migration.md'
-      - 'EntityFramework Integration' : 'features/ef_integration.md'
-      - 'Migration Providers' : 'features/script_providers.md'
-      - 'Variables' : 'features/variables.md'
-      - 'Transactions' : 'features/transactions.md'
-      - 'Pre-migrations' : 'features/pre_migrations.md'
-      - 'Journal' : 'features/journal.md'
-
-#theme: readthedocs
-
+  - 'Intro': index.md
+  - 'Quick Start': quickstart.md
+  - 'Usage': usage.md
+  - 'Features':
+    - 'Script Migration': features/script_migration.md
+    - 'Code Migration': features/code_migration.md
+    - 'EntityFramework Integration': features/ef_integration.md
+    - 'Migration Providers': features/migration_providers.md
+    - 'Variables': features/variables.md
+    - 'Transactions': features/transactions.md
+    - 'Pre-migrations': features/pre_migrations.md
+    - 'Journal': features/journal.md
+    - 'Downgrade': features/downgrade.md
+    - 'Dependency Injection': features/di.md
 
 theme:
-  name: 'material'
-  language: 'en'
+  name: material
+  language: en
+  favicon: images/siisltd.png
+  logo: images/siisltd.png
   font:
-    text: 'Roboto'
-    code: 'Roboto Mono'
+    text: Roboto
+    code: Roboto Mono
   palette:
-    primary: 'red'
-    accent: 'red'
+    primary: red
+    accent: red
 
 markdown_extensions:
   - codehilite
   - markdown_include.include:
       base_path: docs
 
+extra_css:
+  - 'stylesheets/extra.css'

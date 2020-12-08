@@ -1,3 +1,3 @@
 # Quick start
 
-TBA
+> Article is under construction

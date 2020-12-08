@@ -1,4 +1,5 @@
-# Curiosity.Migrations [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations)
+# Curiosity.Migrations [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/siisltdmigrations/badge/?version=latest)](https://siisltdmigrations.readthedocs.io/?badge=latest)
+
 
 Database migration framework for .NET and .NET Core.
 
@@ -18,12 +19,14 @@ Migrations solve the problem of evolving a database schema for multiple database
 
 - [Script migrations](https://siisltdmigrations.readthedocs.io/features/script_migration.md): write your own DDL SQL scripts
 - [Code migrations](https://siisltdmigrations.readthedocs.io/features/code_migration.md): manipulate data from C#, useful for database seeding
-- [EntityFramework Integration](https://siisltdmigrations.readthedocs.io/features/ef_integration.md): use `EntityFramework` for data manipulation from `Code Migrations`
+- [EntityFramework Integration](https://siisltdmigrations.readthedocs.io/features/ef_integration.md): use `EntityFramework` for data manipulation from code migrations
 - [Migration Providers](https://siisltdmigrations.readthedocs.io/features/migration_providers.md): store migrations in a different way (files, embedded resources, etc)
 - [Variable substitutions](https://siisltdmigrations.readthedocs.io/features/variables.md): allows to insert some dynamic data to your migrations
 - [Transactions](https://siisltdmigrations.readthedocs.io/features/transactions.md): you can enable or disable transaction for separate migration
 - [Pre-migrations](https://siisltdmigrations.readthedocs.io/features/pre_migrations.md): executes SQL or code before main migration
 - [Journal](https://siisltdmigrations.readthedocs.io/features/journal.md): choose your own table to store migration history
+- [Downgrade migrations](https://siisltdmigrations.readthedocs.io/features/downgrade.md): allows you to reverse applied migrations
+- [Dependency Injection](https://siisltdmigrations.readthedocs.io/features/di.md): inject dependencies into code migrations
 
 ## Supported databases
 
@@ -51,4 +54,4 @@ If you don't find a desired database, you can contribute and add support by your
 
 ## Getting help
 
-You can find documentation and samples at [siisltdmigrations.readthedocs.io](https://siisltdmigrations.readthedocs.io/).
+You can find documentation and samples at [ReadTheDocs](https://siisltdmigrations.readthedocs.io/).

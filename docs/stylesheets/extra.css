@@ -1,0 +1,31 @@
+button[data-md-color-primary=red],
+[data-md-color-primary=red] .md-header,
+[data-md-color-primary=red] .md-hero {
+    background-color: #c23926;
+}
+
+[data-md-color-primary=red] .md-typeset a,
+[data-md-color-primary=red] .md-nav__link--active,
+[data-md-color-primary=red] .md-nav__link:active {
+    color: #c23926;
+}
+
+@media only screen and (max-width:76.1875em) {
+    html [data-md-color-primary=red] .md-nav--primary .md-nav__title--site,
+    [data-md-color-primary=red] .md-tabs {
+        background-color: #c23926;
+    }
+}
+
+code {
+    box-shadow: .29412em 0 0 hsla(0,0%,92.5%,.5),-.29412em 0 0 hsla(0,0%,92.5%,.5) !important;
+    background-color: hsla(0,0%,92.5%,.5) !important;
+}
+
+em {
+    word-wrap: break-word;
+}
+
+article ul li ul {
+    list-style-type: circle !important;
+}
