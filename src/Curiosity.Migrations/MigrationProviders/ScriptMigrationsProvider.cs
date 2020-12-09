@@ -62,7 +62,7 @@ namespace Curiosity.Migrations
         public ICollection<IMigration> GetMigrations(
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger)
+            ILogger? migrationLogger)
         {
             if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
             if (variables == null) throw new ArgumentNullException(nameof(variables));
@@ -133,7 +133,7 @@ namespace Curiosity.Migrations
             IDbProvider dbProvider,
             string? prefix,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger)
+            ILogger? migrationLogger)
         {
             if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
             if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
@@ -142,8 +142,8 @@ namespace Curiosity.Migrations
             var scripts = new Dictionary<DbVersion, ScriptInfo>();
 
             var regex = String.IsNullOrWhiteSpace(prefix)
-                ? new Regex($"([./]){MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
-                : new Regex($"({prefix}){MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
+                ? new Regex($"{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
+                : new Regex($"{prefix}{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
             
             foreach (var fileName in fileNames)
             {
@@ -154,7 +154,7 @@ namespace Curiosity.Migrations
                     continue;
                 }
 
-                if (!DbVersion.TryParse(match.Groups[2].Value, out var version))
+                if (!DbVersion.TryParse(match.Groups[1].Value, out var version))
                 {
                     migrationLogger?.LogWarning($"\"{fileName}\" has incorrect version migration.");
                     continue;
@@ -189,7 +189,7 @@ namespace Curiosity.Migrations
                         batch));
                 }
 
-                if (match.Groups[7].Success)
+                if (match.Groups[6].Success)
                 {
                     if (scriptInfo.DownScript.Count > 0)
                         throw new InvalidOperationException(
@@ -206,7 +206,7 @@ namespace Curiosity.Migrations
                     scriptInfo.UpScript.AddRange(batches);
                 }
                 
-                var comment = match.Groups[10];
+                var comment = match.Groups[9];
                 scriptInfo.Comment = comment.Success
                     ? comment.Value
                     : null;
@@ -273,7 +273,7 @@ namespace Curiosity.Migrations
             ScriptInfo scriptInfo,
             IDbProvider dbProvider,
             IReadOnlyDictionary<string, string> variables,
-            ILogger migrationLogger)
+            ILogger? migrationLogger)
         {
             var upScript = scriptInfo.UpScript;
             var downScript = scriptInfo.DownScript;

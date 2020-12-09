@@ -44,7 +44,7 @@ namespace Curiosity.Migrations
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private static void AssertMajor(long major)
         {
-            if (major <= 0) throw new ArgumentOutOfRangeException(nameof(major));
+            if (major < 0) throw new ArgumentOutOfRangeException(nameof(major));
         }
         
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local

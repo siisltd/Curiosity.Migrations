@@ -13,7 +13,7 @@ namespace Curiosity.Migrations
     /// </summary>
     public class ScriptMigration : IMigration
     {
-        protected readonly ILogger MigrationLogger;
+        protected readonly ILogger? MigrationLogger;
         protected readonly IDbProvider DbProvider;
         
         /// <inheritdoc />
@@ -31,7 +31,7 @@ namespace Curiosity.Migrations
         public IList<ScriptMigrationBatch> UpScripts { get; }
 
         public ScriptMigration(
-            ILogger migrationLogger,
+            ILogger? migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
             ICollection<ScriptMigrationBatch> upScripts,
