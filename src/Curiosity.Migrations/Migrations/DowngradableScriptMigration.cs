@@ -19,7 +19,7 @@ namespace Curiosity.Migrations
         public IList<ScriptMigrationBatch> DownScripts { get; }
         
         public DowngradableScriptMigration(
-            ILogger migrationLogger,
+            ILogger? migrationLogger,
             IDbProvider dbProvider,
             DbVersion version,
             ICollection<ScriptMigrationBatch> upScripts,

@@ -7,7 +7,7 @@ copyright: <a href="https://survey-studio.com">SIIS Ltd</a> © 2020
 nav:
   - 'Intro': index.md
   - 'Quick Start': quickstart.md
-  - 'Usage': usage.md
+  - 'Basics': basics.md
   - 'Features':
     - 'Script Migration':
       - 'What is it': features/script_migration/index.md
@@ -22,6 +22,7 @@ nav:
     - 'Pre-migrations': features/pre_migrations.md
     - 'Journal': features/journal.md
     - 'Downgrade': features/downgrade.md
+  - Samples: samples/index.md
   - 'Changelog':
     - 'Curiosity.Migration': changelog/curiosity.migration.md
     - 'Curiosity.Migration.PostgreSQL': changelog/curiosity.migration.postgres.md

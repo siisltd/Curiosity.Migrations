@@ -61,8 +61,8 @@ namespace Curiosity.Migrations.UnitTests
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
-            migrationsProvider.FromDirectory(path, "prefix");
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "ScriptsWithPrefix");
+            migrationsProvider.FromDirectory(path, "prefix-");
 
             var migrations = migrationsProvider
                 .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
@@ -129,7 +129,7 @@ namespace Curiosity.Migrations.UnitTests
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
-            migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly(), "PreMigration");
+            migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly(), "PreMigration.");
 
             var migrations = migrationsProvider
                 .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)

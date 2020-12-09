@@ -12,19 +12,23 @@ var builder = new MigratorBuilder();
 builder.UseVariable("%VARIABLIE%", variableValue);
 ```
 
-Then in your database script:
+### Script migrations
+
+Then in your database script use this variables:
 
 ```sql
 -- %VARIABLIE% %AnotherVariable%
 SELECT * FROM dbo.%VARIABLIE%
 ```
 
-Will execute:
+After running migrator script will be transformed:
 
 ```sql
 -- my_variable %AnotherVariable%
 SELECT * FROM dbo.my_variable
 ```
+
+### Code migrations
 
 ## Default variables
 
