@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1] - 2020-12-09
+
+### Fixed
+
+- Version parsing. 
+
 ## [3.0.0] - 2020-12-08
 
 ### Changed
