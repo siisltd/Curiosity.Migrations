@@ -150,7 +150,8 @@ namespace Curiosity.Migrations
                 var match = regex.Match(fileName);
                 if (!match.Success)
                 {
-                    migrationLogger?.LogWarning($"\"{fileName}\" has incorrect name for script migration.");
+                    // it's normal that some files doesn't match a regex, but we log, it's safer
+                    migrationLogger?.LogDebug($"\"{fileName}\" has incorrect name for script migration.");
                     continue;
                 }
 
