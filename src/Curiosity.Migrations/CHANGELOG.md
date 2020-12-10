@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.2] - 2020-12-10
+
+### Changed
+
+- Changed level of log for incorrect migration name from `Warning` to `Debug`.
+
 ## [3.0.1] - 2020-12-09
 
 ### Fixed
