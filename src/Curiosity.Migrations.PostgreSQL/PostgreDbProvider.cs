@@ -219,11 +219,12 @@ namespace Curiosity.Migrations.PostgreSQL
         }
 
         /// <inheritdoc />
-        public Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default)
+        public async Task CreateAppliedMigrationsTableIfNotExistsAsync(CancellationToken token = default)
         {
             AssertConnection(NpgsqlConnection);
 
-            var script = $"CREATE TABLE IF NOT EXISTS \"{AppliedMigrationsTableName}\" " +
+            // create table
+            var tableScript = $"CREATE TABLE IF NOT EXISTS \"{AppliedMigrationsTableName}\" " +
                          $"(id bigserial NOT NULL CONSTRAINT \"{AppliedMigrationsTableName}_pkey\" PRIMARY KEY, " +
                          "created timestamp default timezone('UTC'::text, now()) NOT NULL, " +
                          "name text, " +
@@ -235,11 +236,17 @@ namespace Curiosity.Migrations.PostgreSQL
 
                          $"ALTER TABLE \"{AppliedMigrationsTableName}\" OWNER TO {_defaultVariables[DefaultVariables.User]};";
             
-            return TryExecuteAsync(
-                () => InternalExecuteScriptAsync(NpgsqlConnection, script, token),
+            await TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, tableScript, token),
                 MigrationError.CreatingHistoryTable,
                 $"Can not create history table \"{AppliedMigrationsTableName}\" in database \"{DbName}\"");
             
+            // create index
+            var indexScript = $"CREATE UNIQUE INDEX IF NOT EXISTS ui_migration_history_version ON \"{AppliedMigrationsTableName}\" (version);";
+            await TryExecuteAsync(
+                () => InternalExecuteScriptAsync(NpgsqlConnection, indexScript, token),
+                MigrationError.CreatingHistoryTable,
+                $"Can not create unique index for history table \"{AppliedMigrationsTableName}\" in database \"{DbName}\"");
         }
 
         /// <inheritdoc />
