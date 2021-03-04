@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1] - 2021-03-04
+
+### Added
+
+- Added creation of unique index on version for migration history table.
+
 ## [3.0.0] - 2020-12-08
 
 ### Changed

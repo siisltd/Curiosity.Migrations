@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Curiosity.Migrations.UnitTests.CodeMigrations;
@@ -21,12 +22,6 @@ namespace Curiosity.Migrations.UnitTests
         {
             // arrange
 
-            var provider = new Mock<IDbProvider>();
-            var providerFactory = new Mock<IDbProviderFactory>();
-            providerFactory
-                .Setup(x => x.CreateDbProvider())
-                .Returns(provider.Object);
-            
             var services = new ServiceCollection();
             services.AddTransient<DependencyService>();
             services.AddMigrations(options =>
@@ -35,7 +30,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(providerFactory.Object);
+                    .UserDbProviderFactory(CreateDbProviderFactory());
             });
             
             // act
@@ -45,7 +40,21 @@ namespace Curiosity.Migrations.UnitTests
             // assert
 
             migrator.Should().NotBeNull("because we've registered it");
-        } 
+        }
+
+        private static IDbProviderFactory CreateDbProviderFactory()
+        {
+            var provider = new Mock<IDbProvider>();
+            provider
+                .Setup(x => x.GetDefaultVariables())
+                .Returns(new Dictionary<string, string>());
+            var providerFactory = new Mock<IDbProviderFactory>();
+            providerFactory
+                .Setup(x => x.CreateDbProvider())
+                .Returns(provider.Object);
+
+            return providerFactory.Object;
+        }
         
         /// <summary>
         /// Checks registering many migrators to IoC
@@ -54,12 +63,6 @@ namespace Curiosity.Migrations.UnitTests
         public void AddDifferentMigrationToService()
         {
             // arrange
-
-            var provider = new Mock<IDbProvider>();
-            var providerFactory = new Mock<IDbProviderFactory>();
-            providerFactory
-                .Setup(x => x.CreateDbProvider())
-                .Returns(provider.Object);
             
             var services = new ServiceCollection();      
             services.AddTransient<DependencyService>();
@@ -70,7 +73,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(providerFactory.Object);
+                    .UserDbProviderFactory(CreateDbProviderFactory());
             });
 
             services.AddMigrations(options =>
@@ -79,7 +82,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseCodeMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(providerFactory.Object);
+                    .UserDbProviderFactory(CreateDbProviderFactory());
             });
             
             // act

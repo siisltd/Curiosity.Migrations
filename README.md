@@ -1,4 +1,4 @@
-# Curiosity.Migrations [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/siisltdmigrations/badge/?version=latest)](https://siisltdmigrations.readthedocs.io/?badge=latest)
+# Curiosity.Migrations [![Build Status](https://travis-ci.org/MarvinBand/Migrations.svg?branch=master)](https://travis-ci.org/MarvinBand/Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
 
 
 Database migration framework for .NET and .NET Core.
@@ -55,4 +55,4 @@ If you don't find a desired database, you can contribute and add support by your
 
 ## Getting help
 
-You can find documentation and samples at [ReadTheDocs](https://siisltdmigrations.readthedocs.io/).
+You can find documentation and samples at [ReadTheDocs](https://curiosity-migrations.readthedocs.io/).
