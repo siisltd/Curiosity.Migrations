@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.3] - 2021-03-08
+
+### Changed
+
+- Updated package info.
+
 ## [3.0.2] - 2020-12-10
 
 ### Changed
