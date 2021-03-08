@@ -4,22 +4,39 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         
         <PackageId>Curiosity.Migrations</PackageId>
-        <Version>3.0.2</Version>
-        <Authors>Maxim Markelow, Kirill Lutsenko, Andrei Vinogradov</Authors>
+        <Title>Curiosity.Migrations is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.</Title>
+        <Description>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Description>
+        <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
+
+        <PackageVersion>3.0.3</PackageVersion>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+        
+        <Authors>Maxim Markelow (@markeli), Kirill Lutsenko, Andrei Vinogradov</Authors>
         <Company>SIIS Ltd</Company>
-        <PackageLicenseUrl>https://github.com/SIIS-Ltd/Migrations/blob/master/LICENSE/</PackageLicenseUrl>
-        <PackageProjectUrl>https://github.com/SIIS-Ltd/Migrations</PackageProjectUrl>
-        <PackageIconUrl>https://github.com/SIIS-Ltd/Migrations/raw/master/siisltd.png</PackageIconUrl>
+        <Copyright>SIIS Ltd, 2021</Copyright>
+
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <Title>Migration tool for .NET</Title>
-        <Description>Migration tool for .NET: supports sql script migrations and custom migrations written by C#</Description>
-        <PackageReleaseNotes>https://github.com/SIIS-Ltd/Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
-        <PackageTags>migration; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        
+        <PackageProjectUrl>https://curiosity-migrations.readthedocs.io/</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
+        <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
+
         <LangVersion>8</LangVersion>
         <Nullable>enable</Nullable>
-        
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <PackageIcon>siisltd.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\siisltd.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />

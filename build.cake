@@ -10,6 +10,9 @@ var packages = "./artifacts/packages";
 var solutionPath = "./Curiosity.Migrations.sln";
 var framework = "netstandard2.0";
 
+var nugetSource = "https://api.nuget.org/v3/index.json";
+var nugetApiKey = Argument<string>("nugetApiKey", null);
+
 var isMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master",
     BuildSystem.TravisCI.Environment.Build.Branch);
 
@@ -42,7 +45,6 @@ Task("Build")
     });
 
 Task("UnitTests")
-    .IsDependentOn("Build")
     .Does(() =>
     {        
         Information("UnitTests task...");
@@ -62,8 +64,6 @@ Task("UnitTests")
     });
      
 Task("IntegrationTests")
-    .IsDependentOn("Build")
-    .IsDependentOn("UnitTests")
     .Does(() =>
     {        
         Information("IntegrationTests task...");
@@ -105,10 +105,37 @@ Task("Pack")
          
           DotNetCorePack(solutionPath, settings);
     });
+ 
+Task("Publish")
+    .IsDependentOn("Pack")
+    .Does(() =>
+    {
+         var pushSettings = new DotNetCoreNuGetPushSettings 
+         {
+             Source = nugetSource,
+             ApiKey = nugetApiKey,
+             SkipDuplicate = true
+         };
+         
+         var pkgs = GetFiles($"{packages}/*.nupkg");
+         foreach(var pkg in pkgs) 
+         {     
+             Information($"Publishing \"{pkg}\".");
+             DotNetCoreNuGetPush(pkg.FullPath, pushSettings);
+         }
+ });
+ 
     
 Task("Default")
     .IsDependentOn("Build")
     .IsDependentOn("UnitTests")
     .IsDependentOn("IntegrationTests");
     
+Task("TravisCI")
+    .IsDependentOn("Build")
+    .IsDependentOn("UnitTests")
+    .IsDependentOn("IntegrationTests")
+    .IsDependentOn("Pack")
+    .IsDependentOn("Publish");
+  
 RunTarget(target);
