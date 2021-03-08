@@ -13,9 +13,6 @@ var framework = "netstandard2.0";
 var nugetSource = "https://api.nuget.org/v3/index.json";
 var nugetApiKey = Argument<string>("nugetApiKey", null);
 
-var isMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master",
-    BuildSystem.TravisCI.Environment.Build.Branch);
-
 Task("Clean")
     .Does(() => 
     {            
