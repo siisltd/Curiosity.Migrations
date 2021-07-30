@@ -29,7 +29,5 @@ jobs:
       - name: Unit tests
         run: ./build.sh -t UnitTests --exclusive
       - name: Integration tests
-        run: |
-          whoami
-          ./build.sh -t IntegrationTests --exclusive
+        run: ./build.sh -t IntegrationTests --exclusive
 
