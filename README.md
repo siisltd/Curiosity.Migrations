@@ -1,12 +1,12 @@
-# Curiosity.Migrations [![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
+# Curiosity.Migrations [![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
 
 
 Database migration framework for .NET and .NET Core.
 
 |Branch|Build status|
 |---|---|
-|master|[![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
-|develop|[![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
+|master|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
+|develop|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
 
 `Curiosity.Migrations` is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.
 
