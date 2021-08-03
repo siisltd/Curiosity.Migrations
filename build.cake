@@ -8,7 +8,7 @@ var configuration = Argument<string>("configuration", "Release");
 var artifactsDir = Directory("./artifacts");
 var packages = "./artifacts/packages";
 var solutionPath = "./Curiosity.Migrations.sln";
-var framework = "netstandard2.0";
+var framework = "netstandard2.1";
 
 var nugetSource = "https://api.nuget.org/v3/index.json";
 var nugetApiKey = Argument<string>("nugetApiKey", null);
@@ -107,6 +107,25 @@ Task("Publish")
     .IsDependentOn("Pack")
     .Does(() =>
     {
+         var pushSettings = new DotNetCoreNuGetPushSettings
+         {
+             Source = nugetSource,
+             ApiKey = nugetApiKey,
+             SkipDuplicate = true
+         };
+
+         var pkgs = GetFiles($"{packages}/*.nupkg");
+         foreach(var pkg in pkgs)
+         {
+             Information($"Publishing \"{pkg}\".");
+             DotNetCoreNuGetPush(pkg.FullPath, pushSettings);
+         }
+ });
+ 
+Task("ForcePublish")
+    .IsDependentOn("Pack")
+    .Does(() =>
+    {
          var pushSettings = new DotNetCoreNuGetPushSettings 
          {
              Source = nugetSource,
@@ -120,15 +139,14 @@ Task("Publish")
              Information($"Publishing \"{pkg}\".");
              DotNetCoreNuGetPush(pkg.FullPath, pushSettings);
          }
- });
- 
+ }); 
     
 Task("Default")
     .IsDependentOn("Build")
     .IsDependentOn("UnitTests")
     .IsDependentOn("IntegrationTests");
     
-Task("TravisCI")
+Task("GitHub")
     .IsDependentOn("Build")
     .IsDependentOn("UnitTests")
     .IsDependentOn("IntegrationTests")

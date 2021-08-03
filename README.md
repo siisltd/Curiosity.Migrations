@@ -1,12 +1,12 @@
-# Curiosity.Migrations [![Build Status](https://travis-ci.org/siisltd/Curiosity.Migrations.svg?branch=master)](https://travis-ci.org/siisltd/Curiosity.Migrations) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
+# Curiosity.Migrations [![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
 
 
 Database migration framework for .NET and .NET Core.
 
 |Branch|Build status|
 |---|---|
-|master|[![Build Status](https://travis-ci.org/siisltd/Curiosity.Migrations.svg?branch=master)](https://travis-ci.org/siisltd/Curiosity.Migrations)|
-|develop|[![Build Status](https://travis-ci.org/siisltd/Curiosity.Migrations.svg?branch=develop)](https://travis-ci.org/siisltd/Curiosity.Migrations)|
+|master|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
+|develop|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
 
 `Curiosity.Migrations` is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.
 
@@ -49,8 +49,8 @@ If you don't find a desired database, you can contribute and add support by your
 
 | Package | Build Status | Version | Downloads |
 |---------|------------|------------|------------|
-| Curiosity.Migrations | [![Build Status](https://travis-ci.org/siisltd/Curiosity.Migrations.svg?branch=master)](https://travis-ci.org/siisltd/Curiosity.Migrations) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
-| Curiosity.Migrations.PostgreSQL | [![Build Status](https://travis-ci.org/siisltd/Curiosity.Migrations.svg?branch=master)](https://travis-ci.org/siisltd/Curiosity.Migrations) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
+| Curiosity.Migrations | [![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
+| Curiosity.Migrations.PostgreSQL | [![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
 
 
 ## Getting help

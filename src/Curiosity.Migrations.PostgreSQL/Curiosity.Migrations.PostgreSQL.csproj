@@ -4,9 +4,11 @@
         <TargetFramework>netstandard2.0</TargetFramework>
 
         <PackageId>Curiosity.Migrations.PostgreSQL</PackageId>
-        <Title>PostgreSQL provier for Curiosity.Migrations. Curiosity.Migrations is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.</Title>
-        <Description>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Description>
+        <Title>PostgreSQL provier for Curiosity.Migrations. </Title>
+        <Description>Curiosity.Migrations is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.</Description>
+        <Summary>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Summary>
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
+        <Language>English</Language>
 
         <PackageVersion>3.0.2</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
