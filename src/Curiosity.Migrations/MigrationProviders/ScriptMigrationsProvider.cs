@@ -239,7 +239,7 @@ namespace Curiosity.Migrations
                 switch (optionsMatch.Groups[1].Value.ToUpper())
                 {
                     case "TRANSACTION":
-                        switch (optionsMatch.Groups[2].Value.ToUpper().TrimEnd(';'))
+                        switch (optionsMatch.Groups[2].Value.ToUpper().Trim().TrimEnd(';'))
                         {
                             case "ON":
                                 options.IsTransactionRequired = true;
