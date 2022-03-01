@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +9,7 @@ namespace Curiosity.Migrations
     /// <summary>
     /// Builder for <see cref="IDbMigrator"/>
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class MigratorBuilder
     {
         private MigrationPolicy _upgradePolicy;

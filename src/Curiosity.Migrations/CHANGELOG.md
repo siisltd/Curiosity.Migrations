@@ -6,6 +6,12 @@
 
 - Fixed transaction block parsing.
 
+## [3.0.5] - 2022-03-01
+
+### Fixed
+
+- Fixed applying migrations via patch strategy.
+
 ## [3.0.3] - 2021-03-08
 
 ### Changed

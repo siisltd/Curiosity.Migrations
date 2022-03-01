@@ -31,7 +31,7 @@ namespace Curiosity.Migrations
         /// <param name="upgradePolicy">Policy for upgrading database</param>
         /// <param name="downgradePolicy">Policy for downgrading database</param>
         /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
-        /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version</param>
+        /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version.</param>
         /// <param name="logger">Optional logger</param>
         public DbMigrator(
             IDbProvider dbProvider,
@@ -88,8 +88,8 @@ namespace Curiosity.Migrations
         {
             try
             {
-                await MigrateAsync(token);
-                return MigrationResult.SuccessfullyResult();
+                var appliedMigrationsCount = await MigrateAsync(token);
+                return MigrationResult.SuccessfullyResult(appliedMigrationsCount);
             }
             catch (MigrationException e)
             {
@@ -104,14 +104,14 @@ namespace Curiosity.Migrations
         }
 
         /// <inheritdoc />
-        public async Task MigrateAsync(CancellationToken token = default)
+        public async Task<int> MigrateAsync(CancellationToken token = default)
         {
             try
             {
                 if (_migrationMap.Count == 0)
                 {
                     _logger?.LogWarning("No migrations were added to migrator. Skip migration");
-                    return;
+                    return 0;
                 }
 
                 // check if database exists and create if not
@@ -125,7 +125,7 @@ namespace Curiosity.Migrations
                 {
                     _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" doesn't exist. Creating database...");
                     await _dbProvider.CreateDatabaseIfNotExistsAsync(token);
-                    _logger?.LogInformation("Creating database completed.");
+                    _logger?.LogInformation("Creating database completed");
                 }
 
                 await _dbProvider.OpenConnectionAsync(token);
@@ -150,7 +150,7 @@ namespace Curiosity.Migrations
                 if (migrationsToApply.Count == 0)
                 {
                     _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
-                    return;
+                    return 0;
                 }
 
                 _logger?.LogInformation($"Executing pre-migration scripts for database \"{_dbProvider.DbName}\"...");
@@ -164,13 +164,13 @@ namespace Curiosity.Migrations
                 }
                 else
                 {
-                    _logger?.LogInformation("No pre-migration scripts were found.");
+                    _logger?.LogInformation("No pre-migration scripts were found");
                 }
 
                 if (migrationsToApply.Count == 0)
                 {
                     _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
-                    return;
+                    return 0;
                 }
 
                 _logger?.LogInformation($"Migrating database \"{_dbProvider.DbName}\"...");
@@ -180,7 +180,9 @@ namespace Curiosity.Migrations
                 await MigrateAsync(migrationsToApply, isUpgrade, policy, token);
 
                 await _dbProvider.CloseConnectionAsync();
-                _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed.");
+                _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed. Successfully applied {migrationsToApply.Count} migrations");
+
+                return migrationsToApply.Count;
             }
             catch (MigrationException)
             {
@@ -195,27 +197,29 @@ namespace Curiosity.Migrations
             }
         }
 
-        private async Task<(bool isUpgrade, IReadOnlyCollection<IMigration> migrations)> GetMigrationsAsync(bool isPreMigration, CancellationToken token)
+        private async Task<(bool isUpgrade, IReadOnlyCollection<IMigration> migrations)> GetMigrationsAsync(
+            bool isPreMigration,
+            CancellationToken token)
         {
             var stageName = isPreMigration ? " after pre-migration" : "";
             _logger?.LogInformation($"Getting migrations to apply{stageName}...");
             
             // build target version
             var maxAvailableMigrationVersion = _migrationMap.Values.Max(x => x.Version);
-            var targetVersion = _targetVersion ?? maxAvailableMigrationVersion; // by default we do upgrade to max available version
-            
+
             // get applied migrations versions
-            
             var appliedMigrationVersions = await _dbProvider.GetAppliedMigrationVersionAsync(token);
 
-            // provider should order migrations by version ascending, but we can't trust them
+            // provider should order migrations by version ascending, but we can't trust them, because it can be external
             appliedMigrationVersions = appliedMigrationVersions.OrderBy(x => x).ToArray();
             
             var maxAppliedMigration = appliedMigrationVersions.LastOrDefault();
-            
+
+            _logger?.LogInformation($"Max available migration version = {maxAvailableMigrationVersion}" +
+                                   $"Available migrations count = {_migrationMap.Count}");
             if (appliedMigrationVersions.Count == 0)
             {
-                _logger?.LogInformation("No migrations were applied.");
+                _logger?.LogInformation("No migrations were applied");
             }
             else
             {
@@ -230,14 +234,18 @@ namespace Curiosity.Migrations
             var migrationsToApply = new List<IMigration>();
 
             bool isUpgrade;
-            // it's upgrade
-            if (targetVersion >= maxAppliedMigration) // no strictly comparision because of patch migration strategy
+            // if no target version is specified or target version is greater than max applied
+            if (!_targetVersion.HasValue || _targetVersion.Value >= maxAppliedMigration)
             {
                 // we need only not applied migrations
                 availableMigrationVersions.ExceptWith(appliedMigrationVersions);
-                var notAppliedMigrationVersions = availableMigrationVersions
-                    .Where(x => x <= targetVersion)
-                    .OrderBy(x => x);
+                var query = availableMigrationVersions.AsEnumerable();
+                if (_targetVersion.HasValue)
+                {
+                    query = query.Where(x => x <= _targetVersion.Value);
+                }
+
+                var notAppliedMigrationVersions = query.OrderBy(x => x);
 
                 foreach (var notAppliedMigrationVersion in notAppliedMigrationVersions)
                 {
@@ -253,7 +261,7 @@ namespace Curiosity.Migrations
                 // we do not check implementation of IDowngradableMigration here
                 availableMigrationVersions.IntersectWith(appliedMigrationVersions);
                 var migrationsVersionsToApply = availableMigrationVersions
-                    .Where(x => x > targetVersion)
+                    .Where(x => x > _targetVersion.Value)
                     .OrderByDescending(x => x);
 
                 foreach (var downgradeMigrationVersion in migrationsVersionsToApply)
@@ -265,7 +273,7 @@ namespace Curiosity.Migrations
                 isUpgrade = false;
             }
 
-            _logger?.LogInformation($"Getting migrations to apply{stageName} completed.");
+            _logger?.LogInformation($"Getting migrations to apply{stageName} completed. Found {migrationsToApply.Count} migrations to apply.");
             
             return (isUpgrade, migrationsToApply);
         }
