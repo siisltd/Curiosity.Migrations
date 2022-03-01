@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.4] - 2021-08-03
+
+### Changed
+
+- Fixed transaction block parsing.
+
 ## [3.0.5] - 2022-03-01
 
 ### Fixed
