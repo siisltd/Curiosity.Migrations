@@ -1,16 +1,22 @@
 # Changelog
 
-## [3.0.4] - 2021-08-03
+## [3.0.6] - 2022-03-01
 
-### Changed
+### Fixed
 
-- Fixed transaction block parsing.
+- Fixed log message.
 
 ## [3.0.5] - 2022-03-01
 
 ### Fixed
 
 - Fixed applying migrations via patch strategy.
+
+## [3.0.4] - 2021-08-03
+
+### Changed
+
+- Fixed transaction block parsing.
 
 ## [3.0.3] - 2021-03-08
 

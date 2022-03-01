@@ -215,7 +215,7 @@ namespace Curiosity.Migrations
             
             var maxAppliedMigration = appliedMigrationVersions.LastOrDefault();
 
-            _logger?.LogInformation($"Max available migration version = {maxAvailableMigrationVersion}" +
+            _logger?.LogInformation($"Max available migration version = {maxAvailableMigrationVersion}. " +
                                    $"Available migrations count = {_migrationMap.Count}");
             if (appliedMigrationVersions.Count == 0)
             {

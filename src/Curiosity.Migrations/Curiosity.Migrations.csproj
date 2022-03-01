@@ -10,7 +10,7 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
         <Language>English</Language>
 
-        <PackageVersion>3.0.5</PackageVersion>
+        <PackageVersion>3.0.6</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
         
