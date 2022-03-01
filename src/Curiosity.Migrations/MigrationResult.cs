@@ -23,19 +23,27 @@ namespace Curiosity.Migrations
         /// </summary>
         public string ErrorMessage { get; }
 
-        private MigrationResult(MigrationError? error, string errorMessage)
+        /// <summary>
+        /// Count of applied migrations during this migrator's running.
+        /// </summary>
+        public int AppliedMigrationsCount { get; }
+
+        private MigrationResult(MigrationError? error, string errorMessage, int appliedMigrationsCount)
         {
             Error = error;
             ErrorMessage = errorMessage;
+            AppliedMigrationsCount = appliedMigrationsCount;
         }
 
         /// <summary>
         /// Create successfully migration result
         /// </summary>
         /// <returns></returns>
-        public static MigrationResult SuccessfullyResult()
+        public static MigrationResult SuccessfullyResult(int appliedMigrationsCount)
         {
-            return new MigrationResult(null, String.Empty);
+            if (appliedMigrationsCount < 0) throw new ArgumentOutOfRangeException(nameof(appliedMigrationsCount));
+
+            return new MigrationResult(null, String.Empty, appliedMigrationsCount);
         }
 
         /// <summary>
@@ -46,7 +54,7 @@ namespace Curiosity.Migrations
         /// <returns></returns>
         public static MigrationResult FailureResult(MigrationError error, string errorMessage)
         {
-            return new MigrationResult(error, errorMessage);
+            return new MigrationResult(error, errorMessage, 0);
         }
     }
 }

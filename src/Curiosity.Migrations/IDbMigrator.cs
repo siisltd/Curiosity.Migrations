@@ -12,7 +12,8 @@ namespace Curiosity.Migrations
         /// Execute migration
         /// </summary>
         /// <exception cref="MigrationException"></exception>
-        Task MigrateAsync(CancellationToken token = default);
+        /// <returns>Count of applied migrations.</returns>
+        Task<int> MigrateAsync(CancellationToken token = default);
 
         /// <summary>
         /// Execute migration without throwing exception
