@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.7] - 2022-04-21
+
+### Added
+
+- Added option to disabling warn about incorrect script migrations naming.
+
 ## [3.0.6] - 2022-03-01
 
 ### Fixed
