@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.0] - 2022-07-29
+
+### Added
+
+- Added `MassUpdateCodeMigrationBase` for mass updates.
+
 ## [3.0.7] - 2022-04-21
 
 ### Added
