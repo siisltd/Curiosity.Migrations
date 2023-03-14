@@ -15,6 +15,7 @@ namespace Curiosity.Migrations
     {
         private readonly Dictionary<string, string?> _absoluteDirectoriesPathWithPrefix;
         private readonly Dictionary<Assembly, string?> _assembliesWithPrefix;
+        private bool _warnAboutIncorrectNaming;
 
         public ScriptMigrationsProvider()
         {
@@ -22,6 +23,7 @@ namespace Curiosity.Migrations
             _absoluteDirectoriesPathWithPrefix = new Dictionary<string, string?>(1);
             // usually only one item will be added
             _assembliesWithPrefix = new Dictionary<Assembly, string?>(1);
+            _warnAboutIncorrectNaming = false;
         }
 
         /// <summary>
@@ -29,8 +31,12 @@ namespace Curiosity.Migrations
         /// </summary>
         /// <param name="path">Path to directory where scripts are located. Can be relative and absolute.</param>
         /// <param name="prefix">Specific part of name or path. If no prefix specified provider will process only files without any prefix</param>
+        /// <param name="warnAboutIncorrectNaming">Should provider made warn log about script files with incorrect naming.</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromDirectory(string path, string? prefix = null)
+        public ScriptMigrationsProvider FromDirectory(
+            string path,
+            string? prefix = null,
+            bool warnAboutIncorrectNaming = false)
         {
             if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 
@@ -39,6 +45,7 @@ namespace Curiosity.Migrations
                 : Path.Combine(Directory.GetCurrentDirectory(), path);
 
             _absoluteDirectoriesPathWithPrefix[innerPath] = prefix;
+            _warnAboutIncorrectNaming = warnAboutIncorrectNaming;
 
             return this;
         }
@@ -48,12 +55,14 @@ namespace Curiosity.Migrations
         /// </summary>
         /// <param name="assembly"></param>
         /// <param name="prefix">Specific part of name or namespace part. If no prefix specified provider will process only files without any prefix</param>
+        /// <param name="warnAboutIncorrectNaming">Should provider made warn log about script files with incorrect naming.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScriptMigrationsProvider FromAssembly(Assembly assembly, string? prefix = null)
+        public ScriptMigrationsProvider FromAssembly(Assembly assembly, string? prefix = null, bool warnAboutIncorrectNaming = false)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
             _assembliesWithPrefix[assembly] = prefix;
+            _warnAboutIncorrectNaming = warnAboutIncorrectNaming;
 
             return this;
         }
@@ -151,7 +160,16 @@ namespace Curiosity.Migrations
                 if (!match.Success)
                 {
                     // it's normal that some files doesn't match a regex, but we log, it's safer
-                    migrationLogger?.LogDebug($"\"{fileName}\" has incorrect name for script migration.");
+                    var message = $"\"{fileName}\" has incorrect name for script migration";
+                    if (_warnAboutIncorrectNaming)
+                    {
+                        migrationLogger?.LogWarning(message);
+                    }
+                    else
+                    {
+                        migrationLogger?.LogTrace(message);
+                    }
+
                     continue;
                 }
 

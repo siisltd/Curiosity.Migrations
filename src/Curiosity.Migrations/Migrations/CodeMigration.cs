@@ -40,7 +40,7 @@ namespace Curiosity.Migrations
         protected ILogger? Logger { get; private set; }
 
         /// <summary>
-        /// Initializes migration 
+        /// Initializes the migration. 
         /// </summary>
         /// <param name="dbProvider">Provider for DB access</param>
         /// <param name="variables">Variables for migrations</param>

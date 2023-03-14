@@ -64,11 +64,11 @@ Task("IntegrationTests")
     .Does(() =>
     {        
         Information("IntegrationTests task...");
-		
+
         Information("Running docker...");
         StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml up -d");
-		Information("Running docker completed");
-		
+        Information("Running docker completed");
+
         var projects = GetFiles("./tests/IntegrationTests/**/*csproj");
         foreach(var project in projects)
         {

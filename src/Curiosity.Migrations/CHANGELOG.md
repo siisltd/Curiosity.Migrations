@@ -1,16 +1,34 @@
 # Changelog
 
-## [3.0.4] - 2021-08-03
+## [3.1.0] - 2022-07-29
 
-### Changed
+### Added
 
-- Fixed transaction block parsing.
+- Added `MassUpdateCodeMigrationBase` for mass updates.
+
+## [3.0.7] - 2022-04-21
+
+### Added
+
+- Added option to disabling warn about incorrect script migrations naming.
+
+## [3.0.6] - 2022-03-01
+
+### Fixed
+
+- Fixed log message.
 
 ## [3.0.5] - 2022-03-01
 
 ### Fixed
 
 - Fixed applying migrations via patch strategy.
+
+## [3.0.4] - 2021-08-03
+
+### Changed
+
+- Fixed transaction block parsing.
 
 ## [3.0.3] - 2021-03-08
 
