@@ -12,7 +12,8 @@ namespace Curiosity.Migrations.PostgreSQL
         /// <summary>
         /// Default value for <see cref="MigrationHistoryTableName"/>
         /// </summary>
-        public const string DefaultMigrationTableName = "MigrationHistory";
+        // ReSharper disable once MemberCanBePrivate.Global
+        public const string DefaultMigrationTableName = "migration_history";
 
         /// <inheritdoc />
         public string ConnectionString { get; }
@@ -68,6 +69,7 @@ namespace Curiosity.Migrations.PostgreSQL
         /// </summary>
         public string? TableSpace { get; }
 
+        /// <inheritdoc cref="PostgreDbProviderOptions"/>
         public PostgreDbProviderOptions(
             string connectionString,
             string? migrationHistoryTableName = null,

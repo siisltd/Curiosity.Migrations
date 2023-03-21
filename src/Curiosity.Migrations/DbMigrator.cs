@@ -15,13 +15,13 @@ namespace Curiosity.Migrations
     {
         private readonly ILogger? _logger;
         private readonly IDbProvider _dbProvider;
-        
+
         private readonly MigrationPolicy _upgradePolicy;
         private readonly MigrationPolicy _downgradePolicy;
         private readonly DbVersion? _targetVersion;
 
         private readonly IReadOnlyDictionary<DbVersion, IMigration> _migrationMap;
-        private readonly ICollection<IMigration> _preMigrations;
+        private readonly IReadOnlyList<IMigration> _preMigrations;
 
         /// <summary>
         /// Default realisation of <see cref="IDbMigrator"/>
@@ -35,10 +35,10 @@ namespace Curiosity.Migrations
         /// <param name="logger">Optional logger</param>
         public DbMigrator(
             IDbProvider dbProvider,
-            ICollection<IMigration> migrations,
+            IReadOnlyList<IMigration> migrations,
             MigrationPolicy upgradePolicy,
             MigrationPolicy downgradePolicy,
-            ICollection<IMigration>? preMigrations = null,
+            IReadOnlyList<IMigration>? preMigrations = null,
             DbVersion? targetVersion = null,
             ILogger? logger = null)
         {
@@ -61,11 +61,12 @@ namespace Curiosity.Migrations
             _upgradePolicy = upgradePolicy;
             _downgradePolicy = downgradePolicy;
             _targetVersion = targetVersion;
-            
+
             _preMigrations = preMigrations ?? Array.Empty<IMigration>();
             var preMigrationCheckMap = new HashSet<DbVersion>();
-            foreach (var migration in _preMigrations)
+            for (var i = 0; i < _preMigrations.Count; i++)
             {
+                var migration = _preMigrations[i];
                 if (preMigrationCheckMap.Contains(migration.Version))
                     throw new ArgumentException($"There is more than one pre-migration with version = {migration.Version}", nameof(preMigrations));
 
@@ -86,6 +87,11 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public async Task<MigrationResult> MigrateSafeAsync(CancellationToken token = default)
         {
+            //TODO:
+            // 1. Make this method main for migration, make MigrateAsync internal
+            // 2. Extend migration result with skipped migrations and skip reason (maybe add something like SkipMigrationInfo with step, reason, version and name)
+            // 3. Check policy on migration 
+
             try
             {
                 var appliedMigrationsCount = await MigrateAsync(token);
@@ -203,7 +209,7 @@ namespace Curiosity.Migrations
         {
             var stageName = isPreMigration ? " after pre-migration" : "";
             _logger?.LogInformation($"Getting migrations to apply{stageName}...");
-            
+
             // build target version
             var maxAvailableMigrationVersion = _migrationMap.Values.Max(x => x.Version);
 
@@ -212,11 +218,11 @@ namespace Curiosity.Migrations
 
             // provider should order migrations by version ascending, but we can't trust them, because it can be external
             appliedMigrationVersions = appliedMigrationVersions.OrderBy(x => x).ToArray();
-            
+
             var maxAppliedMigration = appliedMigrationVersions.LastOrDefault();
 
             _logger?.LogInformation($"Max available migration version = {maxAvailableMigrationVersion}. " +
-                                   $"Available migrations count = {_migrationMap.Count}");
+                                    $"Available migrations count = {_migrationMap.Count}");
             if (appliedMigrationVersions.Count == 0)
             {
                 _logger?.LogInformation("No migrations were applied");
@@ -226,11 +232,11 @@ namespace Curiosity.Migrations
                 _logger?.LogInformation($"Max applied migration version = {maxAppliedMigration}. " +
                                         $"Applied migrations count = {appliedMigrationVersions.Count}");
             }
-            
+
             // build list of migrations to apply
-            
+
             var availableMigrationVersions = new HashSet<DbVersion>(_migrationMap.Values.Select(x => x.Version));
-            
+
             var migrationsToApply = new List<IMigration>();
 
             bool isUpgrade;
@@ -274,7 +280,7 @@ namespace Curiosity.Migrations
             }
 
             _logger?.LogInformation($"Getting migrations to apply{stageName} completed. Found {migrationsToApply.Count} migrations to apply.");
-            
+
             return (isUpgrade, migrationsToApply);
         }
 
@@ -294,9 +300,9 @@ namespace Curiosity.Migrations
             foreach (var migration in desiredMigrations)
             {
                 token.ThrowIfCancellationRequested();
-                
+
                 DbTransaction? transaction = null;
-                
+
                 await _dbProvider.CloseConnectionAsync();
                 await _dbProvider.OpenConnectionAsync(token);
 
@@ -304,7 +310,7 @@ namespace Curiosity.Migrations
                 {
                     _logger?.LogInformation(
                         $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for database \"{_dbProvider.DbName}\"...");
-                    
+
                     if (migration.IsTransactionRequired)
                     {
                         transaction = _dbProvider.BeginTransaction();
@@ -313,7 +319,7 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogWarning($"Transaction is disabled for pre-migration {migration.Version}");
                     }
-                    
+
                     await migration.UpgradeAsync(transaction, token);
 
                     transaction?.Commit();
@@ -333,24 +339,31 @@ namespace Curiosity.Migrations
                     transaction?.Dispose();
                 }
             }
+
             return true;
         }
 
-        private async Task MigrateAsync(IReadOnlyCollection<IMigration> orderedMigrations, bool isUpgrade, MigrationPolicy policy, CancellationToken token = default)
+        private async Task MigrateAsync(
+            IReadOnlyCollection<IMigration> orderedMigrations,
+            bool isUpgrade,
+            MigrationPolicy policy,
+            CancellationToken token = default)
         {
-            if (policy == MigrationPolicy.Forbidden)
-                throw new MigrationException(MigrationError.PolicyError, $"{(isUpgrade ? "Upgrading": "Downgrading")} is forbidden due to migration policy");
-            
+            if (policy == MigrationPolicy.AllForbidden)
+                throw new MigrationException(MigrationError.PolicyError, $"{(isUpgrade ? "Upgrading" : "Downgrading")} is forbidden due to migration policy");
+
             if (orderedMigrations.Count == 0) return;
-            
+
             var operationName = isUpgrade
                 ? "Upgrade"
                 : "Downgrade";
             foreach (var migration in orderedMigrations)
             {
                 token.ThrowIfCancellationRequested();
-                
+
                 DbTransaction? transaction = null;
+
+                // check policy, return result
 
                 try
                 {
@@ -367,9 +380,9 @@ namespace Curiosity.Migrations
                     {
                         _logger?.LogWarning($"Transaction is disabled for migration {migration.Version}");
                     }
-                    
+
                     _logger?.LogInformation($"{operationName} to {migration.Version} ({migration.Comment} for database \"{_dbProvider.DbName}\")...");
-                    
+
                     if (isUpgrade)
                     {
                         await migration.UpgradeAsync(transaction, token);
@@ -403,7 +416,7 @@ namespace Curiosity.Migrations
                 }
             }
         }
-        
+
         /// <inheritdoc />
         public void Dispose()
         {

@@ -14,10 +14,11 @@ namespace Curiosity.Migrations
     /// </summary>
     /// <remarks>
     /// Disables transactions for migrations. Transactions must be created manually inside this migration.
+    /// Also sets <see cref="CodeMigration.IsLongRunning"/> option.
     /// </remarks>
     public abstract class MassUpdateCodeMigrationBase : CodeMigration
     {
-       /// <summary>
+        /// <summary>
         /// Delay between update iterations.
         /// </summary>
         protected TimeSpan StepDelay { get; }
@@ -27,6 +28,7 @@ namespace Curiosity.Migrations
         {
             StepDelay = stepDelay;
             IsTransactionRequired = false;
+            IsLongRunning = true;
         }
 
         /// <summary>

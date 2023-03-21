@@ -6,7 +6,6 @@ Database migration framework for .NET and .NET Core.
 |Branch|Build status|
 |---|---|
 |master|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
-|develop|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
 
 `Curiosity.Migrations` is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.
 

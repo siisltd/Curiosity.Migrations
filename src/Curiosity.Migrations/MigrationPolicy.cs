@@ -6,13 +6,23 @@ namespace Curiosity.Migrations
     public enum MigrationPolicy
     {
         /// <summary>
-        /// All migrations are forbidden
+        /// All migrations are forbidden.
         /// </summary>
-        Forbidden = 0x0,
+        AllForbidden = 0x000000,
 
         /// <summary>
-        /// All migrations are allowed
+        /// Allowed to run short running migrations.
         /// </summary>
-        Allowed = 0x1
+        ShortRunningAllowed = 0x000001,
+
+        /// <summary>
+        /// Allowed to run long running migrations.
+        /// </summary>
+        LongRunningAllowed = 0x000002,
+
+        /// <summary>
+        /// All migrations are allowed.
+        /// </summary>
+        AllAllowed = 0xFFFFFF
     }
 }

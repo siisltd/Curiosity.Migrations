@@ -22,8 +22,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
             builder.SetUpTargetVersion(new DbVersion(3, 0));
 
             var migrator = builder.Build();
@@ -56,8 +56,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
             builder.SetUpTargetVersion(new DbVersion(5, 0));
 
             var migrator = builder.Build();
@@ -92,8 +92,8 @@ namespace Curiosity.Migrations.TransactionTests
             builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
             builder.UsePostgreSQL(connectionString);
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
+            builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+            builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
             builder.SetUpTargetVersion(new DbVersion(6, 0));
 
             var migrator = builder.Build();

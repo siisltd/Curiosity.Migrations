@@ -21,6 +21,9 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public bool IsTransactionRequired { get; protected set; } = true;
 
+        /// <inheritdoc />
+        public bool IsLongRunning { get; protected set; } = false;
+
         /// <summary>
         /// Provide access to underlying database
         /// </summary>

@@ -25,6 +25,9 @@ namespace Curiosity.Migrations
         /// <inheritdoc />
         public bool IsTransactionRequired { get; protected set; }
 
+        /// <inheritdoc />
+        public bool IsLongRunning { get; protected set; }
+
         /// <summary>
         /// SQL script to apply migration splitted into batches
         /// </summary>
@@ -36,7 +39,8 @@ namespace Curiosity.Migrations
             DbVersion version,
             ICollection<ScriptMigrationBatch> upScripts,
             string? comment,
-            bool isTransactionRequired = true)
+            bool isTransactionRequired = true,
+            bool isLongRunning = false)
         {
             MigrationLogger = migrationLogger;
             DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
@@ -46,6 +50,7 @@ namespace Curiosity.Migrations
             UpScripts = upScripts.ToArray();
             Comment = comment;
             IsTransactionRequired = isTransactionRequired;
+            IsLongRunning = isLongRunning;
         }
 
         /// <inheritdoc />

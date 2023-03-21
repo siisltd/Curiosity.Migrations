@@ -37,8 +37,8 @@ namespace Curiosity.Migrations.UnitTests
             var migrator = new DbMigrator(
                 provider.Object, 
                 migrations,
-                MigrationPolicy.Allowed,
-                MigrationPolicy.Forbidden,
+                MigrationPolicy.AllAllowed,
+                MigrationPolicy.AllForbidden,
                 null,
                 initialDbVersion);
 
@@ -61,7 +61,7 @@ namespace Curiosity.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(1,1);
-            var policy = MigrationPolicy.Allowed;
+            var policy = MigrationPolicy.AllAllowed;
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
@@ -123,7 +123,7 @@ namespace Curiosity.Migrations.UnitTests
         public async Task UpgradeWithNotSpecifiedTarget_On_MigrateAsync()
         {
             var initialDbVersion = new DbVersion(1,0);
-            var policy = MigrationPolicy.Allowed;
+            var policy = MigrationPolicy.AllAllowed;
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
@@ -185,7 +185,7 @@ namespace Curiosity.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             var targetDbVersion = new DbVersion(2,0);
-            var policy = MigrationPolicy.Forbidden;
+            var policy = MigrationPolicy.AllForbidden;
         
             var provider = new Mock<IDbProvider>();
         
@@ -241,7 +241,7 @@ namespace Curiosity.Migrations.UnitTests
         public void ThrowException_When_NotEnoughMigrations_On_MigrateAsync()
         {
             var targetDbVersion = new DbVersion(3,0);
-            var policy = MigrationPolicy.Allowed;
+            var policy = MigrationPolicy.AllAllowed;
         
             var provider = new Mock<IDbProvider>();
             
@@ -290,7 +290,7 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public async Task ApplyMigrations_OnPatchManner_On_MigrateAsync()
         {
-            var policy = MigrationPolicy.Allowed;
+            var policy = MigrationPolicy.AllAllowed;
 
             var provider = new Mock<IDbProvider>();
 
@@ -477,7 +477,7 @@ namespace Curiosity.Migrations.UnitTests
         public async Task MigrateAsync_Downgrade_Ok()
         {
             var targetDbVersion = new DbVersion(1,0);
-            var policy = MigrationPolicy.Allowed;
+            var policy = MigrationPolicy.AllAllowed;
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
@@ -543,7 +543,7 @@ namespace Curiosity.Migrations.UnitTests
         public async Task MigrateAsync_DowngradeForbidden_Error()
         {
             var targetDbVersion = new DbVersion(1,0);
-            var policy = MigrationPolicy.Forbidden;
+            var policy = MigrationPolicy.AllForbidden;
         
             var provider = new Mock<IDbProvider>();
         
