@@ -1,22 +1,21 @@
 // ReSharper disable UnusedMemberInSuper.Global
-namespace Curiosity.Migrations
+namespace Curiosity.Migrations;
+
+/// <summary>
+/// Options for <see cref="IDbProvider"/>
+/// </summary>
+public interface IDbProviderOptions
 {
     /// <summary>
-    /// Options for <see cref="IDbProvider"/>
+    /// Connection string to database.
     /// </summary>
-    public interface IDbProviderOptions
-    {
-        /// <summary>
-        /// Connection string to database
-        /// </summary>
-        string ConnectionString { get; }
+    string ConnectionString { get; }
 
-        /// <summary>
-        /// Name of migration history table
-        /// </summary>
-        /// <remarks>
-        /// If property is <see langword="null"/> <see cref="IDbProvider"/> will used default value
-        /// </remarks>
-        string MigrationHistoryTableName { get; }
-    }
+    /// <summary>
+    /// Name of migration history table.
+    /// </summary>
+    /// <remarks>
+    /// If property is <see langword="null"/> <see cref="IDbProvider"/> will used default value
+    /// </remarks>
+    string MigrationHistoryTableName { get; }
 }

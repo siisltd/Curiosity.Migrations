@@ -26,7 +26,7 @@
         <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
         <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
 
-        <LangVersion>8</LangVersion>
+        <LangVersion>10</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
     </PropertyGroup>

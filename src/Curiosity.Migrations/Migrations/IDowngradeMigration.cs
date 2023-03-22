@@ -2,17 +2,15 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Curiosity.Migrations
+namespace Curiosity.Migrations;
+
+/// <summary>
+/// Migration that supports downgrade/
+/// </summary>
+public interface IDowngradeMigration : IMigration
 {
     /// <summary>
-    /// Migration that supports downgrade
+    /// Downgrades database to the previous version undoing changes of this migration.
     /// </summary>
-    public interface IDowngradeMigration : IMigration
-    {
-        /// <summary>
-        /// Downgrade database to the previous version undoing changes to this migration
-        /// </summary>
-        /// <returns></returns>
-        Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
-    }
+    Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
 }

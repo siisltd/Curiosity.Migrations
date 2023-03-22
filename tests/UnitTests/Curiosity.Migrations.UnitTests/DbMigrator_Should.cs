@@ -234,7 +234,7 @@ namespace Curiosity.Migrations.UnitTests
             
             Assert.False(result.IsSuccessfully);
             Assert.True(result.Error.HasValue);
-            Assert.Equal(MigrationError.PolicyError, result.Error.Value);
+            Assert.Equal(MigrationErrorCode.PolicyError, result.Error.Value);
         }
         
         [Fact]
@@ -592,7 +592,7 @@ namespace Curiosity.Migrations.UnitTests
             
             Assert.False(result.IsSuccessfully);
             Assert.True(result.Error.HasValue);
-            Assert.Equal(MigrationError.PolicyError, result.Error.Value);
+            Assert.Equal(MigrationErrorCode.PolicyError, result.Error.Value);
         }
 
         #endregion

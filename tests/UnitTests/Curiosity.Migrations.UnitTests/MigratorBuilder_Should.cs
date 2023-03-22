@@ -47,7 +47,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UserDbProviderFactory(factoryMock.Object);
+            builder.UseDbProviderFactory(factoryMock.Object);
 
             // act
             var migrator = builder.Build();
@@ -93,7 +93,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UserDbProviderFactory(factoryMock.Object);
+            builder.UseDbProviderFactory(factoryMock.Object);
             builder.UseVariable(DefaultVariables.User, ManualUserName);
             
             // act
@@ -140,7 +140,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UserDbProviderFactory(factoryMock.Object);
+            builder.UseDbProviderFactory(factoryMock.Object);
             builder.UseVariable(AdditionalVariableName, AdditionalVariableValue);
                 
             // act

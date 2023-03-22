@@ -16,7 +16,7 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Error occured during migration
         /// </summary>
-        public MigrationError? Error { get; }
+        public MigrationErrorCode? Error { get; }
 
         /// <summary>
         /// Error message
@@ -28,7 +28,7 @@ namespace Curiosity.Migrations
         /// </summary>
         public int AppliedMigrationsCount { get; }
 
-        private MigrationResult(MigrationError? error, string errorMessage, int appliedMigrationsCount)
+        private MigrationResult(MigrationErrorCode? error, string errorMessage, int appliedMigrationsCount)
         {
             Error = error;
             ErrorMessage = errorMessage;
@@ -49,12 +49,12 @@ namespace Curiosity.Migrations
         /// <summary>
         /// Create failure migration result with specified params
         /// </summary>
-        /// <param name="error">Migration error code</param>
+        /// <param name="errorCode">Migration error code</param>
         /// <param name="errorMessage">Error message</param>
         /// <returns></returns>
-        public static MigrationResult FailureResult(MigrationError error, string errorMessage)
+        public static MigrationResult FailureResult(MigrationErrorCode errorCode, string errorMessage)
         {
-            return new MigrationResult(error, errorMessage, 0);
+            return new MigrationResult(errorCode, errorMessage, 0);
         }
     }
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.0] - 2023-03-22
+
+### Added
+  
+- Added more comments.
+- Added options to `ServiceCollectionExtensions.AddMigrations` to control whether current instance of IServiceCollection should be used as default for dependency injection of migrator.
+
+### Changed
+     
+- Refactored `MigrationPolicy`, changed existed enum values codes: improved extensibility for future changes. 
+- Renamed `MigrationError`->`MigrationErrorCode`. 
+- Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes 
+
 ## [3.1.0] - 2022-07-29
 
 ### Added

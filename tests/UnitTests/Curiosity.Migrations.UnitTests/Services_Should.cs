@@ -30,7 +30,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(CreateDbProviderFactory());
+                    .UseDbProviderFactory(CreateDbProviderFactory());
             });
             
             // act
@@ -73,7 +73,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(CreateDbProviderFactory());
+                    .UseDbProviderFactory(CreateDbProviderFactory());
             });
 
             services.AddMigrations(options =>
@@ -82,7 +82,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseCodeMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UserDbProviderFactory(CreateDbProviderFactory());
+                    .UseDbProviderFactory(CreateDbProviderFactory());
             });
             
             // act

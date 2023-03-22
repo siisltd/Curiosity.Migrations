@@ -31,17 +31,17 @@ namespace Curiosity.Migrations.UnitTests
             
             Assert.Equal(5, migrations.Count);
             
-            Assert.True(migrations[0] is DowngradableScriptMigration);
+            Assert.True(migrations[0] is DowngradeScriptMigration);
             Assert.Equal(new DbVersion(1,0), migrations[0].Version);
             Assert.Equal("comment", migrations[0].Comment);
-            Assert.Equal("up", ((DowngradableScriptMigration)migrations[0]).UpScripts[0].Script);
-            Assert.Equal("down", ((DowngradableScriptMigration)migrations[0]).DownScripts[0].Script);
+            Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
+            Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
             
-            Assert.True(migrations[1] is DowngradableScriptMigration);
+            Assert.True(migrations[1] is DowngradeScriptMigration);
             Assert.Equal(new DbVersion(1,1), migrations[1].Version);
             Assert.True(String.IsNullOrEmpty(migrations[1].Comment));
-            Assert.Equal("up", ((DowngradableScriptMigration)migrations[1]).UpScripts[0].Script);
-            Assert.Equal("down", ((DowngradableScriptMigration)migrations[1]).DownScripts[0].Script);
+            Assert.Equal("up", ((DowngradeScriptMigration)migrations[1]).UpScripts[0].Script);
+            Assert.Equal("down", ((DowngradeScriptMigration)migrations[1]).DownScripts[0].Script);
 
             Assert.True(migrations[2] is ScriptMigration);
             Assert.Equal(new DbVersion(1,2), migrations[2].Version);
@@ -91,18 +91,18 @@ namespace Curiosity.Migrations.UnitTests
             
             Assert.Equal(5, migrations.Count);
             
-            Assert.True(migrations[0] is DowngradableScriptMigration);
+            Assert.True(migrations[0] is DowngradeScriptMigration);
             Assert.Equal(new DbVersion(1,0), migrations[0].Version);
             Assert.Equal("comment", migrations[0].Comment);
-            Assert.Equal("up", ((DowngradableScriptMigration)migrations[0]).UpScripts[0].Script);
-            Assert.Equal("down", ((DowngradableScriptMigration)migrations[0]).DownScripts[0].Script);
+            Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
+            Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
             
             
-            Assert.True(migrations[1] is DowngradableScriptMigration);
+            Assert.True(migrations[1] is DowngradeScriptMigration);
             Assert.Equal(new DbVersion(1,1), migrations[1].Version);
             Assert.True(String.IsNullOrEmpty(migrations[1].Comment));
-            Assert.Equal("up", ((DowngradableScriptMigration)migrations[1]).UpScripts[0].Script);
-            Assert.Equal("down", ((DowngradableScriptMigration)migrations[1]).DownScripts[0].Script);
+            Assert.Equal("up", ((DowngradeScriptMigration)migrations[1]).UpScripts[0].Script);
+            Assert.Equal("down", ((DowngradeScriptMigration)migrations[1]).DownScripts[0].Script);
             
             
             Assert.True(migrations[2] is ScriptMigration);
