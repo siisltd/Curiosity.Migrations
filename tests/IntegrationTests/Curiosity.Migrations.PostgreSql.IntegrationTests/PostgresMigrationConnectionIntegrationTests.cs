@@ -6,11 +6,11 @@ using Xunit;
 
 namespace Curiosity.Migrations.PostgreSql.IntegrationTests
 {
-    public class PostgreSQLProviderIntegrationTests : IClassFixture<PostgreSqlProviderDbTestFixture>
+    public class PostgresMigrationConnectionIntegrationTests : IClassFixture<PostgreSqlProviderDbTestFixture>
     {
         private readonly PostgreSqlProviderDbTestFixture _fixture;
 
-        public PostgreSQLProviderIntegrationTests(PostgreSqlProviderDbTestFixture fixture)
+        public PostgresMigrationConnectionIntegrationTests(PostgreSqlProviderDbTestFixture fixture)
         {
             _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
         }

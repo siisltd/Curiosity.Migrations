@@ -151,10 +151,10 @@ public class PostgresMigrationConnection : IMigrationConnection
                 var isDatabaseExist = await CheckIfDatabaseExistsAsync(DatabaseName, cancellationToken);
                 if (isDatabaseExist) return;
 
-                var (createDbQuery, createDbParams) = BuildCreateDatabaseSqlQuery();
+                var createDbQuery = BuildCreateDatabaseSqlQuery();
                 await ExecuteNonQuerySqlWithoutInitialCatalogAsync(
                     createDbQuery,
-                    createDbParams,
+                    null,
                     cancellationToken);
             },
             MigrationErrorCode.CreatingDbError,
@@ -172,7 +172,7 @@ public class PostgresMigrationConnection : IMigrationConnection
                         "SELECT 1 AS result FROM pg_database WHERE datname=@databaseName",
                         new Dictionary<string, object>
                         {
-                            {"databaseName", databaseName}
+                            {"@databaseName", databaseName}
                         },
                         cancellationToken);
                 return result is 1 or true;
@@ -242,10 +242,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     {
         foreach (var kvp in commandParams)
         {
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = kvp.Key;
-            parameter.Value = kvp.Value;
-            command.Parameters.Add(parameter);
+            command.Parameters.AddWithValue(kvp.Key, kvp.Value);
         }
     }
 
@@ -327,13 +324,14 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <summary>
     /// Returns SQL query to create a database.
     /// </summary>
-    private (string SqlQuery, IReadOnlyDictionary<string, object>) BuildCreateDatabaseSqlQuery()
+    /// <remarks>
+    /// PostgreSQL doesn't allow CREATE DATABASE parametrization.
+    /// </remarks>
+    private string BuildCreateDatabaseSqlQuery()
     {
         var queryBuilder = new StringBuilder();
-        var queryParams = new Dictionary<string, object>();
 
-        queryBuilder.Append("CREATE DATABASE @databaseName ");
-        queryParams.Add("databaseName", DatabaseName);
+        queryBuilder.Append($"CREATE DATABASE \"{DatabaseName}\" ");
         
         var wasAnyOptionAdded = false;
 
@@ -341,58 +339,51 @@ public class PostgresMigrationConnection : IMigrationConnection
         {
             AppendLineWithOption(
                 queryBuilder,
-                "ENCODING = @encoding",
+                $"ENCODING = '{_options.DatabaseEncoding}'",
                 ref wasAnyOptionAdded);
-            queryParams.Add("encoding", _options.DatabaseEncoding!);
         }
 
         if (!String.IsNullOrWhiteSpace(_options.LC_COLLATE))
         {
             AppendLineWithOption(
                 queryBuilder,
-                "LC_COLLATE = @lcCollate",
+                $"LC_COLLATE = '{_options.LC_COLLATE!}'",
                 ref wasAnyOptionAdded);
-            queryParams.Add("lcCollate", _options.LC_COLLATE!);
         }
 
         if (!String.IsNullOrWhiteSpace(_options.LC_CTYPE))
         {
             AppendLineWithOption(
                 queryBuilder,
-                "LC_CTYPE = @lcCType",
+                $"LC_CTYPE = '{_options.LC_CTYPE!}'",
                 ref wasAnyOptionAdded);
-            queryParams.Add("lcCType", _options.LC_CTYPE!);
         }
 
         if (!String.IsNullOrWhiteSpace(_options.Template))
         {
             AppendLineWithOption(
                 queryBuilder,
-                "TEMPLATE = @template",
+                $"TEMPLATE = '{_options.Template!}'",
                 ref wasAnyOptionAdded);
-            queryParams.Add("template", _options.Template!);
         }
 
         if (!String.IsNullOrWhiteSpace(_options.TableSpace))
         {
             AppendLineWithOption(
                 queryBuilder,
-                $"TABLESPACE = @tableSpace",
+                $"TABLESPACE = '{_options.TableSpace!}'",
                 ref wasAnyOptionAdded);
-            queryParams.Add("tableSpace", _options.TableSpace!);
         }
 
         if (_options.ConnectionLimit.HasValue)
         {
             AppendLineWithOption(
                 queryBuilder,
-                $"CONNECTION LIMIT = @conLimit",
+                $"CONNECTION LIMIT = {_options.ConnectionLimit.Value}",
                 ref wasAnyOptionAdded);
-
-            queryParams.Add("conLimit", _options.ConnectionLimit.Value);
         }
 
-        return (queryBuilder.ToString(), queryParams);
+        return queryBuilder.ToString();
     }
 
     /// <summary>
@@ -422,7 +413,7 @@ public class PostgresMigrationConnection : IMigrationConnection
         var queryFormat = @"
 CREATE TABLE IF NOT EXISTS {0} (
 
-    id      BIGSERIAL NOT NULL CONSTRAINT ""{0}_pkey"" PRIMARY KEY,
+    id      BIGSERIAL NOT NULL PRIMARY KEY,
     created TIMESTAMP NOT NULL DEFAULT timezone('UTC'::text, now()),
     name    TEXT,
     version TEXT      UNIQUE
@@ -431,22 +422,18 @@ WITH (
   OIDS=FALSE 
 );
 
-ALTER TABLE {0} OWNER TO @owner;
+ALTER TABLE {0} OWNER TO {1};
 
 CREATE UNIQUE INDEX IF NOT EXISTS uix_{0}_version ON {0} (version);
 ";
 
-        var query = String.Format(queryFormat, MigrationHistoryTableName);
-        var queryParams = new Dictionary<string, object>()
-        {
-            {"owner", _defaultVariables[DefaultVariables.User]}
-        };
+        var query = String.Format(queryFormat, MigrationHistoryTableName, _defaultVariables[DefaultVariables.User]);
 
         await _actionHelper.TryExecuteAsync(
             () => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 query,
-                queryParams,
+                null,
                 cancellationToken),
             MigrationErrorCode.CreatingHistoryTable,
             $"Can not create history table \"{MigrationHistoryTableName}\" in database \"{DatabaseName}\"");
@@ -476,8 +463,8 @@ SELECT EXISTS (
                         checkTableExistenceQuery,
                         new Dictionary<string, object>
                         {
-                            {"tableScheme", GetSchemeNameFromConnectionString},
-                            {"tableName", tableName}
+                            {"@tableScheme", GetSchemeNameFromConnectionString()},
+                            {"@tableName", tableName}
                         },
                         cancellationToken);
                 return result is 1 or true;
@@ -580,8 +567,8 @@ VALUES (@migrationName, @version)";
                 sql,
                 new Dictionary<string, object>
                 {
-                    {"migrationName", migrationName},
-                    {"version", version.ToString()}
+                    {"@migrationName", migrationName},
+                    {"@version", version.ToString()}
                 },
                 cancellationToken),
             MigrationErrorCode.MigratingError,
@@ -602,7 +589,7 @@ VALUES (@migrationName, @version)";
                 sql,
                 new Dictionary<string, object>
                 {
-                    {"version", version.ToString()}
+                    {"@version", version.ToString()}
                 },
                 cancellationToken),
             MigrationErrorCode.MigratingError,
