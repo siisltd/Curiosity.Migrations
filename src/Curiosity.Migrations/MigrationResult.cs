@@ -1,4 +1,5 @@
 using System;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Curiosity.Migrations
@@ -28,7 +29,6 @@ namespace Curiosity.Migrations
         /// </summary>
         public int AppliedMigrationsCount { get; }
 
-        
 
         private MigrationResult(
             MigrationErrorCode? errorCode,
@@ -59,6 +59,8 @@ namespace Curiosity.Migrations
         /// <returns></returns>
         public static MigrationResult FailureResult(MigrationErrorCode errorCode, string errorMessage)
         {
+            Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
+
             return new MigrationResult(errorCode, errorMessage, 0);
         }
     }

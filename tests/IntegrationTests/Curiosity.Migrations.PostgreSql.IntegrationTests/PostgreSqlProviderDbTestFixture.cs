@@ -6,7 +6,7 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
     public class PostgreSqlProviderDbTestFixture : IDisposable
     {
         public  IMigrationConnection MigrationConnection { get; }
-        public PostgresMigrationConnectionOptions Options { get; }
+        internal PostgresMigrationConnectionOptions Options { get; }
         public string DbName { get; }
         
         public PostgreSqlProviderDbTestFixture()

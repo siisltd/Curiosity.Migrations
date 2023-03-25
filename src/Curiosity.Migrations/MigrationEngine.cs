@@ -42,8 +42,10 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
         DbVersion? targetVersion = null,
         ILogger? logger = null)
     {
-        if (migrations == null) throw new ArgumentNullException(nameof(migrations));
-        _migrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(migrations, nameof(migrations));
+
+        _migrationConnection = migrationConnection;
         _logger = logger;
 
         var migrationMap = new Dictionary<DbVersion, IMigration>();

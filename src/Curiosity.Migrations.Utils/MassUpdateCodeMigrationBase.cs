@@ -76,6 +76,9 @@ public abstract class MassUpdateCodeMigrationBase : CodeMigration
         Action<int, long> onStepCompleted,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotEmpty(updateQuery, nameof(updateQuery));
+        Guard.AssertNotNull(onStepCompleted, nameof(onStepCompleted));
+
         long currentId = 0;
 
         // execute update in batches while we can

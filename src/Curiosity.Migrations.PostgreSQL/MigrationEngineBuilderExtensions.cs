@@ -36,6 +36,8 @@ public static class MigrationEngineBuilderExtensions
         string? template = null,
         string? tableSpace = null)
     {
+        Guard.AssertNotNull(builder, nameof(builder));
+
         var options = new PostgresMigrationConnectionOptions(
             connectionString,
             migrationTableHistoryName,

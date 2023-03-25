@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace Curiosity.Migrations;
 /// <remarks>
 /// Code migrations allows to make complex migrations with complex logic, which are extremely difficult to perform on a clean SQL queries.
 /// </remarks>
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public abstract class CodeMigration : IMigration
 {
     /// <inheritdoc />
@@ -56,6 +58,9 @@ public abstract class CodeMigration : IMigration
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(variables, nameof(variables));
+
         MigrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
         Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         Logger = migrationLogger;

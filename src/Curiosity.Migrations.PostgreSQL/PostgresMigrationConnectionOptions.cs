@@ -70,7 +70,7 @@ public class PostgresMigrationConnectionOptions : IMigrationConnectionOptions
     public string? TableSpace { get; }
 
     /// <inheritdoc cref="PostgresMigrationConnectionOptions"/>
-    public PostgresMigrationConnectionOptions(
+    internal PostgresMigrationConnectionOptions(
         string connectionString,
         string? migrationHistoryTableName = null,
         string? databaseEncoding = null,

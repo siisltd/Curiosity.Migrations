@@ -70,9 +70,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <param name="options">Options to connect and manage database</param>
     public PostgresMigrationConnection(PostgresMigrationConnectionOptions options)
     {
-        if (options == null) throw new ArgumentNullException(nameof(options));
-        if (String.IsNullOrEmpty(options.ConnectionString))
-            throw new ArgumentNullException(nameof(options.ConnectionString));
+        Guard.AssertNotNull(options, nameof(options));
 
         MigrationHistoryTableName = options.MigrationHistoryTableName;
 
@@ -129,17 +127,9 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public DbTransaction BeginTransaction()
     {
-        AssertConnection(NpgsqlConnection);
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return NpgsqlConnection!.BeginTransaction();
-    }
-
-    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-    private void AssertConnection(IDbConnection? connection)
-    {
-        if (connection == null 
-            || connection.State is ConnectionState.Closed or ConnectionState.Broken)
-            throw new InvalidOperationException($"Connection is not opened. Use {nameof(OpenConnectionAsync)}");
     }
 
     /// <inheritdoc />
@@ -162,8 +152,12 @@ public class PostgresMigrationConnection : IMigrationConnection
     }
 
     /// <inheritdoc />
-    public Task<bool> CheckIfDatabaseExistsAsync(string databaseName, CancellationToken cancellationToken = default)
+    public Task<bool> CheckIfDatabaseExistsAsync(
+        string databaseName,
+        CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotEmpty(databaseName, nameof(databaseName));
+
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
@@ -187,6 +181,8 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? queryParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
+
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
@@ -212,6 +208,9 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? queryParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotNull(connection, nameof(connection));
+        Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
+
         var command = connection.CreateCommand();
         command.CommandText = sqlQuery;
 
@@ -226,6 +225,8 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? commandParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotNull(command, nameof(command));
+
         if (commandParams != null)
         {
             AddCommandParameters(command, commandParams);
@@ -240,6 +241,8 @@ public class PostgresMigrationConnection : IMigrationConnection
         NpgsqlCommand command,
         IReadOnlyDictionary<string, object> commandParams)
     {
+        Guard.AssertNotNull(command, nameof(command));
+
         foreach (var kvp in commandParams)
         {
             command.Parameters.AddWithValue(kvp.Key, kvp.Value);
@@ -251,6 +254,8 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// </summary>
     private void LogCommand(NpgsqlCommand command)
     {
+        Guard.AssertNotNull(command, nameof(command));
+
         if (_sqLogger == null) return;
 
         if (command.Parameters.Count == 0)
@@ -272,6 +277,9 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? commandParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotNull(connection, nameof(connection));
+        Guard.AssertNotEmpty(commandText, nameof(commandText));
+
         var command = connection.CreateCommand();
         command.CommandText = commandText;
 
@@ -286,6 +294,8 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? commandParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotNull(command, nameof(command));
+
         if (commandParams != null)
         {
             AddCommandParameters(command, commandParams);
@@ -302,6 +312,8 @@ public class PostgresMigrationConnection : IMigrationConnection
         IReadOnlyDictionary<string, object>? queryParams,
         CancellationToken cancellationToken = default)
     {
+        Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
+
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
@@ -394,6 +406,9 @@ public class PostgresMigrationConnection : IMigrationConnection
         string option,
         ref bool wasAnyOptionAdded)
     {
+        Guard.AssertNotNull(queryBuilder, nameof(queryBuilder));
+        Guard.AssertNotEmpty(option, nameof(option));
+
         if (!wasAnyOptionAdded)
         {
             queryBuilder.AppendLine("WITH ");
@@ -404,12 +419,14 @@ public class PostgresMigrationConnection : IMigrationConnection
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// PostgreSQL doesn't allow CREATE TABLE parametrization.
+    /// </remarks>
     public async Task CreateMigrationHistoryTableIfNotExistsAsync(CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         // create table
-        // we use here string format because we can't pass table name as query param
         var queryFormat = @"
 CREATE TABLE IF NOT EXISTS {0} (
 
@@ -444,8 +461,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uix_{0}_version ON {0} (version);
         string tableName,
         CancellationToken cancellationToken = default)
     {
-        if (String.IsNullOrWhiteSpace(tableName)) throw new ArgumentNullException(nameof(tableName));
-        AssertConnection(NpgsqlConnection);
+        Guard.AssertNotEmpty(tableName, nameof(tableName));
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             async () =>
@@ -490,7 +507,8 @@ SELECT EXISTS (
         IReadOnlyDictionary<string, object>? queryParams,
         CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        Guard.AssertNotEmpty(script, nameof(script));
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             () => ExecuteScalarSqlInternalAsync(
@@ -505,7 +523,7 @@ SELECT EXISTS (
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         // actual version is made by last migration because downgrade can decrease version
         var query = $"SELECT version FROM \"{_options.MigrationHistoryTableName}\"";
@@ -552,9 +570,13 @@ SELECT EXISTS (
             "Can't fetch applied migrations from history table");
     }
     /// <inheritdoc />
-    public Task SaveAppliedMigrationVersionAsync(string migrationName, DbVersion version, CancellationToken cancellationToken = default)
+    public Task SaveAppliedMigrationVersionAsync(
+        string migrationName,
+        DbVersion version,
+        CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        Guard.AssertNotEmpty(migrationName, nameof(migrationName));
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         var sqlFormat = @"
 INSERT INTO {0} (name, version)
@@ -578,7 +600,7 @@ VALUES (@migrationName, @version)";
     /// <inheritdoc />
     public Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         var sqlFormat = @"DELETE FROM {0} WHERE version = @version";
         var sql = String.Format(sqlFormat, MigrationHistoryTableName);
@@ -602,7 +624,8 @@ VALUES (@migrationName, @version)";
         IReadOnlyDictionary<string, object>? queryParams,
         CancellationToken cancellationToken = default)
     {
-        AssertConnection(NpgsqlConnection);
+        Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
+        PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             () => ExecuteNonQueryInternalAsync(

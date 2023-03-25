@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ namespace Curiosity.Migrations;
 /// <summary>
 /// Class for providing <see cref="CodeMigration"/>
 /// </summary>
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class CodeMigrationsProvider : IMigrationsProvider
 {
     private readonly List<Assembly> _assemblies;
@@ -19,7 +21,9 @@ public class CodeMigrationsProvider : IMigrationsProvider
     /// <inheritdoc cref="CodeMigrationsProvider"/>
     public CodeMigrationsProvider(IServiceCollection services)
     {
-        _services = services ?? throw new ArgumentNullException(nameof(services));
+        Guard.AssertNotNull(services, nameof(services));
+
+        _services = services;
         _assemblies = new List<Assembly>();
         _typedAssemblies = new Dictionary<Type, List<Assembly>>();
     }
@@ -31,7 +35,8 @@ public class CodeMigrationsProvider : IMigrationsProvider
     /// <exception cref="ArgumentNullException"></exception>
     public CodeMigrationsProvider FromAssembly(Assembly assembly)
     {
-        if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+        Guard.AssertNotNull(assembly, nameof(assembly));
+
         _assemblies.Add(assembly);
 
         return this;
@@ -44,7 +49,7 @@ public class CodeMigrationsProvider : IMigrationsProvider
     /// <exception cref="ArgumentNullException"></exception>
     public CodeMigrationsProvider FromAssembly<T>(Assembly assembly)
     {
-        if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+        Guard.AssertNotNull(assembly, nameof(assembly));
 
         var migrationType = typeof(T);
 
@@ -64,8 +69,8 @@ public class CodeMigrationsProvider : IMigrationsProvider
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
-        if (variables == null) throw new ArgumentNullException(nameof(variables));
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(variables, nameof(variables));
 
         var migrations = new List<IMigration>();
         var migratorType = typeof(CodeMigration);

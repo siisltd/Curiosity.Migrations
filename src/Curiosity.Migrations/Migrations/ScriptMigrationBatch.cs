@@ -42,8 +42,8 @@ public class ScriptMigrationBatch
         string? name,
         string script)
     {
+        Guard.AssertNotEmpty(script, nameof(script));
         if (orderIndex < 0) throw new ArgumentOutOfRangeException(nameof(orderIndex));
-        if (String.IsNullOrWhiteSpace(script)) throw new ArgumentNullException(nameof(orderIndex));
             
         OrderIndex = orderIndex;
         Name = name;

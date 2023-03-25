@@ -12,7 +12,9 @@ public class PostgresMigrationConnectionFactory : IMigrationConnectionFactory
     /// <inheritdoc cref="PostgresMigrationConnectionFactory"/>
     public PostgresMigrationConnectionFactory(PostgresMigrationConnectionOptions options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        Guard.AssertNotNull(options, nameof(options));
+
+        _options = options;
     }
 
     /// <inheritdoc />

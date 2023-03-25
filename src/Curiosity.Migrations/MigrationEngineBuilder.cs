@@ -104,7 +104,8 @@ public class MigrationEngineBuilder
     /// <exception cref="ArgumentNullException"></exception>
     public MigrationEngineBuilder UseCustomMigrationsProvider(IMigrationsProvider provider)
     {
-        if (provider == null) throw new ArgumentNullException(nameof(provider));
+        Guard.AssertNotNull(provider, nameof(provider));
+
         _migrationsProviders.Add(provider);
         return this;
     }
@@ -134,14 +135,16 @@ public class MigrationEngineBuilder
     /// </summary>
     public MigrationEngineBuilder UseLogger(ILogger logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        Guard.AssertNotNull(logger, nameof(logger));
+
+        _logger = logger;
         return this;
     }
 
     /// <summary>
     /// Use specified logger to log sql queries. All executed sql queries will be logged into specified logger.
     /// </summary>
-    public MigrationEngineBuilder UseLoggerForSql(ILogger logger)
+    public MigrationEngineBuilder UseLoggerForSql(ILogger? logger)
     {
         _sqlLogger = logger;
         return this;
@@ -152,7 +155,10 @@ public class MigrationEngineBuilder
     /// </summary>
     public MigrationEngineBuilder UseMigrationConnectionFactory(IMigrationConnectionFactory migrationConnectionFactory)
     {
-        _dbProviderFactory = migrationConnectionFactory ?? throw new ArgumentNullException(nameof(migrationConnectionFactory));
+        Guard.AssertNotNull(migrationConnectionFactory, nameof(migrationConnectionFactory));
+
+        _dbProviderFactory = migrationConnectionFactory;
+
         return this;
     }
 
@@ -182,10 +188,10 @@ public class MigrationEngineBuilder
     /// </remarks>
     public MigrationEngineBuilder UseVariable(string name, string value)
     {
-        if (String.IsNullOrWhiteSpace(name))
-            throw new ArgumentNullException(nameof(name));
+        Guard.AssertNotEmpty(name, nameof(name));
+        Guard.AssertNotEmpty(value, nameof(value));
 
-        _variables[name] = value ?? throw new ArgumentNullException(nameof(value));
+        _variables[name] = value;
 
         return this;
     }

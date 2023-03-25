@@ -38,10 +38,10 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         string? prefix = null,
         bool warnAboutIncorrectNaming = false)
     {
-        if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+        Guard.AssertNotEmpty(path, nameof(path));
 
-        var innerPath = Path.IsPathRooted(path) 
-            ? path 
+        var innerPath = Path.IsPathRooted(path)
+            ? path
             : Path.Combine(Directory.GetCurrentDirectory(), path);
 
         _absoluteDirectoriesPathWithPrefix[innerPath] = prefix;
@@ -58,9 +58,13 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// <param name="warnAboutIncorrectNaming">Should provider made warn log about script files with incorrect naming.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public ScriptMigrationsProvider FromAssembly(Assembly assembly, string? prefix = null, bool warnAboutIncorrectNaming = false)
+    public ScriptMigrationsProvider FromAssembly(
+        Assembly assembly,
+        string? prefix = null,
+        bool warnAboutIncorrectNaming = false)
     {
-        if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+        Guard.AssertNotNull(assembly, nameof(assembly));
+
         _assembliesWithPrefix[assembly] = prefix;
         _warnAboutIncorrectNaming = warnAboutIncorrectNaming;
 
@@ -73,13 +77,13 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
-        if (variables == null) throw new ArgumentNullException(nameof(variables));
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(variables, nameof(variables));
 
         if (_absoluteDirectoriesPathWithPrefix.Count == 0 && _assembliesWithPrefix.Count == 0)
             throw new InvalidOperationException(
                 $"No directories or assemblies specified. First use method {nameof(FromDirectory)} or {nameof(FromAssembly)}");
-            
+
         var migrations = new List<IMigration>();
         foreach (var keyValuePair in _absoluteDirectoriesPathWithPrefix)
         {
@@ -119,7 +123,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 {
                     using var stream = assembly.GetManifestResourceStream(resourceName);
                     if (stream == null) throw new InvalidOperationException($"Can't open a stream for resource \"{resourceName}\"");
-                        
+
                     using var reader = new StreamReader(stream);
                     return reader.ReadToEnd();
                 },
@@ -137,25 +141,28 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     }
 
     private ICollection<IMigration> GetMigrations(
-        IEnumerable<string> fileNames,
+        IReadOnlyList<string> fileNames,
         Func<string, string> sqlScriptReadFunc,
         IMigrationConnection migrationConnection,
         string? prefix,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
-        if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
-        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
+        Guard.AssertNotNull(fileNames, nameof(fileNames));
+        Guard.AssertNotNull(sqlScriptReadFunc, nameof(sqlScriptReadFunc));
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(variables, nameof(variables));
 
-        var scripts = new Dictionary<DbVersion, ScriptInfo>();
+        var scripts = new Dictionary<DbVersion, MigrationScriptInfo>();
 
         var regex = String.IsNullOrWhiteSpace(prefix)
             ? new Regex($"{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
             : new Regex($"{prefix}{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
-            
-        foreach (var fileName in fileNames)
+
+        for (var i = 0; i < fileNames.Count; i++)
         {
+            var fileName = fileNames[i];
+
             var match = regex.Match(fileName);
             if (!match.Success)
             {
@@ -178,24 +185,24 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 migrationLogger?.LogWarning($"\"{fileName}\" has incorrect version migration.");
                 continue;
             }
-                
+
             if (!scripts.ContainsKey(version))
             {
-                scripts[version] = new ScriptInfo(version);
+                scripts[version] = new MigrationScriptInfo(version);
             }
 
             var scriptInfo = scripts[version];
 
             var script = sqlScriptReadFunc.Invoke(fileName);
-                
+
             // extract options for current migration
             scriptInfo.Options = ExtractMigrationOptions(script);
-                
+
             // split into batches
             var batches = new List<ScriptMigrationBatch>();
             var batchNameRegex = new Regex(@"--\s*BATCH:\s*(.*)\s*\n(.*)", RegexOptions.IgnoreCase);
             var batchIndex = 0;
-                
+
             // Use positive lookahead to split script into batches.
             foreach (var batch in Regex.Split(script, @"(?=--\s*BATCH:)"))
             {
@@ -224,7 +231,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
                 scriptInfo.UpScript.AddRange(batches);
             }
-                
+
             var comment = match.Groups[9];
             scriptInfo.Comment = comment.Success
                 ? comment.Value
@@ -244,6 +251,8 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
     private MigrationOptions ExtractMigrationOptions(string sourceScript)
     {
+        Guard.AssertNotEmpty(sourceScript, nameof(sourceScript));
+
         var options = new MigrationOptions();
 
         var optionsRegex = new Regex(@"--\s*CURIOSITY:\s*(.*)\s*=\s*(.*)\s*\n", RegexOptions.IgnoreCase);
@@ -282,20 +291,24 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// Creates script migration. Replace variables placeholders with real values
     /// </summary>
     /// <param name="dbVersion"></param>
-    /// <param name="scriptInfo"></param>
+    /// <param name="migrationScriptInfo"></param>
     /// <param name="migrationConnection"></param>
     /// <param name="variables"></param>
     /// <param name="migrationLogger"></param>
     /// <returns></returns>
     private IMigration CreateScriptMigration(
         DbVersion dbVersion,
-        ScriptInfo scriptInfo,
+        MigrationScriptInfo migrationScriptInfo,
         IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        var upScript = scriptInfo.UpScript;
-        var downScript = scriptInfo.DownScript;
+        Guard.AssertNotNull(migrationScriptInfo, nameof(migrationScriptInfo));
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotNull(variables, nameof(variables));
+
+        var upScript = migrationScriptInfo.UpScript;
+        var downScript = migrationScriptInfo.DownScript;
 
         foreach (var keyValuePair in variables)
         {
@@ -317,23 +330,23 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 dbVersion,
                 upScript,
                 downScript,
-                scriptInfo.Comment,
-                scriptInfo.Options.IsTransactionRequired)
+                migrationScriptInfo.Comment,
+                migrationScriptInfo.Options.IsTransactionRequired)
             : new ScriptMigration(
                 migrationLogger,
                 migrationConnection,
                 dbVersion,
                 upScript,
-                scriptInfo.Comment,
-                scriptInfo.Options.IsTransactionRequired);
+                migrationScriptInfo.Comment,
+                migrationScriptInfo.Options.IsTransactionRequired);
     }
 
     /// <summary>
     /// Internal class for analysis sql script files
     /// </summary>
-    private class ScriptInfo
+    private class MigrationScriptInfo
     {
-        public ScriptInfo(DbVersion version)
+        public MigrationScriptInfo(DbVersion version)
         {
             Version = version;
         }
@@ -342,13 +355,13 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
         public string? Comment { get; set; }
 
-        public List<ScriptMigrationBatch> UpScript { get; } = new List<ScriptMigrationBatch>();
+        public List<ScriptMigrationBatch> UpScript { get; } = new();
 
-        public List<ScriptMigrationBatch> DownScript { get; } = new List<ScriptMigrationBatch>();
-            
+        public List<ScriptMigrationBatch> DownScript { get; } = new();
+
         public MigrationOptions Options { get; set; } = null!;
     }
-        
+
     private class MigrationOptions
     {
         public bool IsTransactionRequired { get; set; } = true;

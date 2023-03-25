@@ -35,6 +35,9 @@ internal class MigrationActionHelper
         MigrationErrorCode errorCodeType,
         string errorMessage)
     {
+        Guard.AssertNotNull(action, nameof(action));
+        Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
+
         try
         {
             return await action.Invoke();
@@ -79,6 +82,9 @@ internal class MigrationActionHelper
         MigrationErrorCode errorCodeType,
         string errorMessage)
     {
+        Guard.AssertNotNull(action, nameof(action));
+        Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
+
         try
         {
             await action.Invoke();

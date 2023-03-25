@@ -38,6 +38,7 @@ public class ScriptMigration : IMigration
     /// </summary>
     public IList<ScriptMigrationBatch> UpScripts { get; }
 
+    /// <inheritdoc cref="ScriptMigration"/>
     public ScriptMigration(
         ILogger? migrationLogger,
         IMigrationConnection migrationConnection,
@@ -47,9 +48,11 @@ public class ScriptMigration : IMigration
         bool isTransactionRequired = true,
         bool isLongRunning = false)
     {
+        Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
+        Guard.AssertNotEmpty(upScripts, nameof(upScripts));
+
+        MigrationConnection = migrationConnection;
         MigrationLogger = migrationLogger;
-        MigrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
-        if (upScripts == null || upScripts.Count == 0) throw new ArgumentException(nameof(upScripts));
 
         Version = version;
         UpScripts = upScripts.ToArray();
@@ -71,6 +74,8 @@ public class ScriptMigration : IMigration
         ICollection<ScriptMigrationBatch> batches,
         CancellationToken token = default)
     {
+        Guard.AssertNotNull(batches, nameof(batches));
+
         var needLogBatches = batches.Count > 1;
         foreach (var batch in batches.OrderBy(b => b.OrderIndex))
         {
