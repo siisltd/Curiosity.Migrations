@@ -9,17 +9,20 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 {
     public class CodeMigration_3_0 : CodeMigration
     {
+        /// <inheritdoc />
         public override DbVersion Version { get; } = new DbVersion(3, 0);
 
+        /// <inheritdoc />
         public override string Comment { get; } = "Migration using multiple EF context with one connection";
 
+        /// <inheritdoc />
         public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
             var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
-            tempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
+            tempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection);
             
             var anotherTempContextOptionsBuilder = new DbContextOptionsBuilder<AnotherTempContext>();
-            anotherTempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
+            anotherTempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection);
 
             using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
             using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))

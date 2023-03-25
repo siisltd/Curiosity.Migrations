@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>Curiosity.Migrations.Utils</PackageId>
+        <Title>Utils for Curiosity.Migrations.</Title>
+        <Description>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Description>
+        <Summary>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Summary>
+        <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity; utils</PackageTags>
+        <Language>English</Language>
+        
+        <PackageVersion>4.0.0</PackageVersion>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+
+        <Authors>Maxim Markelow (@markeli)</Authors>
+        <Company>SIIS Ltd</Company>
+        <Copyright>SIIS Ltd, 2023</Copyright>
+        
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageProjectUrl>https://curiosity-migrations.readthedocs.io/</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
+        <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations.Utils/CHANGELOG.md</PackageReleaseNotes>
+
+        <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Curiosity.Migrations\Curiosity.Migrations.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.0.123" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PackageIcon>siisltd.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\siisltd.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>

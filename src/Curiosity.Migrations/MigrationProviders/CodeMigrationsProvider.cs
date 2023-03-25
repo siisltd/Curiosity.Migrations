@@ -60,11 +60,11 @@ public class CodeMigrationsProvider : IMigrationsProvider
 
     /// <inheritdoc />
     public ICollection<IMigration> GetMigrations(
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
+        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
         if (variables == null) throw new ArgumentNullException(nameof(variables));
 
         var migrations = new List<IMigration>();
@@ -111,7 +111,7 @@ public class CodeMigrationsProvider : IMigrationsProvider
             if (!(serviceProvider.GetRequiredService(migrationToResolve) is CodeMigration migration))
                 throw new InvalidOperationException($"{migrationToResolve} no created");
 
-            migration.Init(dbProvider, variables, migrationLogger);
+            migration.Init(migrationConnection, variables, migrationLogger);
             migrations.Add(migration);
         }
 

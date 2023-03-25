@@ -2,12 +2,12 @@
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Options for <see cref="IDbProvider"/>
+/// Options for <see cref="IMigrationConnection"/>
 /// </summary>
-public interface IDbProviderOptions
+public interface IMigrationConnectionOptions
 {
     /// <summary>
-    /// Connection string to database.
+    /// Connection string to a database.
     /// </summary>
     string ConnectionString { get; }
 
@@ -15,7 +15,7 @@ public interface IDbProviderOptions
     /// Name of migration history table.
     /// </summary>
     /// <remarks>
-    /// If property is <see langword="null"/> <see cref="IDbProvider"/> will used default value
+    /// If property is <see langword="null"/> <see cref="IMigrationConnection"/> will used default value
     /// </remarks>
-    string MigrationHistoryTableName { get; }
+    string? MigrationHistoryTableName { get; }
 }

@@ -9,9 +9,11 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
 {
     public class CodeMigration_5_0 : CodeMigration
     {
+        /// <inheritdoc />
         public override DbVersion Version { get; } = new DbVersion(5, 0);
 
-        public override string Comment { get; } = "Migrations with switched off transactions";
+        /// <inheritdoc />
+        public override string Comment => "Migrations with switched off transactions";
 
         public CodeMigration_5_0()
         {
@@ -21,10 +23,10 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
         public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
         {
             var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
-            tempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
+            tempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection);
             
             var anotherTempContextOptionsBuilder = new DbContextOptionsBuilder<AnotherTempContext>();
-            anotherTempContextOptionsBuilder.UseNpgsql(DbProvider.Connection);
+            anotherTempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection);
 
             using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
             using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))

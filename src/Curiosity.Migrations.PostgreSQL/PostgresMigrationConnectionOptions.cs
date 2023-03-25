@@ -5,9 +5,9 @@ using System;
 namespace Curiosity.Migrations.PostgreSQL;
 
 /// <summary>
-/// Options for <see cref="PostgreDbProvider"/>
+/// Options for <see cref="PostgresMigrationConnection"/>
 /// </summary>
-public class PostgreDbProviderOptions : IDbProviderOptions
+public class PostgresMigrationConnectionOptions : IMigrationConnectionOptions
 {
     /// <summary>
     /// Default value for <see cref="MigrationHistoryTableName"/>
@@ -69,8 +69,8 @@ public class PostgreDbProviderOptions : IDbProviderOptions
     /// </summary>
     public string? TableSpace { get; }
 
-    /// <inheritdoc cref="PostgreDbProviderOptions"/>
-    public PostgreDbProviderOptions(
+    /// <inheritdoc cref="PostgresMigrationConnectionOptions"/>
+    public PostgresMigrationConnectionOptions(
         string connectionString,
         string? migrationHistoryTableName = null,
         string? databaseEncoding = null,

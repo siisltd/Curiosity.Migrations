@@ -18,7 +18,7 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public void GetMigrations_FromDirectory_WithoutPrefix_Ok()
         {
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
@@ -57,7 +57,7 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public void GetMigrations_FromDirectory_WithPrefix_Ok()
         {
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
@@ -79,7 +79,7 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public void GetMigrations_FromAssembly_WithoutPrefix_Ok()
         {
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
@@ -125,7 +125,7 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public void GetMigrations_FromAssembly_WithPrefix_Ok()
         {
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();
@@ -147,7 +147,7 @@ namespace Curiosity.Migrations.UnitTests
         public void SubstituteVariableToTemplate()
         {
             // arrange
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var migrationsProvider = new ScriptMigrationsProvider();

@@ -30,27 +30,27 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UseDbProviderFactory(CreateDbProviderFactory());
+                    .UseMigrationConnectionFactory(CreateDbProviderFactory());
             });
             
             // act
             var serviceProvider = services.BuildServiceProvider();
-            var migrator = serviceProvider.GetRequiredService<IDbMigrator>();
+            var migrator = serviceProvider.GetRequiredService<IMigrationEngine>();
             
             // assert
 
             migrator.Should().NotBeNull("because we've registered it");
         }
 
-        private static IDbProviderFactory CreateDbProviderFactory()
+        private static IMigrationConnectionFactory CreateDbProviderFactory()
         {
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
             provider
                 .Setup(x => x.GetDefaultVariables())
                 .Returns(new Dictionary<string, string>());
-            var providerFactory = new Mock<IDbProviderFactory>();
+            var providerFactory = new Mock<IMigrationConnectionFactory>();
             providerFactory
-                .Setup(x => x.CreateDbProvider())
+                .Setup(x => x.CreateMigrationConnection())
                 .Returns(provider.Object);
 
             return providerFactory.Object;
@@ -73,7 +73,7 @@ namespace Curiosity.Migrations.UnitTests
                     .UseScriptMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UseDbProviderFactory(CreateDbProviderFactory());
+                    .UseMigrationConnectionFactory(CreateDbProviderFactory());
             });
 
             services.AddMigrations(options =>
@@ -82,12 +82,12 @@ namespace Curiosity.Migrations.UnitTests
                     .UseCodeMigrations()
                     .FromAssembly(Assembly.GetExecutingAssembly());
                 options
-                    .UseDbProviderFactory(CreateDbProviderFactory());
+                    .UseMigrationConnectionFactory(CreateDbProviderFactory());
             });
             
             // act
             var serviceProvider = services.BuildServiceProvider();
-            var migrators = serviceProvider.GetServices<IDbMigrator>()?.ToList();
+            var migrators = serviceProvider.GetServices<IMigrationEngine>()?.ToList();
             
             // assert
 

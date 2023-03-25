@@ -6,17 +6,17 @@ namespace Curiosity.Migrations
     /// <summary>
     /// Result of migration
     /// </summary>
-    public class MigrationResult
+    public readonly struct MigrationResult
     {
         /// <summary>
         /// If migration complete successfully
         /// </summary>
-        public bool IsSuccessfully => Error == null;
+        public bool IsSuccessfully => ErrorCode == null;
 
         /// <summary>
         /// Error occured during migration
         /// </summary>
-        public MigrationErrorCode? Error { get; }
+        public MigrationErrorCode? ErrorCode { get; }
 
         /// <summary>
         /// Error message
@@ -28,9 +28,14 @@ namespace Curiosity.Migrations
         /// </summary>
         public int AppliedMigrationsCount { get; }
 
-        private MigrationResult(MigrationErrorCode? error, string errorMessage, int appliedMigrationsCount)
+        
+
+        private MigrationResult(
+            MigrationErrorCode? errorCode,
+            string errorMessage,
+            int appliedMigrationsCount)
         {
-            Error = error;
+            ErrorCode = errorCode;
             ErrorMessage = errorMessage;
             AppliedMigrationsCount = appliedMigrationsCount;
         }

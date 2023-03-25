@@ -6,18 +6,27 @@ namespace Curiosity.Migrations.UnitTests.CodeMigrations
 {
     public class InitialMigration : CodeMigration, IDowngradeMigration
     {
+        /// <inheritdoc />
         public override DbVersion Version { get; } = new DbVersion(1,0);
-        public override string Comment { get; } = "comment";
-        
+        /// <inheritdoc />
+        public override string Comment => "comment";
 
+        /// <inheritdoc />
         public override Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
-            return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript, token);
+            return MigrationConnection.ExecuteNonQuerySqlAsync(
+                ScriptConstants.UpScript,
+                null,
+                token);
         }
 
+        /// <inheritdoc />
         public Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
         {
-            return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript, token);
+            return MigrationConnection.ExecuteNonQuerySqlAsync(
+                ScriptConstants.DownScript,
+                null,
+                token);
         }
     }
 }

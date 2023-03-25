@@ -30,7 +30,7 @@ public abstract class CodeMigration : IMigration
     /// <summary>
     /// Provides access to underlying database.
     /// </summary>
-    protected IDbProvider DbProvider { get; private set; } = null!;
+    protected IMigrationConnection MigrationConnection { get; private set; } = null!;
 
     /// <summary>
     /// User defined variables.
@@ -48,15 +48,15 @@ public abstract class CodeMigration : IMigration
     /// <summary>
     /// Initializes the migration. 
     /// </summary>
-    /// <param name="dbProvider">Provider for DB access</param>
+    /// <param name="migrationConnection">Provider for DB access</param>
     /// <param name="variables">Variables for migrations</param>
     /// <param name="migrationLogger">Logger for migration</param>
     internal void Init(
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        DbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+        MigrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
         Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         Logger = migrationLogger;
     }

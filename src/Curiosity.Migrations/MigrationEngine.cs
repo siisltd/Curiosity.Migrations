@@ -9,12 +9,12 @@ using Microsoft.Extensions.Logging;
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Default realisation of <see cref="IDbMigrator"/>
+/// Default realisation of <see cref="IMigrationEngine"/>
 /// </summary>
-public sealed class DbMigrator : IDbMigrator, IDisposable
+public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IAsyncDisposable
 {
     private readonly ILogger? _logger;
-    private readonly IDbProvider _dbProvider;
+    private readonly IMigrationConnection _migrationConnection;
 
     private readonly MigrationPolicy _upgradePolicy;
     private readonly MigrationPolicy _downgradePolicy;
@@ -24,17 +24,17 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
     private readonly IReadOnlyList<IMigration> _preMigrations;
 
     /// <summary>
-    /// Default realisation of <see cref="IDbMigrator"/>
+    /// <inheritdoc cref="MigrationEngine"/>
     /// </summary>
-    /// <param name="dbProvider">Provider for database</param>
+    /// <param name="migrationConnection">Provider for database</param>
     /// <param name="migrations">Main migrations for changing database</param>
     /// <param name="upgradePolicy">Policy for upgrading database</param>
     /// <param name="downgradePolicy">Policy for downgrading database</param>
     /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
     /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version.</param>
     /// <param name="logger">Optional logger</param>
-    public DbMigrator(
-        IDbProvider dbProvider,
+    public MigrationEngine(
+        IMigrationConnection migrationConnection,
         IReadOnlyList<IMigration> migrations,
         MigrationPolicy upgradePolicy,
         MigrationPolicy downgradePolicy,
@@ -43,7 +43,7 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
         ILogger? logger = null)
     {
         if (migrations == null) throw new ArgumentNullException(nameof(migrations));
-        _dbProvider = dbProvider ?? throw new ArgumentNullException(nameof(dbProvider));
+        _migrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
         _logger = logger;
 
         var migrationMap = new Dictionary<DbVersion, IMigration>();
@@ -104,7 +104,7 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, $"Error while migrating database {_dbProvider.DbName}. Reason: {e.Message}");
+            _logger?.LogError(e, $"Error while migrating database {_migrationConnection.DatabaseName}. Reason: {e.Message}");
             return MigrationResult.FailureResult(MigrationErrorCode.Unknown, e.Message);
         }
     }
@@ -121,33 +121,33 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
             }
 
             // check if database exists and create if not
-            _logger?.LogInformation($"Check Database \"{_dbProvider.DbName}\" existence...");
-            var isDatabaseExist = await _dbProvider.CheckIfDatabaseExistsAsync(_dbProvider.DbName, token);
+            _logger?.LogInformation($"Check Database \"{_migrationConnection.DatabaseName}\" existence...");
+            var isDatabaseExist = await _migrationConnection.CheckIfDatabaseExistsAsync(_migrationConnection.DatabaseName, token);
             if (isDatabaseExist)
             {
-                _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" exists. Starting migration...");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" exists. Starting migration...");
             }
             else
             {
-                _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" doesn't exist. Creating database...");
-                await _dbProvider.CreateDatabaseIfNotExistsAsync(token);
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" doesn't exist. Creating database...");
+                await _migrationConnection.CreateDatabaseIfNotExistsAsync(token);
                 _logger?.LogInformation("Creating database completed");
             }
 
-            await _dbProvider.OpenConnectionAsync(token);
+            await _migrationConnection.OpenConnectionAsync(token);
 
             // check if applied migrations table exists and create if not 
-            _logger?.LogInformation($"Check \"{_dbProvider.AppliedMigrationsTableName}\" table existence...");
-            var isMigrationTableExists = await _dbProvider.CheckIfTableExistsAsync(_dbProvider.AppliedMigrationsTableName, token);
+            _logger?.LogInformation($"Check \"{_migrationConnection.MigrationHistoryTableName}\" table existence...");
+            var isMigrationTableExists = await _migrationConnection.CheckIfTableExistsAsync(_migrationConnection.MigrationHistoryTableName, token);
             if (isMigrationTableExists)
             {
-                _logger?.LogInformation($"Table \"{_dbProvider.AppliedMigrationsTableName}\" exists. ");
+                _logger?.LogInformation($"Table \"{_migrationConnection.MigrationHistoryTableName}\" exists. ");
             }
             else
             {
-                _logger?.LogInformation($"Creating \"{_dbProvider.AppliedMigrationsTableName}\" table...");
-                await _dbProvider.CreateAppliedMigrationsTableIfNotExistsAsync(token);
-                _logger?.LogInformation($"Creating \"{_dbProvider.AppliedMigrationsTableName}\" table completed.");
+                _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table...");
+                await _migrationConnection.CreateMigrationHistoryTableIfNotExistsAsync(token);
+                _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table completed.");
             }
 
             // get applied migrations versions
@@ -155,15 +155,15 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
 
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Skip migration.");
                 return 0;
             }
 
-            _logger?.LogInformation($"Executing pre-migration scripts for database \"{_dbProvider.DbName}\"...");
+            _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\"...");
             var wasPreMigrationExecuted = await ExecutePreMigrationScriptsAsync(token);
             if (wasPreMigrationExecuted)
             {
-                _logger?.LogInformation($"Executing pre-migration scripts for database \"{_dbProvider.DbName}\" completed.");
+                _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\" completed.");
 
                 // applied migration versions might be changed after pre-migration
                 (isUpgrade, migrationsToApply) = await GetMigrationsAsync(true, token);
@@ -175,18 +175,18 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
 
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_dbProvider.DbName}\" is actual. Skip migration.");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Skip migration.");
                 return 0;
             }
 
-            _logger?.LogInformation($"Migrating database \"{_dbProvider.DbName}\"...");
+            _logger?.LogInformation($"Migrating database \"{_migrationConnection.DatabaseName}\"...");
             var policy = isUpgrade
                 ? _upgradePolicy
                 : _downgradePolicy;
             await MigrateAsync(migrationsToApply, isUpgrade, policy, token);
 
-            await _dbProvider.CloseConnectionAsync();
-            _logger?.LogInformation($"Migrating database {_dbProvider.DbName} completed. Successfully applied {migrationsToApply.Count} migrations");
+            await _migrationConnection.CloseConnectionAsync();
+            _logger?.LogInformation($"Migrating database {_migrationConnection.DatabaseName} completed. Successfully applied {migrationsToApply.Count} migrations");
 
             return migrationsToApply.Count;
         }
@@ -198,7 +198,7 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
         {
             throw new MigrationException(
                 MigrationErrorCode.MigratingError,
-                $"Error while migrating database {_dbProvider.DbName}. Reason: {e.Message}",
+                $"Error while migrating database {_migrationConnection.DatabaseName}. Reason: {e.Message}",
                 e);
         }
     }
@@ -214,7 +214,7 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
         var maxAvailableMigrationVersion = _migrationMap.Values.Max(x => x.Version);
 
         // get applied migrations versions
-        var appliedMigrationVersions = await _dbProvider.GetAppliedMigrationVersionAsync(token);
+        var appliedMigrationVersions = await _migrationConnection.GetAppliedMigrationVersionsAsync(token);
 
         // provider should order migrations by version ascending, but we can't trust them, because it can be external
         appliedMigrationVersions = appliedMigrationVersions.OrderBy(x => x).ToArray();
@@ -303,17 +303,17 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
 
             DbTransaction? transaction = null;
 
-            await _dbProvider.CloseConnectionAsync();
-            await _dbProvider.OpenConnectionAsync(token);
+            await _migrationConnection.CloseConnectionAsync();
+            await _migrationConnection.OpenConnectionAsync(token);
 
             try
             {
                 _logger?.LogInformation(
-                    $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for database \"{_dbProvider.DbName}\"...");
+                    $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for database \"{_migrationConnection.DatabaseName}\"...");
 
                 if (migration.IsTransactionRequired)
                 {
-                    transaction = _dbProvider.BeginTransaction();
+                    transaction = _migrationConnection.BeginTransaction();
                 }
                 else
                 {
@@ -325,13 +325,13 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
                 transaction?.Commit();
 
                 _logger?.LogInformation(
-                    $"Executing pre-migration script {migration.Version} for database \"{_dbProvider.DbName}\" completed.");
+                    $"Executing pre-migration script {migration.Version} for database \"{_migrationConnection.DatabaseName}\" completed.");
             }
             catch (Exception e)
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing pre-migration to {migration.Version} for database \"{_dbProvider.DbName}\": {e.Message}",
+                    $"Error while executing pre-migration to {migration.Version} for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
                     e);
             }
             finally
@@ -363,30 +363,30 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
 
             DbTransaction? transaction = null;
 
-            // check policy, return result
+            //todo check policy, return result
 
             try
             {
                 // sometimes transactions fails without reopening connection
                 //todo #19: fix it later
-                await _dbProvider.CloseConnectionAsync();
-                await _dbProvider.OpenConnectionAsync(token);
+                await _migrationConnection.CloseConnectionAsync();
+                await _migrationConnection.OpenConnectionAsync(token);
 
                 if (migration.IsTransactionRequired)
                 {
-                    transaction = _dbProvider.BeginTransaction();
+                    transaction = _migrationConnection.BeginTransaction();
                 }
                 else
                 {
                     _logger?.LogWarning($"Transaction is disabled for migration {migration.Version}");
                 }
 
-                _logger?.LogInformation($"{operationName} to {migration.Version} ({migration.Comment} for database \"{_dbProvider.DbName}\")...");
+                _logger?.LogInformation($"{operationName} to {migration.Version} ({migration.Comment} for database \"{_migrationConnection.DatabaseName}\")...");
 
                 if (isUpgrade)
                 {
                     await migration.UpgradeAsync(transaction, token);
-                    await _dbProvider.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
+                    await _migrationConnection.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
                 }
                 else
                 {
@@ -394,20 +394,20 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
                         throw new MigrationException(MigrationErrorCode.MigrationNotFound, $"Migration with version {migration.Version} doesn't support downgrade");
 
                     await downgradableMigration.DowngradeAsync(transaction, token);
-                    await _dbProvider.DeleteAppliedMigrationVersionAsync(migration.Version, token);
+                    await _migrationConnection.DeleteAppliedMigrationVersionAsync(migration.Version, token);
                 }
 
                 // Commit transaction if all commands succeed, transaction will auto-rollback
                 // when disposed if either commands fails
                 transaction?.Commit();
 
-                _logger?.LogInformation($"{operationName} to {migration.Version} (database \"{_dbProvider.DbName}\") completed.");
+                _logger?.LogInformation($"{operationName} to {migration.Version} (database \"{_migrationConnection.DatabaseName}\") completed.");
             }
             catch (Exception e)
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing {operationName.ToLower()} migration to {migration.Version} for database \"{_dbProvider.DbName}\": {e.Message}",
+                    $"Error while executing {operationName.ToLower()} migration to {migration.Version} for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
                     e);
             }
             finally
@@ -420,6 +420,6 @@ public sealed class DbMigrator : IDbMigrator, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        _dbProvider.Dispose();
+        _migrationConnection.Dispose();
     }
 }

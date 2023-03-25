@@ -7,14 +7,14 @@ using Microsoft.Extensions.Logging;
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Builder for <see cref="IDbMigrator"/>
+/// Builder for <see cref="IMigrationEngine"/>
 /// </summary>
 /// <remarks>
-/// Configures how instance of <see cref="IDbMigrator"/> should work:
+/// Configures how instance of <see cref="IMigrationEngine"/> should work:
 /// which migrations should be used, what is desired target version, what are the restrictions, etc. 
 /// </remarks>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
-public class MigratorBuilder
+public class MigrationEngineBuilder
 {
     private MigrationPolicy _upgradePolicy;
     private MigrationPolicy _downgradePolicy;
@@ -22,7 +22,7 @@ public class MigratorBuilder
     private readonly ICollection<IMigrationsProvider> _migrationsProviders;
     private readonly ICollection<IMigrationsProvider> _preMigrationsProviders;
 
-    private IDbProviderFactory? _dbProviderFactory;
+    private IMigrationConnectionFactory? _dbProviderFactory;
     private DbVersion? _targetVersion;
     private ILogger? _logger;
 
@@ -41,9 +41,9 @@ public class MigratorBuilder
     /// </summary>
     private ILogger? _sqlLogger;
 
-    /// <inheritdoc cref="MigratorBuilder"/>
+    /// <inheritdoc cref="MigrationEngineBuilder"/>
     /// <param name="services">Existed instance of <see cref="IServiceCollection"/> that should be used for internal dependency injection. If null, new empty instance will be created.</param>
-    public MigratorBuilder(IServiceCollection? services = null)
+    public MigrationEngineBuilder(IServiceCollection? services = null)
     {
         _services = services ?? new ServiceCollection();
         _migrationsProviders = new List<IMigrationsProvider>();
@@ -102,7 +102,7 @@ public class MigratorBuilder
     /// Allows to use custom migration provider
     /// </summary>
     /// <exception cref="ArgumentNullException"></exception>
-    public MigratorBuilder UseCustomMigrationsProvider(IMigrationsProvider provider)
+    public MigrationEngineBuilder UseCustomMigrationsProvider(IMigrationsProvider provider)
     {
         if (provider == null) throw new ArgumentNullException(nameof(provider));
         _migrationsProviders.Add(provider);
@@ -113,7 +113,7 @@ public class MigratorBuilder
     /// Setup upgrade migration policy
     /// </summary>
     /// <param name="policy">Policy</param>
-    public MigratorBuilder UseUpgradeMigrationPolicy(MigrationPolicy policy)
+    public MigrationEngineBuilder UseUpgradeMigrationPolicy(MigrationPolicy policy)
     {
         _upgradePolicy = policy;
         return this;
@@ -123,7 +123,7 @@ public class MigratorBuilder
     /// Setup downgrade migration policy
     /// </summary>
     /// <param name="policy">Policy</param>
-    public MigratorBuilder UseDowngradeMigrationPolicy(MigrationPolicy policy)
+    public MigrationEngineBuilder UseDowngradeMigrationPolicy(MigrationPolicy policy)
     {
         _downgradePolicy = policy;
         return this;
@@ -132,7 +132,7 @@ public class MigratorBuilder
     /// <summary>
     /// Uses specified logger for migrator. This logger will be used to logging internal logs of migrator. 
     /// </summary>
-    public MigratorBuilder UseLogger(ILogger logger)
+    public MigrationEngineBuilder UseLogger(ILogger logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         return this;
@@ -141,20 +141,18 @@ public class MigratorBuilder
     /// <summary>
     /// Use specified logger to log sql queries. All executed sql queries will be logged into specified logger.
     /// </summary>
-    public MigratorBuilder UseLoggerForSql(ILogger logger)
+    public MigrationEngineBuilder UseLoggerForSql(ILogger logger)
     {
         _sqlLogger = logger;
         return this;
     }
 
     /// <summary>
-    /// Setup factory for provider to database access
+    /// Setup factory for migration connection.
     /// </summary>
-    /// <param name="dbProviderFactory"></param>
-    /// <returns></returns>
-    public MigratorBuilder UseDbProviderFactory(IDbProviderFactory dbProviderFactory)
+    public MigrationEngineBuilder UseMigrationConnectionFactory(IMigrationConnectionFactory migrationConnectionFactory)
     {
-        _dbProviderFactory = dbProviderFactory ?? throw new ArgumentNullException(nameof(dbProviderFactory));
+        _dbProviderFactory = migrationConnectionFactory ?? throw new ArgumentNullException(nameof(migrationConnectionFactory));
         return this;
     }
 
@@ -167,7 +165,7 @@ public class MigratorBuilder
     /// If <paramref name="targetDbVersion"></paramref> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
     /// If <paramref name="targetDbVersion"></paramref> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
     /// </remarks>
-    public MigratorBuilder SetUpTargetVersion(DbVersion targetDbVersion)
+    public MigrationEngineBuilder SetUpTargetVersion(DbVersion targetDbVersion)
     {
         _targetVersion = targetDbVersion;
         return this;
@@ -182,7 +180,7 @@ public class MigratorBuilder
     /// <remarks>
     /// The variable will be overwritten if it was added before.
     /// </remarks>
-    public MigratorBuilder UseVariable(string name, string value)
+    public MigrationEngineBuilder UseVariable(string name, string value)
     {
         if (String.IsNullOrWhiteSpace(name))
             throw new ArgumentNullException(nameof(name));
@@ -195,18 +193,18 @@ public class MigratorBuilder
     /// <summary>
     /// Builds migrator.
     /// </summary>
-    /// <returns>Configured and ready new instance of <see cref="IDbMigrator"/>.</returns>
-    /// <exception cref="InvalidOperationException">Throws when <see cref="IDbProvider"/> or <see cref="IMigration"/> does not specified</exception>
-    public IDbMigrator Build()
+    /// <returns>Configured and ready new instance of <see cref="IMigrationEngine"/>.</returns>
+    /// <exception cref="InvalidOperationException">Throws when <see cref="IMigrationConnection"/> or <see cref="IMigration"/> does not specified</exception>
+    public IMigrationEngine Build()
     {
         if (_dbProviderFactory == null)
             throw new InvalidOperationException(
-                $"{typeof(IDbProvider)} not set up. Use {nameof(UseDbProviderFactory)}");
+                $"{typeof(IMigrationConnection)} not set up. Use {nameof(UseMigrationConnectionFactory)}");
         if (_migrationsProviders.Count == 0)
             throw new InvalidOperationException(
                 $"{typeof(IMigrationsProvider)} not set up. Use {nameof(UseScriptMigrations)} or {nameof(UseCodeMigrations)}");
 
-        var dbProvider = _dbProviderFactory.CreateDbProvider();
+        var dbProvider = _dbProviderFactory.CreateMigrationConnection();
         dbProvider.UseSqlLogger(_sqlLogger);
             
         var providerVariables = dbProvider.GetDefaultVariables();
@@ -230,7 +228,7 @@ public class MigratorBuilder
             preMigrations.AddRange(migrationsProvider.GetMigrations(dbProvider, _variables, _logger));
         }
 
-        return new DbMigrator(
+        return new MigrationEngine(
             dbProvider,
             migrations,
             _upgradePolicy,

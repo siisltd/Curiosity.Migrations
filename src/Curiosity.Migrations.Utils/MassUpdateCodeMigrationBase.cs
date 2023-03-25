@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace Curiosity.Migrations;
+namespace Curiosity.Migrations.Utils;
 
 /// <summary>
 /// Base migration for efficient bulk data update in a table.
@@ -85,14 +85,14 @@ public abstract class MassUpdateCodeMigrationBase : CodeMigration
         {
             IEnumerable<long> processedIds;
             // for each update we make our own transaction so that the changes go quickly
-            using (var localTransaction = DbProvider.Connection!.BeginTransaction(IsolationLevel.Unspecified))
+            using (var localTransaction = MigrationConnection.Connection!.BeginTransaction(IsolationLevel.Unspecified))
             {
                 var commandParams = new Dictionary<string, object>
                 {
                     {"id", currentId},
                 };
                 var command = new CommandDefinition(updateQuery, commandParams, cancellationToken: cancellationToken);
-                processedIds = await DbProvider.Connection.QueryAsync<long>(command);
+                processedIds = await MigrationConnection.Connection.QueryAsync<long>(command);
 
                 localTransaction.Commit();
             }

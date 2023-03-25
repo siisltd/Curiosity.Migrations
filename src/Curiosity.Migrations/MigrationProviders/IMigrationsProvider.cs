@@ -11,12 +11,12 @@ public interface IMigrationsProvider
     /// <summary>
     /// Provide migrations
     /// </summary>
-    /// <param name="dbProvider">Instance of <see cref="IDbProvider"/> to initialize migrations</param>
+    /// <param name="migrationConnection">Instance of <see cref="IMigrationConnection"/> to initialize migrations</param>
     /// <param name="variables">Dictionary with variables. Key - variable name, value - variable value</param>
     /// <param name="migrationLogger">Logger for migration</param>
     /// <returns></returns>
     ICollection<IMigration> GetMigrations(
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger);
 }

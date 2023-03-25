@@ -69,11 +69,11 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
     /// <inheritdoc />
     public ICollection<IMigration> GetMigrations(
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
-        if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
+        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
         if (variables == null) throw new ArgumentNullException(nameof(variables));
 
         if (_absoluteDirectoriesPathWithPrefix.Count == 0 && _assembliesWithPrefix.Count == 0)
@@ -96,7 +96,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
             var directoryMigrations = GetMigrations(
                 fileNames,
                 File.ReadAllText,
-                dbProvider,
+                migrationConnection,
                 prefix,
                 variables,
                 migrationLogger);
@@ -123,7 +123,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                     using var reader = new StreamReader(stream);
                     return reader.ReadToEnd();
                 },
-                dbProvider,
+                migrationConnection,
                 prefix,
                 variables,
                 migrationLogger);
@@ -139,14 +139,14 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     private ICollection<IMigration> GetMigrations(
         IEnumerable<string> fileNames,
         Func<string, string> sqlScriptReadFunc,
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         string? prefix,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
         if (fileNames == null) throw new ArgumentNullException(nameof(fileNames));
         if (sqlScriptReadFunc == null) throw new ArgumentNullException(nameof(sqlScriptReadFunc));
-        if (dbProvider == null) throw new ArgumentNullException(nameof(dbProvider));
+        if (migrationConnection == null) throw new ArgumentNullException(nameof(migrationConnection));
 
         var scripts = new Dictionary<DbVersion, ScriptInfo>();
 
@@ -236,7 +236,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 CreateScriptMigration(
                     scriptInfo.Key,
                     scriptInfo.Value,
-                    dbProvider,
+                    migrationConnection,
                     variables,
                     migrationLogger))
             .ToArray();
@@ -283,14 +283,14 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// </summary>
     /// <param name="dbVersion"></param>
     /// <param name="scriptInfo"></param>
-    /// <param name="dbProvider"></param>
+    /// <param name="migrationConnection"></param>
     /// <param name="variables"></param>
     /// <param name="migrationLogger"></param>
     /// <returns></returns>
     private IMigration CreateScriptMigration(
         DbVersion dbVersion,
         ScriptInfo scriptInfo,
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
         ILogger? migrationLogger)
     {
@@ -313,7 +313,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         return downScript.Count > 0
             ? new DowngradeScriptMigration(
                 migrationLogger,
-                dbProvider,
+                migrationConnection,
                 dbVersion,
                 upScript,
                 downScript,
@@ -321,7 +321,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 scriptInfo.Options.IsTransactionRequired)
             : new ScriptMigration(
                 migrationLogger,
-                dbProvider,
+                migrationConnection,
                 dbVersion,
                 upScript,
                 scriptInfo.Comment,

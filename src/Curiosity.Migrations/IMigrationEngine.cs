@@ -4,12 +4,9 @@ using System.Threading.Tasks;
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Database migrator.
+/// Engine that executes configured migrations.
 /// </summary>
-/// <remarks>
-/// Engine that executes all configured migrations. 
-/// </remarks>
-public interface IDbMigrator
+public interface IMigrationEngine
 {
     /// <summary>
     /// Executes migration of a database applying all migration according to migrator's configuration.

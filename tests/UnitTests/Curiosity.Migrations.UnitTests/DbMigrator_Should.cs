@@ -11,7 +11,7 @@ using Xunit;
 namespace Curiosity.Migrations.UnitTests
 {
     /// <summary>
-    /// Positive unit tests for <see cref="DbMigrator"/>.
+    /// Positive unit tests for <see cref="MigrationEngine"/>.
     /// </summary>
     public class DbMigrator_Should
     {
@@ -22,10 +22,10 @@ namespace Curiosity.Migrations.UnitTests
         {
             var initialDbVersion = new DbVersion(1,0);
             
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
             
             provider
@@ -34,7 +34,7 @@ namespace Curiosity.Migrations.UnitTests
             
             var migrations = new List<IMigration>(0);
             
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 MigrationPolicy.AllAllowed,
@@ -51,7 +51,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Verify(x => x.CreateDatabaseIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
 
             provider
-                .Verify(x => x.CreateAppliedMigrationsTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
+                .Verify(x => x.CreateMigrationHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
             
             Assert.True(result.IsSuccessfully);
         }
@@ -65,7 +65,7 @@ namespace Curiosity.Migrations.UnitTests
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
         
             provider
                 .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
@@ -73,7 +73,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
             
             provider
@@ -105,7 +105,7 @@ namespace Curiosity.Migrations.UnitTests
                 migrations[1].Version
             };
             
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 policy,
@@ -127,7 +127,7 @@ namespace Curiosity.Migrations.UnitTests
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
         
             provider
                 .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
@@ -135,7 +135,7 @@ namespace Curiosity.Migrations.UnitTests
                 .Returns(() => Task.CompletedTask);
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
         
             provider
@@ -168,7 +168,7 @@ namespace Curiosity.Migrations.UnitTests
                 migrations[2].Version
             };
             
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 policy,
@@ -187,14 +187,14 @@ namespace Curiosity.Migrations.UnitTests
             var targetDbVersion = new DbVersion(2,0);
             var policy = MigrationPolicy.AllForbidden;
         
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
         
             provider
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
         
             var firstMigration = new Mock<IMigration>();
@@ -222,7 +222,7 @@ namespace Curiosity.Migrations.UnitTests
                 fourthMigration.Object
             };
             
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 policy,
@@ -233,8 +233,8 @@ namespace Curiosity.Migrations.UnitTests
             var result = await migrator.MigrateSafeAsync();
             
             Assert.False(result.IsSuccessfully);
-            Assert.True(result.Error.HasValue);
-            Assert.Equal(MigrationErrorCode.PolicyError, result.Error.Value);
+            Assert.True(result.ErrorCode.HasValue);
+            Assert.Equal(MigrationErrorCode.PolicyError, result.ErrorCode.Value);
         }
         
         [Fact]
@@ -243,7 +243,7 @@ namespace Curiosity.Migrations.UnitTests
             var targetDbVersion = new DbVersion(3,0);
             var policy = MigrationPolicy.AllAllowed;
         
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
             
             var firstMigration = new Mock<IMigration>();
             firstMigration
@@ -272,7 +272,7 @@ namespace Curiosity.Migrations.UnitTests
 
             try
             {
-                var _ = new DbMigrator(
+                var _ = new MigrationEngine(
                     provider.Object, 
                     migrations,
                     policy,
@@ -292,7 +292,7 @@ namespace Curiosity.Migrations.UnitTests
         {
             var policy = MigrationPolicy.AllAllowed;
 
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
 
             provider
                 .Setup(x => x.BeginTransaction())
@@ -444,10 +444,10 @@ namespace Curiosity.Migrations.UnitTests
             totalMigrationsFiles.AddRange(notAppliedMigrations);
 
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(totalAppliedMigrations.Select(x => x.Version).ToList() as IReadOnlyCollection<DbVersion>));
 
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object,
                 totalMigrationsFiles,
                 policy,
@@ -481,7 +481,7 @@ namespace Curiosity.Migrations.UnitTests
         
             var actualAppliedMigrations = new HashSet<DbVersion>();
             
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
         
             provider
                 .Setup(x => x.DeleteAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
@@ -513,7 +513,7 @@ namespace Curiosity.Migrations.UnitTests
             };
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<DbVersion>));
 
             var expectedAppliedMigrations = new HashSet<DbVersion>
@@ -522,7 +522,7 @@ namespace Curiosity.Migrations.UnitTests
                 migrations[2].Version
             };
             
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 policy,
@@ -545,7 +545,7 @@ namespace Curiosity.Migrations.UnitTests
             var targetDbVersion = new DbVersion(1,0);
             var policy = MigrationPolicy.AllForbidden;
         
-            var provider = new Mock<IDbProvider>();
+            var provider = new Mock<IMigrationConnection>();
         
             provider
                 .Setup(x => x.BeginTransaction())
@@ -577,10 +577,10 @@ namespace Curiosity.Migrations.UnitTests
             };
             
             provider
-                .Setup(x => x.GetAppliedMigrationVersionAsync(It.IsAny<CancellationToken>()))
+                .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
                 .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<DbVersion>));
 
-            var migrator = new DbMigrator(
+            var migrator = new MigrationEngine(
                 provider.Object, 
                 migrations,
                 policy,
@@ -591,8 +591,8 @@ namespace Curiosity.Migrations.UnitTests
             var result = await migrator.MigrateSafeAsync();
             
             Assert.False(result.IsSuccessfully);
-            Assert.True(result.Error.HasValue);
-            Assert.Equal(MigrationErrorCode.PolicyError, result.Error.Value);
+            Assert.True(result.ErrorCode.HasValue);
+            Assert.Equal(MigrationErrorCode.PolicyError, result.ErrorCode.Value);
         }
 
         #endregion

@@ -8,7 +8,12 @@ namespace Curiosity.Migrations;
 /// </summary>
 public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
 {
-    private static readonly Regex Regex = new Regex(MigrationConstants.VersionPattern, RegexOptions.IgnoreCase);
+    private static readonly Regex Regex = new(MigrationConstants.VersionPattern, RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Text representation of a version.
+    /// </summary>
+    private readonly string _version;
 
     /// <summary>
     /// Major version
@@ -22,25 +27,29 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     /// Useful when combining migrations to a single logical group (eg. 1 step of data manipulation, 2 step and etc.) 
     /// </remarks>
     public short Minor { get; }
-        
+
     /// <inheritdoc cref="DbVersion"/>
     public DbVersion(long major, short minor = 0) : this()
     {
         AssertMajor(major);
         AssertMinor(minor);
-            
+
         Major = major;
         Minor = minor;
+
+        _version = $"{Major:D4}.{Minor:D2}";
     }
-        
+
     /// <inheritdoc cref="DbVersion"/>
-    public DbVersion(string version): this()
+    public DbVersion(string version) : this()
     {
         if (!TryParse(version, out var validVersion))
             throw new ArgumentException($"Incorrect version. Version must be parsed by this regexp: {MigrationConstants.VersionPattern}");
 
         Major = validVersion.Major;
         Minor = validVersion.Minor;
+
+        _version = validVersion.ToString();
     }
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
@@ -48,7 +57,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     {
         if (major < 0) throw new ArgumentOutOfRangeException(nameof(major));
     }
-        
+
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
     private static void AssertMinor(short minor)
     {
@@ -70,13 +79,13 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"{Major:D4}.{Minor:D2}";
+        return _version;
     }
 
     /// <inheritdoc />
     public int CompareTo(object obj)
     {
-        var version = (DbVersion) obj;
+        var version = (DbVersion)obj;
 
         var result = Major.CompareTo(version.Major);
         if (result != 0)
@@ -152,7 +161,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
 
         if (String.IsNullOrWhiteSpace(source))
             return false;
-            
+
         var match = Regex.Match(source);
         if (!match.Success)
             return false;
@@ -163,7 +172,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
         result &= long.TryParse(match.Groups[1].Value.Replace("-", ""), out var major);
         if (!result)
             return false;
-            
+
         try
         {
             AssertMajor(major);
@@ -172,7 +181,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
         {
             return false;
         }
-            
+
         // it's optional
         short minor = 0;
         if (!String.IsNullOrEmpty(match.Groups[3].Value))

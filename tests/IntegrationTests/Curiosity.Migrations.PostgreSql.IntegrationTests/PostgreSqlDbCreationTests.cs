@@ -10,26 +10,26 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
         [Fact]
         public async Task CreateDb_WithoutParams_Ok()
         {
-            IDbProvider dbProvider = null;
+            IMigrationConnection migrationConnection = null;
             var random = new Random();
             var dbName = $"temp_{random.Next(100)}";
             try
             {
-                var options = new PostgreDbProviderOptions(
+                var options = new PostgresMigrationConnectionOptions(
                     String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName));
-                dbProvider = new PostgreDbProvider(options);
-                await dbProvider.CreateDatabaseIfNotExistsAsync();
+                migrationConnection = new PostgresMigrationConnection(options);
+                await migrationConnection.CreateDatabaseIfNotExistsAsync();
             }
             finally
             {
-                if (dbProvider != null)
+                if (migrationConnection != null)
                 {
                     try
                     {
 
-                        await dbProvider.OpenConnectionAsync();
-                        await dbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {dbName}");
-                        await dbProvider.CloseConnectionAsync();
+                        await migrationConnection.OpenConnectionAsync();
+                        await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
+                        await migrationConnection.CloseConnectionAsync();
                     }
                     catch (Exception)
                     {
@@ -42,27 +42,27 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
         [Fact]
         public async Task CreateDb_WithTemplate_Ok()
         {
-            IDbProvider dbProvider = null;
+            IMigrationConnection migrationConnection = null;
             var random = new Random();
             var dbName = $"temp_{random.Next(100)}";
             try
             {
-                var options = new PostgreDbProviderOptions(
+                var options = new PostgresMigrationConnectionOptions(
                     String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
                     template: "template0");
-                dbProvider = new PostgreDbProvider(options);
-                await dbProvider.CreateDatabaseIfNotExistsAsync();
+                migrationConnection = new PostgresMigrationConnection(options);
+                await migrationConnection.CreateDatabaseIfNotExistsAsync();
             }
             finally
             {
-                if (dbProvider != null)
+                if (migrationConnection != null)
                 {
                     try
                     {
 
-                        await dbProvider.OpenConnectionAsync();
-                        await dbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {dbName}");
-                        await dbProvider.CloseConnectionAsync();
+                        await migrationConnection.OpenConnectionAsync();
+                        await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
+                        await migrationConnection.CloseConnectionAsync();
                     }
                     catch (Exception)
                     {
@@ -75,28 +75,28 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
         [Fact]
         public async Task CreateDb_WithEncoding_Ok()
         {
-            IDbProvider dbProvider = null;
+            IMigrationConnection migrationConnection = null;
             var random = new Random();
             var dbName = $"temp_{random.Next(100)}";
             try
             {
-                var options = new PostgreDbProviderOptions(
+                var options = new PostgresMigrationConnectionOptions(
                     String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
                     template: "template0",
                     databaseEncoding: "SQL_ASCII");
-                dbProvider = new PostgreDbProvider(options);
-                await dbProvider.CreateDatabaseIfNotExistsAsync();
+                migrationConnection = new PostgresMigrationConnection(options);
+                await migrationConnection.CreateDatabaseIfNotExistsAsync();
             }
             finally
             {
-                if (dbProvider != null)
+                if (migrationConnection != null)
                 {
                     try
                     {
 
-                        await dbProvider.OpenConnectionAsync();
-                        await dbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {dbName}");
-                        await dbProvider.CloseConnectionAsync();
+                        await migrationConnection.OpenConnectionAsync();
+                        await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
+                        await migrationConnection.CloseConnectionAsync();
                     }
                     catch (Exception)
                     {
@@ -109,31 +109,31 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
         [Fact]
         public async Task CreateDb_WithAllParams_Ok()
         {
-            IDbProvider dbProvider = null;
+            IMigrationConnection migrationConnection = null;
             var random = new Random();
             var dbName = $"temp_{random.Next(100)}";
             try
             {
-                var options = new PostgreDbProviderOptions(
+                var options = new PostgresMigrationConnectionOptions(
                     String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
                     template: "template0",
                     connectionLimit: 10,
                     lcCollate: "C",
                     lcCtype: "C", 
                     databaseEncoding: "SQL_ASCII");
-                dbProvider = new PostgreDbProvider(options);
-                await dbProvider.CreateDatabaseIfNotExistsAsync();
+                migrationConnection = new PostgresMigrationConnection(options);
+                await migrationConnection.CreateDatabaseIfNotExistsAsync();
             }
             finally
             {
-                if (dbProvider != null)
+                if (migrationConnection != null)
                 {
                     try
                     {
 
-                        await dbProvider.OpenConnectionAsync();
-                        await dbProvider.ExecuteScriptAsync($"DROP TABLE IF EXISTS {dbName}");
-                        await dbProvider.CloseConnectionAsync();
+                        await migrationConnection.OpenConnectionAsync();
+                        await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
+                        await migrationConnection.CloseConnectionAsync();
                     }
                     catch (Exception)
                     {

@@ -3,7 +3,7 @@ namespace Curiosity.Migrations;
 /// <summary>
 /// Migration error code.
 /// </summary>
-public enum MigrationErrorCode
+public enum MigrationErrorCode //todo extend code ranges
 {
     /// <summary>
     /// Unknown.

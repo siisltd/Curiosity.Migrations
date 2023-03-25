@@ -7,7 +7,7 @@ using Xunit;
 namespace Curiosity.Migrations.UnitTests
 {
     /// <summary>
-    /// Unit tests for <see cref="MigratorBuilder"/>
+    /// Unit tests for <see cref="MigrationEngineBuilder"/>
     /// </summary>
     public class MigratorBuilder_Should
     {
@@ -21,9 +21,9 @@ namespace Curiosity.Migrations.UnitTests
         public void RetrieveOnlyDefaultVariablesFromProvider()
         {
             // arrange
-            var builder = new MigratorBuilder();
+            var builder = new MigrationEngineBuilder();
 
-            var providerMock = new Mock<IDbProvider>();
+            var providerMock = new Mock<IMigrationConnection>();
             providerMock
                 .Setup(x => x.GetDefaultVariables())
                 .Returns(() => new Dictionary<string, string>
@@ -31,23 +31,23 @@ namespace Curiosity.Migrations.UnitTests
                     {DefaultVariables.User, ProviderUserName},
                     {DefaultVariables.DbName, ProviderDbName}
                 });
-            var factoryMock = new Mock<IDbProviderFactory>();
+            var factoryMock = new Mock<IMigrationConnectionFactory>();
             factoryMock
-                .Setup(x => x.CreateDbProvider())
+                .Setup(x => x.CreateMigrationConnection())
                 .Returns(() => providerMock.Object);
 
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
                 .Setup(x => x.GetMigrations(
-                    It.IsAny<IDbProvider>(), 
+                    It.IsAny<IMigrationConnection>(), 
                     It.IsAny<Dictionary<string, string>>(),
                     It.IsAny<ILogger>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+                .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UseDbProviderFactory(factoryMock.Object);
+            builder.UseMigrationConnectionFactory(factoryMock.Object);
 
             // act
             var migrator = builder.Build();
@@ -67,9 +67,9 @@ namespace Curiosity.Migrations.UnitTests
         public void OverrideDefaultVariablesFromProvider()
         {
             // arrange
-            var builder = new MigratorBuilder();
+            var builder = new MigrationEngineBuilder();
 
-            var providerMock = new Mock<IDbProvider>();
+            var providerMock = new Mock<IMigrationConnection>();
             providerMock
                 .Setup(x => x.GetDefaultVariables())
                 .Returns(() => new Dictionary<string, string>
@@ -77,23 +77,23 @@ namespace Curiosity.Migrations.UnitTests
                     {DefaultVariables.User, ProviderUserName},
                     {DefaultVariables.DbName, ProviderDbName}
                 });
-            var factoryMock = new Mock<IDbProviderFactory>();
+            var factoryMock = new Mock<IMigrationConnectionFactory>();
             factoryMock
-                .Setup(x => x.CreateDbProvider())
+                .Setup(x => x.CreateMigrationConnection())
                 .Returns(() => providerMock.Object);
 
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
                 .Setup(x => x.GetMigrations(
-                    It.IsAny<IDbProvider>(), 
+                    It.IsAny<IMigrationConnection>(), 
                     It.IsAny<Dictionary<string, string>>(),
                     It.IsAny<ILogger>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+                .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UseDbProviderFactory(factoryMock.Object);
+            builder.UseMigrationConnectionFactory(factoryMock.Object);
             builder.UseVariable(DefaultVariables.User, ManualUserName);
             
             // act
@@ -114,9 +114,9 @@ namespace Curiosity.Migrations.UnitTests
         public void RetrieveDefaultVariablesFromProviderWithManual()
         {
             // arrange
-            var builder = new MigratorBuilder();
+            var builder = new MigrationEngineBuilder();
 
-            var providerMock = new Mock<IDbProvider>();
+            var providerMock = new Mock<IMigrationConnection>();
             providerMock
                 .Setup(x => x.GetDefaultVariables())
                 .Returns(() => new Dictionary<string, string>
@@ -124,23 +124,23 @@ namespace Curiosity.Migrations.UnitTests
                     {DefaultVariables.User, ProviderUserName},
                     {DefaultVariables.DbName, ProviderDbName}
                 });
-            var factoryMock = new Mock<IDbProviderFactory>();
+            var factoryMock = new Mock<IMigrationConnectionFactory>();
             factoryMock
-                .Setup(x => x.CreateDbProvider())
+                .Setup(x => x.CreateMigrationConnection())
                 .Returns(() => providerMock.Object);
 
             IReadOnlyDictionary<string, string> scriptVariables = null;
             var migrationsProviderMock = new Mock<IMigrationsProvider>();
             migrationsProviderMock
                 .Setup(x => x.GetMigrations(
-                    It.IsAny<IDbProvider>(),
+                    It.IsAny<IMigrationConnection>(),
                     It.IsAny<Dictionary<string, string>>(),
                     It.IsAny<ILogger>()))
-                .Callback<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-                .Returns<IDbProvider, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+                .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
+                .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
 
             builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
-            builder.UseDbProviderFactory(factoryMock.Object);
+            builder.UseMigrationConnectionFactory(factoryMock.Object);
             builder.UseVariable(AdditionalVariableName, AdditionalVariableValue);
                 
             // act

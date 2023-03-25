@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
 
         <PackageId>Curiosity.Migrations.PostgreSQL</PackageId>
         <Title>PostgreSQL provier for Curiosity.Migrations. </Title>
@@ -26,9 +25,10 @@
         <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
         <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
 
-        <LangVersion>10</LangVersion>
+        <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup>

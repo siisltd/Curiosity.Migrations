@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Curiosity.Migrations.PostgreSQL;
 
 /// <summary>
-/// Extension to adding Postgre migrations to <see cref="MigratorBuilder"/>
+/// Extension to adding Postgre migrations to <see cref="MigrationEngineBuilder"/>
 /// </summary>
-public static class MigratorBuilderExtensions
+[SuppressMessage("ReSharper", "UnusedType.Global")]
+public static class MigrationEngineBuilderExtensions
 {
     /// <summary>
     /// Use provider to make migration on Postgre database. 
@@ -18,11 +21,12 @@ public static class MigratorBuilderExtensions
     /// <param name="template">The name of the template from which to create the new database. If param <see langword="null"/> default value from DB will be used</param>
     /// <param name="tableSpace">The name of the tablespace that will be associated with the new database. If param <see langword="null"/> default value from DB will be used </param>
     /// <remarks>
-    /// For detailed params description look at <see cref="PostgreDbProviderOptions"/>
+    /// For detailed params description look at <see cref="PostgresMigrationConnectionOptions"/>
     /// </remarks>
     // ReSharper disable once InconsistentNaming
-    public static MigratorBuilder UsePostgreSQL(
-        this MigratorBuilder builder,
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    public static MigrationEngineBuilder ConfigureForPostgreSql(
+        this MigrationEngineBuilder builder,
         string connectionString,
         string? migrationTableHistoryName = null,
         string? databaseEncoding = null,
@@ -32,7 +36,7 @@ public static class MigratorBuilderExtensions
         string? template = null,
         string? tableSpace = null)
     {
-        var options = new PostgreDbProviderOptions(
+        var options = new PostgresMigrationConnectionOptions(
             connectionString,
             migrationTableHistoryName,
             databaseEncoding,
@@ -41,7 +45,7 @@ public static class MigratorBuilderExtensions
             connectionLimit,
             template,
             tableSpace);
-        builder.UseDbProviderFactory(new PostgreDbProviderFactory(options));
+        builder.UseMigrationConnectionFactory(new PostgresMigrationConnectionFactory(options));
         return builder;
     }
 }

@@ -15,3 +15,4 @@ public static class MigrationConstants
     /// </summary>
     public static readonly string MigrationFileNamePattern = $@"({VersionPattern})(.(down)|.(up))?(-([\w]*))?\.sql$";
 }
+

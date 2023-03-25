@@ -23,7 +23,7 @@ namespace Curiosity.Migrations.UnitTests
         public void ReturnMigrationsFromAssembly()
         {
             // arrange
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());
@@ -72,7 +72,7 @@ namespace Curiosity.Migrations.UnitTests
         public void ReturnCodeMigrationsFromAssemblyByBaseClass()
         {
             // arrange
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());
@@ -101,7 +101,7 @@ namespace Curiosity.Migrations.UnitTests
         public void ReturnCodeMigrationsFromAssemblyByInterface()
         {
             // arrange
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
 
             var logger = Mock.Of<ILogger>();
             var provider = new CodeMigrationsProvider(GetServiceCollection());
@@ -130,7 +130,7 @@ namespace Curiosity.Migrations.UnitTests
         public void ReturnCodeMigrationWithDependenciesFromIoC()
         {
             // arrange
-            var dbProvider = Mock.Of<IDbProvider>();
+            var dbProvider = Mock.Of<IMigrationConnection>();
             var logger = Mock.Of<ILogger>();
 
             var provider = new CodeMigrationsProvider(GetServiceCollection());

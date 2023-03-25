@@ -21,12 +21,12 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
     /// <inheritdoc cref="DowngradeScriptMigration"/>
     public DowngradeScriptMigration(
         ILogger? migrationLogger,
-        IDbProvider dbProvider,
+        IMigrationConnection migrationConnection,
         DbVersion version,
         ICollection<ScriptMigrationBatch> upScripts,
         ICollection<ScriptMigrationBatch>? downScripts,
         string? comment,
-        bool isTransactionRequired = true) : base(migrationLogger, dbProvider, version, upScripts, comment, isTransactionRequired)
+        bool isTransactionRequired = true) : base(migrationLogger, migrationConnection, version, upScripts, comment, isTransactionRequired)
     {
         DownScripts = downScripts?.ToArray() ?? Array.Empty<ScriptMigrationBatch>();
     }
