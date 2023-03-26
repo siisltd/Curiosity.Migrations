@@ -132,7 +132,7 @@ public interface IMigrationConnection : IDisposable
     /// <exception cref="MigrationException"></exception>
     Task<int> ExecuteNonQuerySqlAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -144,7 +144,7 @@ public interface IMigrationConnection : IDisposable
     /// <exception cref="MigrationException"></exception>
     Task<object> ExecuteScalarSqlAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -153,7 +153,7 @@ public interface IMigrationConnection : IDisposable
     /// <inheritdoc cref="ExecuteScalarSqlAsync"/>
     Task<int> ExecuteNonQuerySqlWithoutInitialCatalogAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -165,7 +165,7 @@ public interface IMigrationConnection : IDisposable
     /// <exception cref="MigrationException"></exception>
     Task<object> ExecuteScalarSqlWithoutInitialCatalogAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);
 
     /// <summary>

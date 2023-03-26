@@ -164,7 +164,7 @@ public class PostgresMigrationConnection : IMigrationConnection
                 var result =
                     await ExecuteScalarSqlWithoutInitialCatalogAsync(
                         "SELECT 1 AS result FROM pg_database WHERE datname=@databaseName",
-                        new Dictionary<string, object>
+                        new Dictionary<string, object?>
                         {
                             {"@databaseName", databaseName}
                         },
@@ -178,7 +178,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public Task<object> ExecuteScalarSqlWithoutInitialCatalogAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
@@ -205,7 +205,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     private Task<object> ExecuteScalarSqlInternalAsync(
         NpgsqlConnection connection,
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(connection, nameof(connection));
@@ -222,7 +222,7 @@ public class PostgresMigrationConnection : IMigrationConnection
 
     private Task<object> ExecuteScalarCommandInternalAsync(
         NpgsqlCommand command,
-        IReadOnlyDictionary<string, object>? commandParams,
+        IReadOnlyDictionary<string, object?>? commandParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(command, nameof(command));
@@ -239,7 +239,7 @@ public class PostgresMigrationConnection : IMigrationConnection
 
     private static void AddCommandParameters(
         NpgsqlCommand command,
-        IReadOnlyDictionary<string, object> commandParams)
+        IReadOnlyDictionary<string, object?> commandParams)
     {
         Guard.AssertNotNull(command, nameof(command));
 
@@ -274,7 +274,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     private Task<int> ExecuteNonQueryInternalAsync(
         NpgsqlConnection connection,
         string commandText,
-        IReadOnlyDictionary<string, object>? commandParams,
+        IReadOnlyDictionary<string, object?>? commandParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(connection, nameof(connection));
@@ -291,7 +291,7 @@ public class PostgresMigrationConnection : IMigrationConnection
 
     private Task<int> ExecuteNonQueryCommandInternalAsync(
         NpgsqlCommand command,
-        IReadOnlyDictionary<string, object>? commandParams,
+        IReadOnlyDictionary<string, object?>? commandParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(command, nameof(command));
@@ -309,7 +309,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public Task<int> ExecuteNonQuerySqlWithoutInitialCatalogAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
@@ -433,7 +433,7 @@ CREATE TABLE IF NOT EXISTS {0} (
     id      BIGSERIAL NOT NULL PRIMARY KEY,
     created TIMESTAMP NOT NULL DEFAULT timezone('UTC'::text, now()),
     name    TEXT,
-    version TEXT      UNIQUE
+    version TEXT      NOT NULL UNIQUE
 )
 WITH ( 
   OIDS=FALSE 
@@ -478,7 +478,7 @@ SELECT EXISTS (
                 var result = await ExecuteScalarSqlInternalAsync(
                         NpgsqlConnection!,
                         checkTableExistenceQuery,
-                        new Dictionary<string, object>
+                        new Dictionary<string, object?>
                         {
                             {"@tableScheme", GetSchemeNameFromConnectionString()},
                             {"@tableName", tableName}
@@ -504,7 +504,7 @@ SELECT EXISTS (
     /// <inheritdoc />
     public Task<object> ExecuteScalarSqlAsync(
         string script,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(script, nameof(script));
@@ -572,7 +572,7 @@ SELECT EXISTS (
     /// <inheritdoc />
     public Task SaveAppliedMigrationVersionAsync(
         DbVersion version,
-        string migrationName,
+        string? migrationName,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(migrationName, nameof(migrationName));
@@ -587,7 +587,7 @@ VALUES (@migrationName, @version)";
             () => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 sql,
-                new Dictionary<string, object>
+                new Dictionary<string, object?>
                 {
                     {"@migrationName", migrationName},
                     {"@version", version.ToString()}
@@ -609,7 +609,7 @@ VALUES (@migrationName, @version)";
             () => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 sql,
-                new Dictionary<string, object>
+                new Dictionary<string, object?>
                 {
                     {"@version", version.ToString()}
                 },
@@ -621,7 +621,7 @@ VALUES (@migrationName, @version)";
     /// <inheritdoc />
     public Task<int> ExecuteNonQuerySqlAsync(
         string sqlQuery,
-        IReadOnlyDictionary<string, object>? queryParams,
+        IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));

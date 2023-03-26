@@ -13,13 +13,11 @@ public struct MigrationInfo
     /// <summary>
     /// Migration's comment.
     /// </summary>
-    public string Comment { get; }
+    public string? Comment { get; }
 
     /// <inheritdoc cref="MigrationInfo"/>
-    public MigrationInfo(DbVersion version, string comment)
+    public MigrationInfo(DbVersion version, string? comment)
     {
-        Guard.AssertNotEmpty(comment, nameof(comment));
-
         Version = version;
         Comment = comment;
     }

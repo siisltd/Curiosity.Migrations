@@ -21,7 +21,7 @@ public abstract class CodeMigration : IMigration
     public abstract DbVersion Version { get; }
 
     /// <inheritdoc />
-    public abstract string Comment { get; }
+    public abstract string? Comment { get; }
 
     /// <inheritdoc />
     public bool IsTransactionRequired { get; protected set; } = true;
