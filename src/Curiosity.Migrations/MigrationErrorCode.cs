@@ -43,12 +43,17 @@ public enum MigrationErrorCode
     CreatingHistoryTable = 50,
 
     /// <summary>
+    /// Unknown error.
+    /// </summary>
+    UnknownError = 70,
+
+    /// <summary>
     /// Error during executing migrations commands.
     /// </summary>
     /// <remarks>
     /// Incorrect script.
     /// </remarks>
-    MigratingError = 70,
+    MigratingError = 71,
 
     /// <summary>
     /// Migration with specified <see cref="DbVersion"/> not found.

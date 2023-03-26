@@ -11,7 +11,7 @@ namespace Curiosity.Migrations;
 /// <summary>
 /// Default realisation of <see cref="IMigrationEngine"/>
 /// </summary>
-public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IAsyncDisposable
+public sealed class MigrationEngine : IMigrationEngine, IDisposable
 {
     private readonly ILogger? _logger;
     private readonly IMigrationConnection _migrationConnection;
@@ -20,12 +20,10 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
     private readonly MigrationPolicy _downgradePolicy;
     private readonly DbVersion? _targetVersion;
 
-    private readonly IReadOnlyDictionary<DbVersion, IMigration> _migrationMap;
-    private readonly IReadOnlyList<IMigration> _preMigrations;
+    private readonly IReadOnlyDictionary<DbVersion, IMigration> _availableMigrationsMap;
+    private readonly IReadOnlyList<IMigration> _availablePreMigrations;
 
-    /// <summary>
     /// <inheritdoc cref="MigrationEngine"/>
-    /// </summary>
     /// <param name="migrationConnection">Provider for database</param>
     /// <param name="migrations">Main migrations for changing database</param>
     /// <param name="upgradePolicy">Policy for upgrading database</param>
@@ -58,17 +56,17 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
             migrationMap.Add(migration.Version, migration);
         }
 
-        _migrationMap = migrationMap;
+        _availableMigrationsMap = migrationMap;
 
         _upgradePolicy = upgradePolicy;
         _downgradePolicy = downgradePolicy;
         _targetVersion = targetVersion;
 
-        _preMigrations = preMigrations ?? Array.Empty<IMigration>();
+        _availablePreMigrations = preMigrations ?? Array.Empty<IMigration>();
         var preMigrationCheckMap = new HashSet<DbVersion>();
-        for (var i = 0; i < _preMigrations.Count; i++)
+        for (var i = 0; i < _availablePreMigrations.Count; i++)
         {
-            var migration = _preMigrations[i];
+            var migration = _availablePreMigrations[i];
             if (preMigrationCheckMap.Contains(migration.Version))
                 throw new ArgumentException($"There is more than one pre-migration with version = {migration.Version}", nameof(preMigrations));
 
@@ -77,70 +75,47 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
 
         if (targetVersion.HasValue && migrationMap.Values.Count > 0)
         {
-            var migrationsMaxVersion = _migrationMap.Values.Max(x => x.Version);
+            var migrationsMaxVersion = _availableMigrationsMap.Values.Max(x => x.Version);
             if (targetVersion > migrationsMaxVersion)
                 throw new ArgumentException("Target version can't be greater than max available migration version", nameof(targetVersion));
 
-            if (_migrationMap.Values.All(x => x.Version != targetVersion))
+            if (_availableMigrationsMap.Values.All(x => x.Version != targetVersion))
                 throw new ArgumentException($"No migrations were registered with desired target version (target version = {targetVersion})", nameof(targetVersion));
         }
     }
 
     /// <inheritdoc />
-    public async Task<MigrationResult> MigrateSafeAsync(CancellationToken token = default)
-    {
-        //TODO:
-        // 1. Make this method main for migration, make MigrateAsync internal
-        // 2. Extend migration result with skipped migrations and skip reason (maybe add something like SkipMigrationInfo with step, reason, version and name)
-        // 3. Check policy on migration 
-
-        try
-        {
-            var appliedMigrationsCount = await MigrateAsync(token);
-            return MigrationResult.SuccessfullyResult(appliedMigrationsCount);
-        }
-        catch (MigrationException e)
-        {
-            _logger?.LogError(e, e.Message);
-            return MigrationResult.FailureResult(e.ErrorCode, e.Message);
-        }
-        catch (Exception e)
-        {
-            _logger?.LogError(e, $"Error while migrating database {_migrationConnection.DatabaseName}. Reason: {e.Message}");
-            return MigrationResult.FailureResult(MigrationErrorCode.Unknown, e.Message);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task<int> MigrateAsync(CancellationToken token = default)
+    public async Task<MigrationResult> MigrateAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            if (_migrationMap.Count == 0)
+            if (_availableMigrationsMap.Count == 0)
             {
-                _logger?.LogWarning("No migrations were added to migrator. Skip migration");
-                return 0;
+                _logger?.LogWarning("No migrations were added to migrator. Stop migration");
+                return MigrationResult.CreateSuccessful(
+                    Array.Empty<MigrationInfo>(),
+                    Array.Empty<MigrationInfo>());
             }
 
             // check if database exists and create if not
-            _logger?.LogInformation($"Check Database \"{_migrationConnection.DatabaseName}\" existence...");
-            var isDatabaseExist = await _migrationConnection.CheckIfDatabaseExistsAsync(_migrationConnection.DatabaseName, token);
+            _logger?.LogInformation($"Check database \"{_migrationConnection.DatabaseName}\" existence...");
+            var isDatabaseExist = await _migrationConnection.CheckIfDatabaseExistsAsync(_migrationConnection.DatabaseName, cancellationToken);
             if (isDatabaseExist)
             {
-                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" exists. Starting migration...");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" already exists. Starting migration...");
             }
             else
             {
                 _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" doesn't exist. Creating database...");
-                await _migrationConnection.CreateDatabaseIfNotExistsAsync(token);
+                await _migrationConnection.CreateDatabaseIfNotExistsAsync(cancellationToken);
                 _logger?.LogInformation("Creating database completed");
             }
 
-            await _migrationConnection.OpenConnectionAsync(token);
+            await _migrationConnection.OpenConnectionAsync(cancellationToken);
 
             // check if applied migrations table exists and create if not 
             _logger?.LogInformation($"Check \"{_migrationConnection.MigrationHistoryTableName}\" table existence...");
-            var isMigrationTableExists = await _migrationConnection.CheckIfTableExistsAsync(_migrationConnection.MigrationHistoryTableName, token);
+            var isMigrationTableExists = await _migrationConnection.CheckIfTableExistsAsync(_migrationConnection.MigrationHistoryTableName, cancellationToken);
             if (isMigrationTableExists)
             {
                 _logger?.LogInformation($"Table \"{_migrationConnection.MigrationHistoryTableName}\" exists. ");
@@ -148,27 +123,29 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
             else
             {
                 _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table...");
-                await _migrationConnection.CreateMigrationHistoryTableIfNotExistsAsync(token);
+                await _migrationConnection.CreateMigrationHistoryTableIfNotExistsAsync(cancellationToken);
                 _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table completed.");
             }
 
             // get applied migrations versions
-            var (isUpgrade, migrationsToApply) = await GetMigrationsAsync(false, token);
+            var (isUpgrade, migrationsToApply) = await GetMigrationsToApplyAsync(false, cancellationToken);
 
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Skip migration.");
-                return 0;
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration.");
+                return MigrationResult.CreateSuccessful(
+                    Array.Empty<MigrationInfo>(),
+                    Array.Empty<MigrationInfo>());
             }
 
             _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\"...");
-            var wasPreMigrationExecuted = await ExecutePreMigrationScriptsAsync(token);
+            var wasPreMigrationExecuted = await ExecutePreMigrationScriptsAsync(cancellationToken);
             if (wasPreMigrationExecuted)
             {
                 _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\" completed.");
 
                 // applied migration versions might be changed after pre-migration
-                (isUpgrade, migrationsToApply) = await GetMigrationsAsync(true, token);
+                (isUpgrade, migrationsToApply) = await GetMigrationsToApplyAsync(true, cancellationToken);
             }
             else
             {
@@ -177,43 +154,62 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
 
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Skip migration.");
-                return 0;
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration.");
+                return MigrationResult.CreateSuccessful(
+                    Array.Empty<MigrationInfo>(),
+                    Array.Empty<MigrationInfo>());
             }
 
             _logger?.LogInformation($"Migrating database \"{_migrationConnection.DatabaseName}\"...");
             var policy = isUpgrade
                 ? _upgradePolicy
                 : _downgradePolicy;
-            await MigrateAsync(migrationsToApply, isUpgrade, policy, token);
+            var migrationResult = await MigrateAsync(migrationsToApply, isUpgrade, policy, cancellationToken);
 
             await _migrationConnection.CloseConnectionAsync();
-            _logger?.LogInformation($"Migrating database {_migrationConnection.DatabaseName} completed. Successfully applied {migrationsToApply.Count} migrations");
+            _logger?.LogInformation($"Migrating database \"{_migrationConnection.DatabaseName}\" completed. Successfully applied {migrationsToApply.Count} migrations");
 
-            return migrationsToApply.Count;
+            return MigrationResult.CreateSuccessful(migrationResult.Applied, migrationResult.Skipped);
         }
-        catch (MigrationException)
+        catch (MigrationException e)
         {
-            throw;
+            _logger?.LogError(
+                e,
+                e.MigrationInfo != null
+                    ? $"Failed to execute migration \"{e.MigrationInfo.Value.Version}\" (ErrorCode={e.ErrorCode}): {e.Message}"
+                    : $"Failed to execute migration (ErrorCode={e.ErrorCode}): {e.Message}");
+
+            return MigrationResult.CreateFailed(
+                e.ErrorCode,
+                e.Message,
+                e.MigrationInfo);
         }
         catch (Exception e)
         {
-            throw new MigrationException(
-                MigrationErrorCode.MigratingError,
-                $"Error while migrating database {_migrationConnection.DatabaseName}. Reason: {e.Message}",
-                e);
+            var errorMessage = $"Unknown error while migrating database \"{_migrationConnection.DatabaseName}\"";
+
+            _logger?.LogError(e, errorMessage);
+
+            return MigrationResult.CreateFailed(
+                MigrationErrorCode.UnknownError,
+                errorMessage);
         }
     }
 
-    private async Task<(bool isUpgrade, IReadOnlyCollection<IMigration> migrations)> GetMigrationsAsync(
+    /// <summary>
+    /// Returns migrations to apply.
+    /// </summary>
+    /// <param name="isPreMigration">Should we return pre-migrations?</param>
+    /// <param name="token">Cancellation token.</param>
+    private async Task<(bool isUpgrade, IReadOnlyList<IMigration> migrations)> GetMigrationsToApplyAsync(
         bool isPreMigration,
         CancellationToken token)
     {
-        var stageName = isPreMigration ? " after pre-migration" : "";
+        var stageName = isPreMigration ? " (pre-migration stage)" : "";
         _logger?.LogInformation($"Getting migrations to apply{stageName}...");
 
         // build target version
-        var maxAvailableMigrationVersion = _migrationMap.Values.Max(x => x.Version);
+        var maxAvailableMigrationVersion = _availableMigrationsMap.Values.Max(x => x.Version);
 
         // get applied migrations versions
         var appliedMigrationVersions = await _migrationConnection.GetAppliedMigrationVersionsAsync(token);
@@ -223,21 +219,21 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
 
         var maxAppliedMigration = appliedMigrationVersions.LastOrDefault();
 
-        _logger?.LogInformation($"Max available migration version = {maxAvailableMigrationVersion}. " +
-                                $"Available migrations count = {_migrationMap.Count}");
+        _logger?.LogInformation($"Max available migration version - {maxAvailableMigrationVersion}. " +
+                                $"Available migrations count - {_availableMigrationsMap.Count}");
         if (appliedMigrationVersions.Count == 0)
         {
-            _logger?.LogInformation("No migrations were applied");
+            _logger?.LogInformation("No migrations have been applied yet");
         }
         else
         {
-            _logger?.LogInformation($"Max applied migration version = {maxAppliedMigration}. " +
-                                    $"Applied migrations count = {appliedMigrationVersions.Count}");
+            _logger?.LogInformation($"Max applied migration version - {maxAppliedMigration}. " +
+                                    $"Applied migrations count - {appliedMigrationVersions.Count}");
         }
 
         // build list of migrations to apply
 
-        var availableMigrationVersions = new HashSet<DbVersion>(_migrationMap.Values.Select(x => x.Version));
+        var availableMigrationVersions = new HashSet<DbVersion>(_availableMigrationsMap.Values.Select(x => x.Version));
 
         var migrationsToApply = new List<IMigration>();
 
@@ -257,7 +253,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
 
             foreach (var notAppliedMigrationVersion in notAppliedMigrationVersions)
             {
-                var notAppliedMigration = _migrationMap[notAppliedMigrationVersion];
+                var notAppliedMigration = _availableMigrationsMap[notAppliedMigrationVersion];
                 migrationsToApply.Add(notAppliedMigration);
             }
 
@@ -274,7 +270,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
 
             foreach (var downgradeMigrationVersion in migrationsVersionsToApply)
             {
-                var downgradeMigration = _migrationMap[downgradeMigrationVersion];
+                var downgradeMigration = _availableMigrationsMap[downgradeMigrationVersion];
                 migrationsToApply.Add(downgradeMigration);
             }
 
@@ -293,7 +289,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
     /// <exception cref="MigrationException"></exception>
     private async Task<bool> ExecutePreMigrationScriptsAsync(CancellationToken token = default)
     {
-        var desiredMigrations = _preMigrations
+        var desiredMigrations = _availablePreMigrations
             .OrderBy(x => x.Version)
             .ToArray();
         if (desiredMigrations.Length == 0)
@@ -311,7 +307,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
             try
             {
                 _logger?.LogInformation(
-                    $"Executing pre-migration script {migration.Version} (\"{migration.Comment}\") for database \"{_migrationConnection.DatabaseName}\"...");
+                    $"Executing pre-migration script \"{migration.Version}\" (\"{migration.Comment}\") for database \"{_migrationConnection.DatabaseName}\"...");
 
                 if (migration.IsTransactionRequired)
                 {
@@ -327,13 +323,13 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
                 transaction?.Commit();
 
                 _logger?.LogInformation(
-                    $"Executing pre-migration script {migration.Version} for database \"{_migrationConnection.DatabaseName}\" completed.");
+                    $"Executing pre-migration script \"{migration.Version}\" for database \"{_migrationConnection.DatabaseName}\" completed.");
             }
             catch (Exception e)
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing pre-migration to {migration.Version} for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
+                    $"Error while executing pre-migration to \"{migration.Version}\" for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
                     e);
             }
             finally
@@ -345,34 +341,55 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
         return true;
     }
 
-    private async Task MigrateAsync(
-        IReadOnlyCollection<IMigration> orderedMigrations,
+    private async Task<(IReadOnlyList<MigrationInfo> Applied, IReadOnlyList<MigrationInfo> Skipped)> MigrateAsync(
+        IReadOnlyList<IMigration> orderedMigrations,
         bool isUpgrade,
         MigrationPolicy policy,
-        CancellationToken token = default)
+        CancellationToken cancellationToken = default)
     {
         if (policy == MigrationPolicy.AllForbidden)
-            throw new MigrationException(MigrationErrorCode.PolicyError, $"{(isUpgrade ? "Upgrading" : "Downgrading")} is forbidden due to migration policy");
+        {
+            throw new MigrationException(
+                MigrationErrorCode.PolicyError,
+                $"{(isUpgrade ? "Upgrading" : "Downgrading")} is forbidden due to migration policy");
+        }
 
-        if (orderedMigrations.Count == 0) return;
+        if (orderedMigrations.Count == 0) return (Array.Empty<MigrationInfo>(), Array.Empty<MigrationInfo>());
 
         var operationName = isUpgrade
             ? "Upgrade"
             : "Downgrade";
-        foreach (var migration in orderedMigrations)
+
+        var appliedMigrations = new List<MigrationInfo>(orderedMigrations.Count);
+        var skippedMigrations = new List<MigrationInfo>();
+
+        for (var i = 0; i < orderedMigrations.Count; i++)
         {
-            token.ThrowIfCancellationRequested();
+            var migration = orderedMigrations[i];
+            var currentMigration = new MigrationInfo(migration.Version, migration.Comment);
+
+            // check policies
+            if (!policy.HasFlag(MigrationPolicy.LongRunningAllowed) && migration.IsLongRunning)
+            {
+                skippedMigrations.Add(currentMigration);
+                _logger?.LogWarning($"Skip long-running migration \"{migration.Version}\" due to policy restriction");
+            }
+            if (!policy.HasFlag(MigrationPolicy.ShortRunningAllowed) && !migration.IsLongRunning)
+            {
+                skippedMigrations.Add(currentMigration);
+                _logger?.LogWarning($"Skip short-running migration \"{migration.Version}\" due to policy restriction");
+            }
 
             DbTransaction? transaction = null;
 
-            //todo check policy, return result
-
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // sometimes transactions fails without reopening connection
                 //todo #19: fix it later
                 await _migrationConnection.CloseConnectionAsync();
-                await _migrationConnection.OpenConnectionAsync(token);
+                await _migrationConnection.OpenConnectionAsync(cancellationToken);
 
                 if (migration.IsTransactionRequired)
                 {
@@ -380,43 +397,55 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable    //todo IA
                 }
                 else
                 {
-                    _logger?.LogWarning($"Transaction is disabled for migration {migration.Version}");
+                    _logger?.LogWarning($"Transaction is disabled for migration \"{migration.Version}\"");
                 }
 
-                _logger?.LogInformation($"{operationName} to {migration.Version} ({migration.Comment} for database \"{_migrationConnection.DatabaseName}\")...");
+                _logger?.LogInformation($"{operationName} to \"{migration.Version}\" ({migration.Comment} for database \"{_migrationConnection.DatabaseName}\")...");
 
                 if (isUpgrade)
                 {
-                    await migration.UpgradeAsync(transaction, token);
-                    await _migrationConnection.SaveAppliedMigrationVersionAsync(migration.Comment, migration.Version, token);
+                    await migration.UpgradeAsync(transaction, cancellationToken);
+                    await _migrationConnection.SaveAppliedMigrationVersionAsync(migration.Version, migration.Comment, cancellationToken);
                 }
                 else
                 {
                     if (!(migration is IDowngradeMigration downgradableMigration))
-                        throw new MigrationException(MigrationErrorCode.MigrationNotFound, $"Migration with version {migration.Version} doesn't support downgrade");
+                        throw new MigrationException(MigrationErrorCode.MigrationNotFound, $"Migration with version \"{migration.Version}\" doesn't support downgrade");
 
-                    await downgradableMigration.DowngradeAsync(transaction, token);
-                    await _migrationConnection.DeleteAppliedMigrationVersionAsync(migration.Version, token);
+                    await downgradableMigration.DowngradeAsync(transaction, cancellationToken);
+                    await _migrationConnection.DeleteAppliedMigrationVersionAsync(migration.Version, cancellationToken);
                 }
 
                 // Commit transaction if all commands succeed, transaction will auto-rollback
                 // when disposed if either commands fails
                 transaction?.Commit();
 
-                _logger?.LogInformation($"{operationName} to {migration.Version} (database \"{_migrationConnection.DatabaseName}\") completed.");
+                appliedMigrations.Add(currentMigration);
+                _logger?.LogInformation($"{operationName} to \"{migration.Version}\" (database \"{_migrationConnection.DatabaseName}\") completed.");
+            }
+            catch (MigrationException e)
+            {
+                throw new MigrationException(
+                    e.ErrorCode,
+                    e.Message,
+                    e,
+                    currentMigration);
             }
             catch (Exception e)
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing {operationName.ToLower()} migration to {migration.Version} for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
-                    e);
+                    $"Error while executing {operationName.ToLower()} migration to \"{migration.Version}\" for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
+                    e,
+                    currentMigration);
             }
             finally
             {
                 transaction?.Dispose();
             }
         }
+
+        return (appliedMigrations, skippedMigrations);
     }
 
     /// <inheritdoc />

@@ -39,7 +39,7 @@ namespace Curiosity.Migrations.PostgreSql.IntegrationTests
 
             var desiredDbVersion = new DbVersion(1, 0);
 
-            await provider.SaveAppliedMigrationVersionAsync($"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}", desiredDbVersion);
+            await provider.SaveAppliedMigrationVersionAsync(desiredDbVersion, $"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}");
             var actualAppliedMigrations = await provider.GetAppliedMigrationVersionsAsync();
             
             Assert.NotNull(actualAppliedMigrations);

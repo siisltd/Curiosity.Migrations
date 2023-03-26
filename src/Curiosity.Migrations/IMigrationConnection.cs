@@ -110,8 +110,8 @@ public interface IMigrationConnection : IDisposable
     /// </summary>
     /// <exception cref="MigrationException"></exception>
     Task SaveAppliedMigrationVersionAsync(
-        string migrationName,
         DbVersion version,
+        string migrationName,
         CancellationToken cancellationToken = default);
 
     /// <summary>

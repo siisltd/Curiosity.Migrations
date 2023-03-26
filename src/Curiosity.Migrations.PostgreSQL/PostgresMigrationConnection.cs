@@ -571,8 +571,8 @@ SELECT EXISTS (
     }
     /// <inheritdoc />
     public Task SaveAppliedMigrationVersionAsync(
-        string migrationName,
         DbVersion version,
+        string migrationName,
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(migrationName, nameof(migrationName));

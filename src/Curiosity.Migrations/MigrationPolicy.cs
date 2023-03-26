@@ -1,8 +1,11 @@
+using System;
+
 namespace Curiosity.Migrations;
 
 /// <summary>
 /// Migration policy. Specifies what kind of migrations are allowed to apply.
 /// </summary>
+[Flags]
 public enum MigrationPolicy
 {
     /// <summary>

@@ -20,42 +20,43 @@ namespace Curiosity.Migrations.UnitTests
         [Fact]
         public async Task SkipMigration_On_MigrateAsync()
         {
-            var initialDbVersion = new DbVersion(1,0);
-            
+            var initialDbVersion = new DbVersion(1, 0);
+
             var provider = new Mock<IMigrationConnection>();
-            
+
             provider
                 .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-                .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
-            
+                .Returns(() => Task.FromResult(new[] { initialDbVersion } as IReadOnlyCollection<DbVersion>));
+
             provider
                 .Setup(x => x.BeginTransaction())
                 .Returns(() => new MockTransaction());
-            
+
             var migrations = new List<IMigration>(0);
-            
+
             var migrator = new MigrationEngine(
-                provider.Object, 
+                provider.Object,
                 migrations,
                 MigrationPolicy.AllAllowed,
                 MigrationPolicy.AllForbidden,
                 null,
                 initialDbVersion);
 
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
 
-            provider
-                .Verify(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()), Times.Never);
-            
-            provider
-                .Verify(x => x.CreateDatabaseIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
+            provider.Verify(x => x.SaveAppliedMigrationVersionAsync(
+                    It.IsAny<DbVersion>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
 
-            provider
-                .Verify(x => x.CreateMigrationHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
-            
+            provider.Verify(x => x.CreateDatabaseIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
+
+            provider.Verify(x => x.CreateMigrationHistoryTableIfNotExistsAsync(It.IsAny<CancellationToken>()), Times.Never);
+
             Assert.True(result.IsSuccessfully);
         }
-        
+
         [Fact]
         public async Task UpgradeToSpecifiedTarget_On_MigrateAsync()
         {
@@ -68,8 +69,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IMigrationConnection>();
         
             provider
-                .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion, CancellationToken>((name, version, token) => actualAppliedMigrations.Add(version))
+                .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Callback<DbVersion, string, CancellationToken>((version, name, token) => actualAppliedMigrations.Add(version))
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -113,7 +114,7 @@ namespace Curiosity.Migrations.UnitTests
                 null,
                 targetDbVersion);
         
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
             
             Assert.True(result.IsSuccessfully);
             Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -130,8 +131,8 @@ namespace Curiosity.Migrations.UnitTests
             var provider = new Mock<IMigrationConnection>();
         
             provider
-                .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<string>(), It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-                .Callback<string, DbVersion, CancellationToken>((name, version, token) => actualAppliedMigrations.Add(version))
+                .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Callback<DbVersion, string, CancellationToken>((version, name, token) => actualAppliedMigrations.Add(version))
                 .Returns(() => Task.CompletedTask);
             
             provider
@@ -174,7 +175,7 @@ namespace Curiosity.Migrations.UnitTests
                 policy,
                 policy);
         
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
             
             Assert.True(result.IsSuccessfully);
             Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -230,7 +231,7 @@ namespace Curiosity.Migrations.UnitTests
                 null,
                 targetDbVersion);
         
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
             
             Assert.False(result.IsSuccessfully);
             Assert.True(result.ErrorCode.HasValue);
@@ -453,10 +454,10 @@ namespace Curiosity.Migrations.UnitTests
                 policy,
                 policy);
 
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
 
             Assert.True(result.IsSuccessfully);
-            Assert.Equal(notAppliedMigrations.Count, result.AppliedMigrationsCount);
+            Assert.Equal(notAppliedMigrations.Count, result.AppliedMigrations.Count);
         }
 
         private IMigration GetIMigrationMock(string version)
@@ -530,7 +531,7 @@ namespace Curiosity.Migrations.UnitTests
                 null,
                 targetDbVersion);
         
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
             
             Assert.True(result.IsSuccessfully);
             Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -588,7 +589,7 @@ namespace Curiosity.Migrations.UnitTests
                 null,
                 targetDbVersion);
         
-            var result = await migrator.MigrateSafeAsync();
+            var result = await migrator.MigrateAsync();
             
             Assert.False(result.IsSuccessfully);
             Assert.True(result.ErrorCode.HasValue);
