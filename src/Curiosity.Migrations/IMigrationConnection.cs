@@ -111,7 +111,7 @@ public interface IMigrationConnection : IDisposable
     /// <exception cref="MigrationException"></exception>
     Task SaveAppliedMigrationVersionAsync(
         DbVersion version,
-        string migrationName,
+        string? migrationName,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -142,7 +142,7 @@ public interface IMigrationConnection : IDisposable
     /// <param name="queryParams">Optional query params.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <exception cref="MigrationException"></exception>
-    Task<object> ExecuteScalarSqlAsync(
+    Task<object?> ExecuteScalarSqlAsync(
         string sqlQuery,
         IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);
@@ -163,7 +163,7 @@ public interface IMigrationConnection : IDisposable
     /// <param name="queryParams">Optional query params.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="MigrationException"></exception>
-    Task<object> ExecuteScalarSqlWithoutInitialCatalogAsync(
+    Task<object?> ExecuteScalarSqlWithoutInitialCatalogAsync(
         string sqlQuery,
         IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default);

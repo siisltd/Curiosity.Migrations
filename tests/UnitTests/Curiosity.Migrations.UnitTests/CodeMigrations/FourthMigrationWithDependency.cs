@@ -10,7 +10,7 @@ public class FourthMigrationWithDependency : CustomBaseCodeMigration, IDowngrade
     public DependencyService DependencyService { get; }
 
     /// <inheritdoc />
-    public override DbVersion Version { get; } = new DbVersion(1,3);
+    public override DbVersion Version { get; } = new(1,3);
         
     /// <inheritdoc />
     public override string Comment => "comment";

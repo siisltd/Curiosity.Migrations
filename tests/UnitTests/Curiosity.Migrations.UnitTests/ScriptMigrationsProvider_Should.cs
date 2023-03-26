@@ -32,7 +32,7 @@ public class ScriptMigrationsProvider_Should
         Assert.Equal(5, migrations.Count);
             
         Assert.True(migrations[0] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1,0), migrations[0].Version);
+        Assert.Equal(new DbVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
@@ -68,7 +68,7 @@ public class ScriptMigrationsProvider_Should
             .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
             .ToList();
             
-        Assert.Equal(1, migrations.Count);
+        Assert.Single(migrations);
             
         Assert.True(migrations[0] is ScriptMigration);
         Assert.Equal(new DbVersion(0,1), migrations[0].Version);
@@ -92,7 +92,7 @@ public class ScriptMigrationsProvider_Should
         Assert.Equal(5, migrations.Count);
             
         Assert.True(migrations[0] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1,0), migrations[0].Version);
+        Assert.Equal(new DbVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
@@ -117,7 +117,7 @@ public class ScriptMigrationsProvider_Should
             
             
         Assert.True(migrations[4] is ScriptMigration);
-        Assert.Equal(new DbVersion(2,0), migrations[4].Version);
+        Assert.Equal(new DbVersion(2), migrations[4].Version);
         Assert.True(String.IsNullOrEmpty(migrations[4].Comment));
         Assert.Equal("prefix", ((ScriptMigration)migrations[4]).UpScripts[0].Script);
     }
@@ -135,10 +135,10 @@ public class ScriptMigrationsProvider_Should
             .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
             .ToList();
             
-        Assert.Equal(1, migrations.Count);
+        Assert.Single(migrations);
             
         Assert.True(migrations[0] is ScriptMigration);
-        Assert.Equal(new DbVersion(2,0), migrations[0].Version);
+        Assert.Equal(new DbVersion(2), migrations[0].Version);
         Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
         Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScripts[0].Script);
     }

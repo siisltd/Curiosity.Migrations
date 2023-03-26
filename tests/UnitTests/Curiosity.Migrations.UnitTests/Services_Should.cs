@@ -87,7 +87,7 @@ public class Services_Should
             
         // act
         var serviceProvider = services.BuildServiceProvider();
-        var migrators = serviceProvider.GetServices<IMigrationEngine>()?.ToList();
+        var migrators = serviceProvider.GetServices<IMigrationEngine>().ToList();
             
         // assert
 

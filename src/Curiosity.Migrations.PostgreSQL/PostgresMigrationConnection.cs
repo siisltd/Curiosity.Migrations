@@ -89,7 +89,7 @@ public class PostgresMigrationConnection : IMigrationConnection
 
         _defaultVariables = new Dictionary<string, string>
         {
-            [DefaultVariables.User] = tempConnectionBuilder.Username,
+            [DefaultVariables.User] = tempConnectionBuilder.Username!,
             [DefaultVariables.DbName] = tempConnectionBuilder.Database
         };
 
@@ -176,7 +176,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     }
 
     /// <inheritdoc />
-    public Task<object> ExecuteScalarSqlWithoutInitialCatalogAsync(
+    public Task<object?> ExecuteScalarSqlWithoutInitialCatalogAsync(
         string sqlQuery,
         IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
@@ -186,7 +186,7 @@ public class PostgresMigrationConnection : IMigrationConnection
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
-                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
+                await using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
                     await connection.OpenAsync(cancellationToken);
                     var result = await ExecuteScalarSqlInternalAsync(
@@ -202,7 +202,7 @@ public class PostgresMigrationConnection : IMigrationConnection
             "Can not execute SQl query");
     }
 
-    private Task<object> ExecuteScalarSqlInternalAsync(
+    private Task<object?> ExecuteScalarSqlInternalAsync(
         NpgsqlConnection connection,
         string sqlQuery,
         IReadOnlyDictionary<string, object?>? queryParams,
@@ -220,7 +220,7 @@ public class PostgresMigrationConnection : IMigrationConnection
             cancellationToken);
     }
 
-    private Task<object> ExecuteScalarCommandInternalAsync(
+    private Task<object?> ExecuteScalarCommandInternalAsync(
         NpgsqlCommand command,
         IReadOnlyDictionary<string, object?>? commandParams,
         CancellationToken cancellationToken = default)
@@ -245,7 +245,7 @@ public class PostgresMigrationConnection : IMigrationConnection
 
         foreach (var kvp in commandParams)
         {
-            command.Parameters.AddWithValue(kvp.Key, kvp.Value);
+            command.Parameters.AddWithValue(kvp.Key, kvp.Value ?? DBNull.Value);
         }
     }
 
@@ -317,7 +317,7 @@ public class PostgresMigrationConnection : IMigrationConnection
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
-                using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
+                await using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
                 {
                     await connection.OpenAsync(cancellationToken);
                     var result = await ExecuteNonQueryInternalAsync(
@@ -502,7 +502,7 @@ SELECT EXISTS (
     }
 
     /// <inheritdoc />
-    public Task<object> ExecuteScalarSqlAsync(
+    public Task<object?> ExecuteScalarSqlAsync(
         string script,
         IReadOnlyDictionary<string, object?>? queryParams,
         CancellationToken cancellationToken = default)
@@ -540,7 +540,7 @@ SELECT EXISTS (
 
                     var appliedMigrations = new List<DbVersion>();
 
-                    using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+                    await using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                     {
                         if (!reader.HasRows) return Array.Empty<DbVersion>();
 

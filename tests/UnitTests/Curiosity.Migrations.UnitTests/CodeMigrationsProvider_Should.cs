@@ -38,7 +38,7 @@ public class CodeMigrationsProvider_Should
         Assert.Equal(4, migrations.Count);
             
         Assert.True(migrations[0] is CodeMigration);
-        Assert.Equal(new DbVersion(1,0), migrations[0].Version);
+        Assert.Equal(new DbVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
             
             
@@ -146,6 +146,6 @@ public class CodeMigrationsProvider_Should
         migrations.Count.Should().Be(4, "because we have only 4 code migrations");
         var typedMigration = migrations[3] as FourthMigrationWithDependency;
         typedMigration.Should().NotBeNull();
-        typedMigration.DependencyService.Should().NotBeNull("because IoC should create dependency");
+        typedMigration!.DependencyService.Should().NotBeNull("because IoC should create dependency");
     }
 }

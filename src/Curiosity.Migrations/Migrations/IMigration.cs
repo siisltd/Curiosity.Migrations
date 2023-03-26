@@ -17,7 +17,7 @@ public interface IMigration
     /// <summary>
     /// Migration's comment.
     /// </summary>
-    string Comment { get; }
+    string? Comment { get; }
 
     /// <summary>
     /// Is transaction required for this migration?

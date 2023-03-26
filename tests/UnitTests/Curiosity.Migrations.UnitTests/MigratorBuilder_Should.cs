@@ -43,8 +43,8 @@ public class MigratorBuilder_Should
                 It.IsAny<IMigrationConnection>(),
                 It.IsAny<Dictionary<string, string>>(),
                 It.IsAny<ILogger>()))
-            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, variables, _) => { scriptVariables = variables; })
+            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, _, _) => new List<IMigration>(0));
 
         builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
         builder.UseMigrationConnectionFactory(factoryMock.Object);
@@ -89,8 +89,8 @@ public class MigratorBuilder_Should
                 It.IsAny<IMigrationConnection>(),
                 It.IsAny<Dictionary<string, string>>(),
                 It.IsAny<ILogger>()))
-            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, variables, _) => { scriptVariables = variables; })
+            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, _, _) => new List<IMigration>(0));
 
         builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
         builder.UseMigrationConnectionFactory(factoryMock.Object);
@@ -136,8 +136,8 @@ public class MigratorBuilder_Should
                 It.IsAny<IMigrationConnection>(),
                 It.IsAny<Dictionary<string, string>>(),
                 It.IsAny<ILogger>()))
-            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => { scriptVariables = variables; })
-            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((provider, variables, logger) => new List<IMigration>(0));
+            .Callback<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, variables, _) => { scriptVariables = variables; })
+            .Returns<IMigrationConnection, IReadOnlyDictionary<string, string>, ILogger>((_, _, _) => new List<IMigration>(0));
 
         builder.UseCustomMigrationsProvider(migrationsProviderMock.Object);
         builder.UseMigrationConnectionFactory(factoryMock.Object);

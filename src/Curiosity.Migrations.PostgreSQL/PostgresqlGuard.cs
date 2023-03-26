@@ -11,7 +11,7 @@ namespace Curiosity.Migrations.PostgreSQL;
 internal static class PostgresqlGuard
 {
     public const string TableNameRegExpPattern = "$[a-z_][a-z0-9_].*^";
-    private static readonly Regex TableNameRexExp = new Regex(TableNameRegExpPattern, RegexOptions.IgnoreCase);
+    private static readonly Regex TableNameRexExp = new(TableNameRegExpPattern, RegexOptions.IgnoreCase);
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
     public static void AssertConnection(IDbConnection? connection)

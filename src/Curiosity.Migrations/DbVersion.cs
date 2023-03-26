@@ -65,7 +65,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     }
 
     /// <inheritdoc />
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is DbVersion version && Equals(version);
     }
@@ -83,8 +83,10 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     }
 
     /// <inheritdoc />
-    public int CompareTo(object obj)
+    public int CompareTo(object? obj)
     {
+        if (obj == null) return -1;
+
         var version = (DbVersion)obj;
 
         var result = Major.CompareTo(version.Major);
