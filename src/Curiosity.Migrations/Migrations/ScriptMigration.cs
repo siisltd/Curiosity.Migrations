@@ -36,14 +36,14 @@ public class ScriptMigration : IMigration
     /// <summary>
     /// SQL script to apply migration split into batches.
     /// </summary>
-    public IList<ScriptMigrationBatch> UpScripts { get; }
+    public IReadOnlyList<ScriptMigrationBatch> UpScripts { get; }
 
     /// <inheritdoc cref="ScriptMigration"/>
     public ScriptMigration(
         ILogger? migrationLogger,
         IMigrationConnection migrationConnection,
         DbVersion version,
-        ICollection<ScriptMigrationBatch> upScripts,
+        IReadOnlyList<ScriptMigrationBatch> upScripts,
         string? comment,
         bool isTransactionRequired = true,
         bool isLongRunning = false)
@@ -71,7 +71,7 @@ public class ScriptMigration : IMigration
     /// Executes migration's batches.
     /// </summary>
     protected async Task RunBatchesAsync(
-        ICollection<ScriptMigrationBatch> batches,
+        IReadOnlyList<ScriptMigrationBatch> batches,
         CancellationToken token = default)
     {
         Guard.AssertNotNull(batches, nameof(batches));

@@ -35,7 +35,7 @@ internal static class Guard
         if (String.IsNullOrWhiteSpace(parameter))
             throw new ArgumentNullException(parameterName);
     }
-    
+
     /// <summary>
     /// Checks, that string is not empty.
     /// </summary>
@@ -44,6 +44,21 @@ internal static class Guard
     /// <exception cref="ArgumentNullException"></exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AssertNotEmpty<T>(ICollection<T>? parameter, string parameterName)
+    {
+        AssertNotNull(parameter, parameterName);
+
+        if (parameter!.Count == 0)
+            throw new ArgumentException($"{parameterName} can't be empty", parameterName);
+    }
+
+    /// <summary>
+    /// Checks, that string is not empty.
+    /// </summary>
+    /// <param name="parameter">Parameter's name.</param>
+    /// <param name="parameterName">Parameter's value.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AssertNotEmpty<T>(IReadOnlyList<T>? parameter, string parameterName)
     {
         AssertNotNull(parameter, parameterName);
 

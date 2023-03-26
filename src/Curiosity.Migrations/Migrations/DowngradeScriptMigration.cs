@@ -16,21 +16,30 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
     /// <summary>
     /// SQL script to undo migration split into batches
     /// </summary>
-    public IList<ScriptMigrationBatch> DownScripts { get; }
-        
+    public IReadOnlyList<ScriptMigrationBatch> DownScripts { get; }
+
     /// <inheritdoc cref="DowngradeScriptMigration"/>
     public DowngradeScriptMigration(
         ILogger? migrationLogger,
         IMigrationConnection migrationConnection,
         DbVersion version,
-        ICollection<ScriptMigrationBatch> upScripts,
-        ICollection<ScriptMigrationBatch>? downScripts,
+        IReadOnlyList<ScriptMigrationBatch> upScripts,
+        IReadOnlyList<ScriptMigrationBatch>? downScripts,
         string? comment,
-        bool isTransactionRequired = true) : base(migrationLogger, migrationConnection, version, upScripts, comment, isTransactionRequired)
+        bool isTransactionRequired = true,
+        bool isLongRunning = false)
+        : base(
+            migrationLogger,
+            migrationConnection,
+            version,
+            upScripts,
+            comment,
+            isTransactionRequired,
+            isLongRunning)
     {
         DownScripts = downScripts?.ToArray() ?? Array.Empty<ScriptMigrationBatch>();
     }
-        
+
     /// <inheritdoc />
     public Task DowngradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
     {

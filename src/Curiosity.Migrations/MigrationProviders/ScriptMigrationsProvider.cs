@@ -277,6 +277,19 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                         default:
                             throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
                     }
+                    break;
+                case "LONG-RUNNING":
+                    switch (optionsMatch.Groups[2].Value.ToUpper().Trim().TrimEnd(';'))
+                    {
+                        case "TRUE":
+                            options.IsLongRunning = true;
+                            break;
+                        case "FALSE":
+                            options.IsLongRunning = false;
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
+                    }
 
                     break;
                 default:
@@ -331,14 +344,16 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 upScript,
                 downScript,
                 migrationScriptInfo.Comment,
-                migrationScriptInfo.Options.IsTransactionRequired)
+                migrationScriptInfo.Options.IsTransactionRequired,
+                migrationScriptInfo.Options.IsLongRunning)
             : new ScriptMigration(
                 migrationLogger,
                 migrationConnection,
                 dbVersion,
                 upScript,
                 migrationScriptInfo.Comment,
-                migrationScriptInfo.Options.IsTransactionRequired);
+                migrationScriptInfo.Options.IsTransactionRequired,
+                migrationScriptInfo.Options.IsLongRunning);
     }
 
     /// <summary>
@@ -365,5 +380,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     private class MigrationOptions
     {
         public bool IsTransactionRequired { get; set; } = true;
+
+        public bool IsLongRunning { get; set; } = false;
     }
 }
