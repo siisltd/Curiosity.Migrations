@@ -1,6 +1,5 @@
-namespace Curiosity.Migrations.UnitTests.CodeMigrations
+namespace Curiosity.Migrations.UnitTests.CodeMigrations;
+
+public abstract class CustomBaseCodeMigration : CodeMigration
 {
-    public abstract class CustomBaseCodeMigration : CodeMigration
-    {
-    }
 }

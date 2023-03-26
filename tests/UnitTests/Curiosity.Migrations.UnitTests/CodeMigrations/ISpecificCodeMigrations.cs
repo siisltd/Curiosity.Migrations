@@ -1,7 +1,6 @@
-namespace Curiosity.Migrations.UnitTests.CodeMigrations
+namespace Curiosity.Migrations.UnitTests.CodeMigrations;
+
+public interface ISpecificCodeMigrations
 {
-    public interface ISpecificCodeMigrations
-    {
         
-    }
 }

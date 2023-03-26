@@ -36,7 +36,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
                 
                 var request1 = new BackgroundProcessorRequestEntity
                 {
-                    CreatedUtc = DateTime.Now,
+                    CreatedUtc = DateTime.UtcNow,
                     TimeZoneId = "temo",
                     Type = 1,
                     State = 1,
@@ -46,7 +46,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations
                 };
                 var request2 = new BackgroundProcessorRequestEntity
                 {
-                    CreatedUtc = DateTime.Now,
+                    CreatedUtc = DateTime.UtcNow,
                     TimeZoneId = "temo",
                     Type = 1,
                     State = 1,
