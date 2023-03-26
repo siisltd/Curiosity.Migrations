@@ -1,4 +1,3 @@
-using System;
 
 // ReSharper disable InconsistentNaming
 
@@ -70,7 +69,7 @@ public class PostgresMigrationConnectionOptions : IMigrationConnectionOptions
     public string? TableSpace { get; }
 
     /// <inheritdoc cref="PostgresMigrationConnectionOptions"/>
-    internal PostgresMigrationConnectionOptions(
+    public PostgresMigrationConnectionOptions(
         string connectionString,
         string? migrationHistoryTableName = null,
         string? databaseEncoding = null,
@@ -80,12 +79,19 @@ public class PostgresMigrationConnectionOptions : IMigrationConnectionOptions
         string? template = null,
         string? tableSpace = null)
     {
-        if (String.IsNullOrWhiteSpace(connectionString)) throw new ArgumentNullException(nameof(connectionString));
+        PostgresqlGuard.AssertConnectionString(connectionString, nameof(connectionString));
 
         ConnectionString = connectionString;
-        MigrationHistoryTableName = migrationHistoryTableName == null || String.IsNullOrWhiteSpace(migrationHistoryTableName)
-            ? DefaultMigrationTableName
-            : migrationHistoryTableName;
+
+        if (migrationHistoryTableName != null)
+        {
+            PostgresqlGuard.AssertTableName(migrationHistoryTableName, nameof(migrationHistoryTableName));
+            MigrationHistoryTableName = migrationHistoryTableName;
+        }
+        else
+        {
+            MigrationHistoryTableName = DefaultMigrationTableName;
+        }
         DatabaseEncoding = databaseEncoding;
         LC_COLLATE = lcCollate;
         LC_CTYPE = lcCtype;

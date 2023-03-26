@@ -3,7 +3,7 @@
 ## [4.0.0] - 2023-03-25
 
 ### Added
-  
+
 - Added more comments.
 - Added options to `ServiceCollectionExtensions.AddMigrations` to control whether current instance of IServiceCollection should be used as default for dependency injection of migrator.
 
@@ -11,12 +11,14 @@
 
 - Upgraded to C# 11.0.
 - Refactored `MigrationPolicy`, changed existed enum values codes: improved extensibility for future changes. 
-- Renamed `MigrationError`->`MigrationErrorCode`. 
-- Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes 
- 
+- Renamed `MigrationError`->`MigrationErrorCode`.
+- Extended ranges of `MigrationErrorCode`.
+- Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
+
 ### Removed
 
 - Removed `Dapper` dependency. 
+- Moved `MassUpdateCodeMigrationBase` to `Curiosity.Migration.Utils` package.
 
 ## [3.1.0] - 2022-07-29
 

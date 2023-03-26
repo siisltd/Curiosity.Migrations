@@ -3,7 +3,7 @@ namespace Curiosity.Migrations;
 /// <summary>
 /// Migration error code.
 /// </summary>
-public enum MigrationErrorCode //todo extend code ranges
+public enum MigrationErrorCode
 {
     /// <summary>
     /// Unknown.
@@ -16,7 +16,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Incorrect server address, port, network problems, etc.
     /// </remarks>
-    ConnectionError = 1,
+    ConnectionError = 10,
 
     /// <summary>
     /// Can not authorize.
@@ -24,7 +24,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Incorrect login, password.
     /// </remarks>
-    AuthorizationError = 2,
+    AuthorizationError = 20,
 
     /// <summary>
     /// Can not create database.
@@ -32,7 +32,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Incorrect creation script on user does no have permission to create databases.
     /// </remarks>
-    CreatingDbError = 3,
+    CreatingDbError = 30,
 
     /// <summary>
     /// Can not create migration history table.
@@ -40,7 +40,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Incorrect creation script on user does no have permission to create databases.
     /// </remarks>
-    CreatingHistoryTable = 4,
+    CreatingHistoryTable = 50,
 
     /// <summary>
     /// Error during executing migrations commands.
@@ -48,7 +48,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Incorrect script.
     /// </remarks>
-    MigratingError = 5,
+    MigratingError = 70,
 
     /// <summary>
     /// Migration with specified <see cref="DbVersion"/> not found.
@@ -56,7 +56,7 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Check loaded migration from file, assembly, etc.
     /// </remarks>
-    MigrationNotFound = 6,
+    MigrationNotFound = 90,
 
     /// <summary>
     /// Policy restricts migration.
@@ -64,5 +64,5 @@ public enum MigrationErrorCode //todo extend code ranges
     /// <remarks>
     /// Check <see cref="MigrationPolicy"/>.
     /// </remarks>
-    PolicyError = 7
+    PolicyError = 100
 }

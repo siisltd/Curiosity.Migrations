@@ -48,19 +48,16 @@ internal class MigrationActionHelper
         }
         catch (PostgresException e)
             when (e.SqlState.StartsWith("08")
-                  || e.SqlState == "3D000"
-                  || e.SqlState == "3F000")
+                  || e.SqlState is "3D000" or "3F000")
         {
             throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to database \"{_databaseName}\"", e);
         }
         catch (PostgresException e)
             when (e.SqlState.StartsWith("28")
-                  || e.SqlState == "0P000"
-                  || e.SqlState == "42501"
-                  || e.SqlState == "42000")
+                  || e.SqlState is "0P000" or "42501" or "42000")
         {
             throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for {_databaseName}", e);
+                $"Invalid authorization specification for \"{_databaseName}\"", e);
         }
         catch (NpgsqlException e)
         {
@@ -95,19 +92,16 @@ internal class MigrationActionHelper
         }
         catch (PostgresException e)
             when (e.SqlState.StartsWith("08")
-                  || e.SqlState == "3D000"
-                  || e.SqlState == "3F000")
+                  || e.SqlState is "3D000" or "3F000")
         {
             throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to the database \"{_databaseName}\"", e);
         }
         catch (PostgresException e)
             when (e.SqlState.StartsWith("28")
-                  || e.SqlState == "0P000"
-                  || e.SqlState == "42501"
-                  || e.SqlState == "42000")
+                  || e.SqlState is "0P000" or "42501" or "42000")
         {
             throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for {_databaseName}", e);
+                $"Invalid authorization specification for \"{_databaseName}\"", e);
         }
         catch (NpgsqlException e)
         {
