@@ -85,7 +85,26 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task<MigrationResult> MigrateAsync(CancellationToken cancellationToken = default)
+    public Task<MigrationResult> UpgradeDatabaseAsync(CancellationToken cancellationToken = default)
+    {
+        return MigrateAsync(true, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<MigrationResult> DowngradeDatabaseAsync(CancellationToken cancellationToken = default)
+    {
+        if (_targetVersion == null)
+            throw new InvalidOperationException("Can't execute database downgrade because target version wasn't specified. Target version is required for downgrade migrations");
+
+        return MigrateAsync(false, cancellationToken);
+    }
+
+    /// <summary>
+    /// Executes migration of a database applying all migration according to migrator's configuration.
+    /// </summary>
+    private async Task<MigrationResult> MigrateAsync(
+        bool isUpgrade,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -128,8 +147,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             }
 
             // get applied migrations versions
-            var (isUpgrade, migrationsToApply) = await GetMigrationsToApplyAsync(false, cancellationToken);
-
+            var migrationsToApply = await GetMigrationsToApplyAsync(isUpgrade, false, cancellationToken);
             if (migrationsToApply.Count == 0)
             {
                 _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration.");
@@ -145,7 +163,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\" completed.");
 
                 // applied migration versions might be changed after pre-migration
-                (isUpgrade, migrationsToApply) = await GetMigrationsToApplyAsync(true, cancellationToken);
+                migrationsToApply = await GetMigrationsToApplyAsync(isUpgrade, true, cancellationToken);
             }
             else
             {
@@ -199,9 +217,11 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
     /// <summary>
     /// Returns migrations to apply.
     /// </summary>
+    /// <param name="isUpgrade">True if upgrade database, false if downgrade.</param>
     /// <param name="isPreMigration">Should we return pre-migrations?</param>
     /// <param name="token">Cancellation token.</param>
-    private async Task<(bool isUpgrade, IReadOnlyList<IMigration> migrations)> GetMigrationsToApplyAsync(
+    private async Task<IReadOnlyList<IMigration>> GetMigrationsToApplyAsync(
+        bool isUpgrade,
         bool isPreMigration,
         CancellationToken token)
     {
@@ -214,7 +234,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         // get applied migrations versions
         var appliedMigrationVersions = await _migrationConnection.GetAppliedMigrationVersionsAsync(token);
 
-        // provider should order migrations by version ascending, but we can't trust them, because it can be external
+        // provider should order migrations by version ascending, but we can't trust them, because provider can be external
         appliedMigrationVersions = appliedMigrationVersions.OrderBy(x => x).ToArray();
 
         var maxAppliedMigration = appliedMigrationVersions.LastOrDefault();
@@ -237,9 +257,8 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
         var migrationsToApply = new List<IMigration>();
 
-        bool isUpgrade;
         // if no target version is specified or target version is greater than max applied
-        if (!_targetVersion.HasValue || _targetVersion.Value >= maxAppliedMigration)
+        if (isUpgrade)
         {
             // we need only not applied migrations
             availableMigrationVersions.ExceptWith(appliedMigrationVersions);
@@ -256,16 +275,18 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 var notAppliedMigration = _availableMigrationsMap[notAppliedMigrationVersion];
                 migrationsToApply.Add(notAppliedMigration);
             }
-
-            isUpgrade = true;
         }
         else // it's downgrade
         {
             // we need only applied migrations
             // we do not check implementation of IDowngradableMigration here
             availableMigrationVersions.IntersectWith(appliedMigrationVersions);
-            var migrationsVersionsToApply = availableMigrationVersions
-                .Where(x => x > _targetVersion.Value)
+            var query = availableMigrationVersions.AsEnumerable();
+            if (_targetVersion.HasValue)
+            {
+                query = query.Where(x => x > _targetVersion.Value);
+            }
+            var migrationsVersionsToApply = query
                 .OrderByDescending(x => x);
 
             foreach (var downgradeMigrationVersion in migrationsVersionsToApply)
@@ -273,13 +294,11 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 var downgradeMigration = _availableMigrationsMap[downgradeMigrationVersion];
                 migrationsToApply.Add(downgradeMigration);
             }
-
-            isUpgrade = false;
         }
 
         _logger?.LogInformation($"Getting migrations to apply{stageName} completed. Found {migrationsToApply.Count} migrations to apply.");
 
-        return (isUpgrade, migrationsToApply);
+        return migrationsToApply;
     }
 
     /// <summary>

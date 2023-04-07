@@ -28,7 +28,7 @@ public class TransactionTests
 
         var migrator = builder.Build();
 
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
 
         var migrationProvider = new PostgresMigrationConnection(new PostgresMigrationConnectionOptions(connectionString));
         await migrationProvider.OpenConnectionAsync();
@@ -63,7 +63,7 @@ public class TransactionTests
 
         var migrator = builder.Build();
 
-        await migrator.MigrateAsync();
+        await migrator.UpgradeDatabaseAsync();
 
         var migrationProvider = new PostgresMigrationConnection(new PostgresMigrationConnectionOptions(connectionString));
         await migrationProvider.OpenConnectionAsync();
@@ -101,7 +101,7 @@ public class TransactionTests
 
         try
         {
-            await migrator.MigrateAsync();
+            await migrator.UpgradeDatabaseAsync();
 
             // last migration is incorrect, can not go here
             Assert.False(true);

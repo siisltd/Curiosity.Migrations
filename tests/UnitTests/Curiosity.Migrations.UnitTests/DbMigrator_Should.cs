@@ -40,7 +40,7 @@ public class DbMigrator_Should
             null,
             initialDbVersion);
 
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
 
         provider.Verify(x => x.SaveAppliedMigrationVersionAsync(
                 It.IsAny<MigrationVersion>(),
@@ -112,7 +112,7 @@ public class DbMigrator_Should
             null,
             targetDbVersion);
         
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
             
         Assert.True(result.IsSuccessfully);
         Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -173,7 +173,7 @@ public class DbMigrator_Should
             policy,
             policy);
         
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
             
         Assert.True(result.IsSuccessfully);
         Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -229,7 +229,7 @@ public class DbMigrator_Should
             null,
             targetDbVersion);
         
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
             
         Assert.False(result.IsSuccessfully);
         Assert.True(result.ErrorCode.HasValue);
@@ -452,7 +452,7 @@ public class DbMigrator_Should
             policy,
             policy);
 
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.UpgradeDatabaseAsync();
 
         Assert.True(result.IsSuccessfully);
         Assert.Equal(notAppliedMigrations.Count, result.AppliedMigrations.Count);
@@ -529,7 +529,7 @@ public class DbMigrator_Should
             null,
             targetDbVersion);
         
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.DowngradeDatabaseAsync();
             
         Assert.True(result.IsSuccessfully);
         Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
@@ -587,7 +587,7 @@ public class DbMigrator_Should
             null,
             targetDbVersion);
         
-        var result = await migrator.MigrateAsync();
+        var result = await migrator.DowngradeDatabaseAsync();
             
         Assert.False(result.IsSuccessfully);
         Assert.True(result.ErrorCode.HasValue);

@@ -8,9 +8,7 @@ namespace Curiosity.Migrations;
 /// </summary>
 public interface IMigrationEngine
 {
-    /// <summary>
-    /// Executes migration of a database applying all migration according to migrator's configuration.
-    /// </summary>
-    /// <returns>Count of applied migrations.</returns>
-    Task<MigrationResult> MigrateAsync(CancellationToken cancellationToken = default);
+    Task<MigrationResult> UpgradeDatabaseAsync(CancellationToken cancellationToken = default);
+
+    Task<MigrationResult> DowngradeDatabaseAsync(CancellationToken cancellationToken = default);
 }

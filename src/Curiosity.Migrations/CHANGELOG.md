@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.0.0] - 2023-03-25
+## [4.0.0] - 2023-04-07
 
 ### Added
 
@@ -15,6 +15,7 @@
 - Extended ranges of `MigrationErrorCode`.
 - Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
 - Renamed `DbVersion` -> `MigrationVersion`.
+- Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
 
 ### Removed
 
