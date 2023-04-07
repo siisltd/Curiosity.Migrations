@@ -178,7 +178,7 @@ public class DbMigrator_Should
         Assert.True(result.IsSuccessfully);
         Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
     }
-        
+
     [Fact]
     public async Task ForbidMigration_On_MigrateAsync()
     {
@@ -234,6 +234,222 @@ public class DbMigrator_Should
         Assert.False(result.IsSuccessfully);
         Assert.True(result.ErrorCode.HasValue);
         Assert.Equal(MigrationErrorCode.PolicyError, result.ErrorCode.Value);
+    }
+    
+    [Fact]
+    public async Task SkipLongRunningMigration_On_MigrateAsync()
+    {
+        var initialDbVersion = new MigrationVersion(1);
+        var targetDbVersion = new MigrationVersion(2);
+        var policy = MigrationPolicy.ShortRunningAllowed;
+        
+        var provider = new Mock<IMigrationConnection>();
+        
+        provider
+            .Setup(x => x.BeginTransaction())
+            .Returns(() => new MockTransaction());
+            
+        provider
+            .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
+        
+        var firstMigration = new Mock<IMigration>();
+        firstMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1));
+        var secondMigration = new Mock<IMigration>();
+        secondMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 1));
+        secondMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var thirdMigration = new Mock<IMigration>();
+        thirdMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 2));
+        thirdMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var fourthMigration = new Mock<IMigration>();
+        fourthMigration 
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(2));
+            
+        var migrations = new List<IMigration>
+        {
+            firstMigration.Object,
+            secondMigration.Object,
+            thirdMigration.Object,
+            fourthMigration.Object
+        };
+            
+        var migrator = new MigrationEngine(
+            provider.Object, 
+            migrations,
+            policy,
+            policy,
+            null,
+            targetDbVersion);
+        
+        var result = await migrator.UpgradeDatabaseAsync();
+
+        var notAppliedMigrations = migrations.Where(x => x.Version != initialDbVersion).ToList();
+        var shortRunningMigrations = new HashSet<MigrationVersion>(notAppliedMigrations.Where(x => !x.IsLongRunning).Select(x => x.Version));
+        var longRunningMigrations = new HashSet<MigrationVersion>(notAppliedMigrations.Where(x => x.IsLongRunning).Select(x => x.Version));
+        var appliedMigrations = new HashSet<MigrationVersion>(result.AppliedMigrations.Select(x => x.Version));
+        var skippedMigrations = new HashSet<MigrationVersion>(result.SkippedByPolicyMigrations.Select(x => x.Version));
+
+        Assert.True(result.IsSuccessfully);
+        Assert.False(result.ErrorCode.HasValue);
+        Assert.NotEmpty(result.SkippedByPolicyMigrations);
+        Assert.Equal(shortRunningMigrations, appliedMigrations);
+        Assert.Equal(longRunningMigrations, skippedMigrations);
+    }
+
+    [Fact]
+    public async Task SkipShortRunningMigration_On_MigrateAsync()
+    {
+        var initialDbVersion = new MigrationVersion(1);
+        var targetDbVersion = new MigrationVersion(2);
+        var policy = MigrationPolicy.LongRunningAllowed;
+        
+        var provider = new Mock<IMigrationConnection>();
+        
+        provider
+            .Setup(x => x.BeginTransaction())
+            .Returns(() => new MockTransaction());
+            
+        provider
+            .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
+        
+        var firstMigration = new Mock<IMigration>();
+        firstMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1));
+        var secondMigration = new Mock<IMigration>();
+        secondMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 1));
+        secondMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var thirdMigration = new Mock<IMigration>();
+        thirdMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 2));
+        thirdMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var fourthMigration = new Mock<IMigration>();
+        fourthMigration 
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(2));
+            
+        var migrations = new List<IMigration>
+        {
+            firstMigration.Object,
+            secondMigration.Object,
+            thirdMigration.Object,
+            fourthMigration.Object
+        };
+            
+        var migrator = new MigrationEngine(
+            provider.Object, 
+            migrations,
+            policy,
+            policy,
+            null,
+            targetDbVersion);
+        
+        var result = await migrator.UpgradeDatabaseAsync();
+
+        var notAppliedMigrations = migrations.Where(x => x.Version != initialDbVersion).ToList();
+        var shortRunningMigrations = new HashSet<MigrationVersion>(notAppliedMigrations.Where(x => !x.IsLongRunning).Select(x => x.Version));
+        var longRunningMigrations = new HashSet<MigrationVersion>(notAppliedMigrations.Where(x => x.IsLongRunning).Select(x => x.Version));
+        var appliedMigrations = new HashSet<MigrationVersion>(result.AppliedMigrations.Select(x => x.Version));
+        var skippedMigrations = new HashSet<MigrationVersion>(result.SkippedByPolicyMigrations.Select(x => x.Version));
+
+        Assert.True(result.IsSuccessfully);
+        Assert.False(result.ErrorCode.HasValue);
+        Assert.NotEmpty(result.SkippedByPolicyMigrations);
+        Assert.Equal(shortRunningMigrations, skippedMigrations);
+        Assert.Equal(longRunningMigrations, appliedMigrations);
+    }
+    
+    [Fact]
+    public async Task ExecutesOnlyTargetLongRunning_On_MigrateAsync()
+    {
+        var initialDbVersion = new MigrationVersion(1);
+        var targetDbVersion = new MigrationVersion(1, 2);
+        var policy = MigrationPolicy.LongRunningAllowed;
+        
+        var provider = new Mock<IMigrationConnection>();
+        
+        provider
+            .Setup(x => x.BeginTransaction())
+            .Returns(() => new MockTransaction());
+            
+        provider
+            .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
+        
+        var firstMigration = new Mock<IMigration>();
+        firstMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1));
+        var secondMigration = new Mock<IMigration>();
+        secondMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 1));
+        secondMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var thirdMigration = new Mock<IMigration>();
+        thirdMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 2));
+        thirdMigration
+            .Setup(x => x.IsLongRunning)
+            .Returns(true);
+        var fourthMigration = new Mock<IMigration>();
+        fourthMigration 
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(2));
+            
+        var migrations = new List<IMigration>
+        {
+            firstMigration.Object,
+            secondMigration.Object,
+            thirdMigration.Object,
+            fourthMigration.Object
+        };
+            
+        var migrator = new MigrationEngine(
+            provider.Object, 
+            migrations,
+            policy,
+            policy,
+            null,
+            targetDbVersion,
+            true);
+        
+        var result = await migrator.UpgradeDatabaseAsync();
+
+        var notAppliedMigrations = migrations.Where(x => x.Version != initialDbVersion).ToList();
+        var shortRunningMigrations = new HashSet<MigrationVersion>(notAppliedMigrations.Where(x => !x.IsLongRunning).Select(x => x.Version));
+        var longRunningMigrations = new HashSet<MigrationVersion>(
+            notAppliedMigrations
+                .Where(x => x.IsLongRunning)
+                .Where(x => x.Version == targetDbVersion)
+                .Select(x => x.Version));
+        var appliedMigrations = new HashSet<MigrationVersion>(result.AppliedMigrations.Select(x => x.Version));
+
+        Assert.True(result.IsSuccessfully);
+        Assert.False(result.ErrorCode.HasValue);
+        Assert.Empty(result.SkippedByPolicyMigrations);
+        Assert.Equal(longRunningMigrations, appliedMigrations);
     }
         
     [Fact]
@@ -592,6 +808,60 @@ public class DbMigrator_Should
         Assert.False(result.IsSuccessfully);
         Assert.True(result.ErrorCode.HasValue);
         Assert.Equal(MigrationErrorCode.PolicyError, result.ErrorCode.Value);
+    }
+    
+    [Fact]
+    public async Task ThrowException_WhenNoTargetVersion_OnDowngrade()
+    {
+        var policy = MigrationPolicy.AllForbidden;
+        
+        var provider = new Mock<IMigrationConnection>();
+        
+        provider
+            .Setup(x => x.BeginTransaction())
+            .Returns(() => new MockTransaction());
+            
+        var firstMigration = new Mock<IDowngradeMigration>();
+        firstMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1));
+        var secondMigration = new Mock<IDowngradeMigration>();
+        secondMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 1));
+        var thirdMigration = new Mock<IDowngradeMigration>();
+        thirdMigration
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(1, 2));
+        var fourthMigration = new Mock<IDowngradeMigration>();
+        fourthMigration 
+            .Setup(x => x.Version)
+            .Returns(new MigrationVersion(2));
+            
+        var migrations = new List<IMigration>
+        {
+            firstMigration.Object,
+            secondMigration.Object,
+            thirdMigration.Object,
+            fourthMigration.Object
+        };
+            
+        provider
+            .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<MigrationVersion>));
+
+        var migrator = new MigrationEngine(
+            provider.Object, 
+            migrations,
+            policy,
+            policy,
+            null,
+            null);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await migrator.DowngradeDatabaseAsync();
+        });
     }
 
     #endregion

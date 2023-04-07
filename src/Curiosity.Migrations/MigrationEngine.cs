@@ -19,6 +19,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
     private readonly MigrationPolicy _upgradePolicy;
     private readonly MigrationPolicy _downgradePolicy;
     private readonly MigrationVersion? _targetVersion;
+    private readonly bool _onlyTargetVersion;
 
     private readonly IReadOnlyDictionary<MigrationVersion, IMigration> _availableMigrationsMap;
     private readonly IReadOnlyList<IMigration> _availablePreMigrations;
@@ -29,7 +30,15 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
     /// <param name="upgradePolicy">Policy for upgrading database</param>
     /// <param name="downgradePolicy">Policy for downgrading database</param>
     /// <param name="preMigrations">Migrations that will be executed before <paramref name="migrations"/></param>
-    /// <param name="targetVersion">Desired version of database after migration. If <see langword="null"/> migrator will upgrade database to the most actual version.</param>
+    /// <param name="targetVersion">
+    /// Target migration version. Options for upgrades. Required for downgrades.
+    /// If specified, migrator will upgrade or downgrade database depending on the current applied version and the specified.
+    /// If not specified, migrator will apply all migrations, provided by registered instances of <see cref="IMigrationsProvider"/> for upgrade,
+    /// and already applied migrations for a downgrade if they provided by registered instances of <see cref="IMigrationsProvider"/>. 
+    /// </param>
+    /// <param name="onlyTargetVersion">
+    /// Should engine executes only specified target migration?
+    /// Otherwise all migration with version less than target will be used for upgrade and all migration with version greater than applied will be used for downgrade.</param>
     /// <param name="logger">Optional logger</param>
     public MigrationEngine(
         IMigrationConnection migrationConnection,
@@ -38,6 +47,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         MigrationPolicy downgradePolicy,
         IReadOnlyList<IMigration>? preMigrations = null,
         MigrationVersion? targetVersion = null,
+        bool onlyTargetVersion = false,
         ILogger? logger = null)
     {
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
@@ -61,6 +71,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _upgradePolicy = upgradePolicy;
         _downgradePolicy = downgradePolicy;
         _targetVersion = targetVersion;
+        _onlyTargetVersion = onlyTargetVersion;
 
         _availablePreMigrations = preMigrations ?? Array.Empty<IMigration>();
         var preMigrationCheckMap = new HashSet<MigrationVersion>();
@@ -265,7 +276,9 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var query = availableMigrationVersions.AsEnumerable();
             if (_targetVersion.HasValue)
             {
-                query = query.Where(x => x <= _targetVersion.Value);
+                query = _onlyTargetVersion
+                    ? query.Where(x => x == _targetVersion.Value)
+                    : query.Where(x => x <= _targetVersion.Value);
             }
 
             var notAppliedMigrationVersions = query.OrderBy(x => x);
@@ -284,8 +297,11 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var query = availableMigrationVersions.AsEnumerable();
             if (_targetVersion.HasValue)
             {
-                query = query.Where(x => x > _targetVersion.Value);
+                query = _onlyTargetVersion
+                    ? query.Where(x => x == _targetVersion.Value)
+                    : query.Where(x => x > _targetVersion.Value);
             }
+
             var migrationsVersionsToApply = query
                 .OrderByDescending(x => x);
 
@@ -392,11 +408,13 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             {
                 skippedMigrations.Add(currentMigration);
                 _logger?.LogWarning($"Skip long-running migration \"{migration.Version}\" due to policy restriction");
+                continue;
             }
             if (!policy.HasFlag(MigrationPolicy.ShortRunningAllowed) && !migration.IsLongRunning)
             {
                 skippedMigrations.Add(currentMigration);
                 _logger?.LogWarning($"Skip short-running migration \"{migration.Version}\" due to policy restriction");
+                continue;
             }
 
             DbTransaction? transaction = null;

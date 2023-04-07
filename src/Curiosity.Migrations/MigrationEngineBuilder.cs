@@ -7,7 +7,8 @@ using Microsoft.Extensions.Logging;
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Builder for <see cref="IMigrationEngine"/>
+/// Builder for <see cref="IMigrationEngine"/>.
+/// Configures and creates default implementation of migration engine.
 /// </summary>
 /// <remarks>
 /// Configures how instance of <see cref="IMigrationEngine"/> should work:
@@ -24,6 +25,7 @@ public class MigrationEngineBuilder
 
     private IMigrationConnectionFactory? _dbProviderFactory;
     private MigrationVersion? _targetVersion;
+    private bool _onlyTargetVersion = false;
     private ILogger? _logger;
 
     /// <summary>
@@ -165,15 +167,25 @@ public class MigrationEngineBuilder
     /// <summary>
     /// Setup target version of migration
     /// </summary>
-    /// <param name="targetMigrationVersion">Target database version</param>
-    /// <returns></returns>
+    /// <param name="targetMigrationVersion">
+    /// Target migration version. Options for upgrades. Required for downgrades.
+    /// If specified, migrator will upgrade or downgrade database depending on the current applied version and the specified.
+    /// If not specified, migrator will apply all migrations, provided by registered instances of <see cref="IMigrationsProvider"/> for upgrade,
+    /// and already applied migrations for a downgrade if they provided by registered instances of <see cref="IMigrationsProvider"/>. 
+    /// </param>
+    /// <param name="onlyTargetVersion">
+    /// Should engine executes only specified target migration?
+    /// Otherwise all migration with version less than target will be used for upgrade and all migration with version greater than applied will be used for downgrade.</param>
     /// <remarks>
-    /// If <paramref name="targetMigrationVersion"></paramref> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
-    /// If <paramref name="targetMigrationVersion"></paramref> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
+    /// If <paramref name="targetMigrationVersion"></paramref> .
+    /// If <paramref name="targetMigrationVersion"></paramref>
     /// </remarks>
-    public MigrationEngineBuilder SetUpTargetVersion(MigrationVersion targetMigrationVersion)
+    public MigrationEngineBuilder SetUpTargetVersion(
+        MigrationVersion targetMigrationVersion,
+        bool onlyTargetVersion = false)
     {
         _targetVersion = targetMigrationVersion;
+        _onlyTargetVersion = onlyTargetVersion;
         return this;
     }
 
@@ -241,6 +253,7 @@ public class MigrationEngineBuilder
             _downgradePolicy,
             preMigrations,
             _targetVersion,
+            _onlyTargetVersion,
             _logger);
     }
 }

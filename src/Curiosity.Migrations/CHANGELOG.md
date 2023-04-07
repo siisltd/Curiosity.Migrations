@@ -6,6 +6,8 @@
 
 - Added more comments.
 - Added options to `ServiceCollectionExtensions.AddMigrations` to control whether current instance of IServiceCollection should be used as default for dependency injection of migrator.
+- Added `onlyTargetVersion` option.
+- Added saving initial version format (before parse changes).
 
 ### Changed
 
