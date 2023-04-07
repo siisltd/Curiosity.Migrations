@@ -36,12 +36,13 @@ public abstract class MassUpdateCodeMigrationBase : CodeMigration
     /// </summary>
     /// <param name="updateQuery">
     /// SQL query to change data. Must contain a CTE with SELECT to get data and UPDATE to change (CTE is for PostgreSQL, use alternatives at your DBMS).
-    /// SELECT must have a LIMIT and a <code>WHERE id = @id</code> condition so that it can be iterated.
+    /// SELECT must have a LIMIT and a <code>WHERE id >= @id</code> condition so that it can be iterated.
     /// UPDATE must return the ID of the changed data. An example request can be seen below in the example section.
     /// </param>
     /// <param name="onStepCompleted">
     /// The action that will be called after processing the next migration step.
-    /// The total number of rows processed so far is transmitted.
+    /// First argument - number of processed row on this step.
+    /// Second argument - total number of rows processed by this migration.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Number of updated entities.</returns>

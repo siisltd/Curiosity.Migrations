@@ -64,9 +64,7 @@ public class PostgresMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public string MigrationHistoryTableName { get; }
 
-    /// <summary>
-    /// Provide access to a Postgres database.
-    /// </summary>
+    /// <inheritdoc cref="PostgresMigrationConnection"/>
     /// <param name="options">Options to connect and manage database.</param>
     public PostgresMigrationConnection(PostgresMigrationConnectionOptions options)
     {
@@ -569,6 +567,7 @@ SELECT EXISTS (
             MigrationErrorCode.MigratingError,
             "Can't fetch applied migrations from history table");
     }
+
     /// <inheritdoc />
     public Task SaveAppliedMigrationVersionAsync(
         MigrationVersion version,
