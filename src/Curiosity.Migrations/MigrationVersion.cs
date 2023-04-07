@@ -13,7 +13,7 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
     /// <summary>
     /// Text representation of a version.
     /// </summary>
-    private readonly string _version;
+    private readonly string _rawVersion;
 
     /// <summary>
     /// Major version
@@ -29,7 +29,15 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
     public short Minor { get; }
 
     /// <inheritdoc cref="MigrationVersion"/>
-    public MigrationVersion(long major, short minor = 0) : this()
+    public MigrationVersion(long major, short minor = 0) 
+        : this(major, minor, $"{major:D4}.{minor:D2}")
+    {
+    }
+
+    private MigrationVersion(
+        long major,
+        short minor,
+        string rawString) : this()
     {
         AssertMajor(major);
         AssertMinor(minor);
@@ -37,7 +45,7 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
         Major = major;
         Minor = minor;
 
-        _version = $"{Major:D4}.{Minor:D2}";
+        _rawVersion = rawString;
     }
 
     /// <inheritdoc cref="MigrationVersion"/>
@@ -49,7 +57,7 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
         Major = validVersion.Major;
         Minor = validVersion.Minor;
 
-        _version = validVersion.ToString();
+        _rawVersion = validVersion.ToString();
     }
 
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
@@ -79,7 +87,7 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
     /// <inheritdoc />
     public override string ToString()
     {
-        return _version;
+        return _rawVersion;
     }
 
     /// <inheritdoc />
@@ -170,8 +178,8 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
 
         var result = true;
 
-        // major version may contains '-'
-        result &= long.TryParse(match.Groups[1].Value.Replace("-", ""), out var major);
+        // major version may contains '_'
+        result &= long.TryParse(match.Groups[1].Value.Replace("_", ""), out var major);
         if (!result)
             return false;
 
@@ -202,7 +210,7 @@ public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersi
             }
         }
 
-        version = new MigrationVersion(major, minor);
+        version = new MigrationVersion(major, minor, source);
 
         return result;
     }

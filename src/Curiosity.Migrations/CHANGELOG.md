@@ -16,13 +16,18 @@
 - Renamed `MigrationError`->`MigrationErrorCode`.
 - Extended ranges of `MigrationErrorCode`.
 - Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
-- [#27](https://github.com/siisltd/Curiosity.Migrations/issues/28): Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
+- [#22](https://github.com/siisltd/Curiosity.Migrations/issues/22): Forbid to use `-` at version's major part. Replaced it by `_`.
+- [#27](https://github.com/siisltd/Curiosity.Migrations/issues/27): Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
 - [#28](https://github.com/siisltd/Curiosity.Migrations/issues/28): Renamed `DbVersion` -> `MigrationVersion`.
 
 ### Removed
 
 - Removed `Dapper` dependency. 
 - Moved `MassUpdateCodeMigrationBase` to `Curiosity.Migration.Utils` package.
+
+### Fixed
+ 
+- [#22](https://github.com/siisltd/Curiosity.Migrations/issues/22): Fixed issue with parsing version like `20210916-1055-00`.
 
 ## [3.1.0] - 2022-07-29
 

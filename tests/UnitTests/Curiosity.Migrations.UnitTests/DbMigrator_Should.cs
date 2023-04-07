@@ -646,9 +646,9 @@ public class DbMigrator_Should
         // there are new migrations we want to apply
         var notAppliedMigrations = new List<IMigration>
         {
-            GetIMigrationMock("20220215-1200.00"),
-            GetIMigrationMock("20220215-1200.01"),
-            GetIMigrationMock("20220215-1200.02")
+            GetIMigrationMock("20220215_1200.00"),
+            GetIMigrationMock("20220215_1200.01"),
+            GetIMigrationMock("20220215_1200.02")
         };
 
         var totalAppliedMigrations = new List<IMigration>(appliedMigrationFilesBase);

@@ -51,7 +51,7 @@ public class DbVersion_Should
     [Fact]
     public void Pattern_Should_Handle_Yyymmdd_hhmm_Version()
     {
-        var parseResult = MigrationVersion.TryParse("20201208-1850", out var version);
+        var parseResult = MigrationVersion.TryParse("20201208_1850", out var version);
 
         parseResult.Should().BeTrue("it's correct version");
         version.Major.Should().Be(202012081850, "version contains major version");
@@ -61,7 +61,7 @@ public class DbVersion_Should
     [Fact]
     public void Pattern_Should_Handle_Yyymmdd_hhmm_minor_Version()
     {
-        var parseResult = MigrationVersion.TryParse("20201208-1850.02", out var version);
+        var parseResult = MigrationVersion.TryParse("20201208_1850.02", out var version);
 
         parseResult.Should().BeTrue("it's correct version");
         version.Major.Should().Be(202012081850, "version contains major version");

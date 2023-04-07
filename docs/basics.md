@@ -11,15 +11,15 @@ Version consist of two parts - major and minor numbers separated by dot - `Major
 
 Commonly, version is just an incrementing value. Some people use a single number to versioning their migrations, another use numbered date format such as `yyyyMMdd`. `Curiosity.Migrations` uses next regular expression pattern to parse version from string:
 
-> `([\d\-]+)(\.(\d+))*`
+> `([\d\_]+)(\.(\d+))*`
 
 There are examples of valid versions:
 
 - `1` 
 - `100.5` 
 - `20201012` 
-- `20201012-1030` 
-- `20201012-1030.21` 
+- `20201012_1030` 
+- `20201012_1030.21` 
 
 ## Policy 
 
