@@ -16,8 +16,8 @@
 - Renamed `MigrationError`->`MigrationErrorCode`.
 - Extended ranges of `MigrationErrorCode`.
 - Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
-- Renamed `DbVersion` -> `MigrationVersion`.
-- Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
+- [#27](https://github.com/siisltd/Curiosity.Migrations/issues/28): Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
+- [#28](https://github.com/siisltd/Curiosity.Migrations/issues/28): Renamed `DbVersion` -> `MigrationVersion`.
 
 ### Removed
 
@@ -270,4 +270,3 @@ Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Curiosity.Migrations).
 
 - Added pre-migration scripts
 - Added options for `IDbProvider` and factory to create `IDbProvider`.
-
