@@ -19,10 +19,10 @@ namespace Curiosity.Migrations.PostgreSQL;
 public class PostgresMigrationConnection : IMigrationConnection
 {
     /// <summary>
-    /// 'Postgres' database is guaranteed to exist, needs to create own database.
+    /// 'postgres' database is guaranteed to exist, needs to create own database.
     /// </summary>
     /// <remarks>
-    /// Can not open connection without specified database name
+    /// Can not open connection without specified database name, so we will use this one.
     /// </remarks>
     private const string PostgreDefaultDatabase = "postgres";
 
@@ -35,15 +35,15 @@ public class PostgresMigrationConnection : IMigrationConnection
     private readonly MigrationActionHelper _actionHelper;
 
     /// <summary>
-    /// Dictionary with default variables from connection string and DB connection
+    /// Dictionary with default variables from connection string and DB connection.
     /// </summary>
     /// <remarks>
-    /// Key - variable name, value - variable value
+    /// Key - variable name, value - variable value.
     /// </remarks>
     private readonly Dictionary<string, string> _defaultVariables;
 
     /// <summary>
-    /// Logger for sql queries
+    /// Logger for sql queries.
     /// </summary>
     private ILogger? _sqLogger;
 
@@ -65,9 +65,9 @@ public class PostgresMigrationConnection : IMigrationConnection
     public string MigrationHistoryTableName { get; }
 
     /// <summary>
-    /// Provide access to Postgre database
+    /// Provide access to a Postgres database.
     /// </summary>
-    /// <param name="options">Options to connect and manage database</param>
+    /// <param name="options">Options to connect and manage database.</param>
     public PostgresMigrationConnection(PostgresMigrationConnectionOptions options)
     {
         Guard.AssertNotNull(options, nameof(options));

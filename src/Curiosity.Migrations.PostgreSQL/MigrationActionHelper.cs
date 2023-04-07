@@ -21,7 +21,7 @@ internal class MigrationActionHelper
 
     /// <summary>
     /// Tries to execute passed function catching common postgres exceptions and return result.
-    /// All caught exceptions will be processed and re-thrown.
+    /// All caught exceptions will be processed and re-thrown as <see cref="MigrationException"/>.
     /// </summary>
     /// <param name="action">Code that should be executed and that can cause postgres exceptions.</param>
     /// <param name="errorCodeType">Type for exception that will be thrown if unknown exception occurs.</param>

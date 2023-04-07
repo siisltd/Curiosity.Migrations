@@ -3,7 +3,7 @@ namespace Curiosity.Migrations.TransactionTests;
 public class Config
 {
     /// <summary>
-    /// Маска строки подключения к БД. Должно быть указано все, кроме имя БД
+    /// Database connection string mask. Everything except the database name must be specified.
     /// </summary>
     public string ConnectionStringMask { get; set; } = null!;
 }
