@@ -1,7 +1,7 @@
 namespace Curiosity.Migrations;
 
 /// <summary>
-/// Names of default variables 
+/// Names of default variables.
 /// </summary>
 public static class DefaultVariables
 {

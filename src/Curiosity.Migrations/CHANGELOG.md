@@ -14,7 +14,6 @@
 - Upgraded to C# 11.0.
 - Refactored `MigrationPolicy`, changed existed enum values codes: improved extensibility for future changes. 
 - Renamed `MigrationError`->`MigrationErrorCode`.
-- Extended ranges of `MigrationErrorCode`.
 - Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
 - [#22](https://github.com/siisltd/Curiosity.Migrations/issues/22): Forbid to use `-` at version's major part. Replaced it by `_`.
 - [#27](https://github.com/siisltd/Curiosity.Migrations/issues/27): Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
