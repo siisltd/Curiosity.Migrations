@@ -10,7 +10,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations;
 public class CodeMigration_5_0 : CodeMigration
 {
     /// <inheritdoc />
-    public override DbVersion Version { get; } = new(5);
+    public override MigrationVersion Version { get; } = new(5);
 
     /// <inheritdoc />
     public override string Comment => "Migrations with switched off transactions";

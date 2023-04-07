@@ -6,7 +6,7 @@ namespace Curiosity.Migrations;
 /// <summary>
 /// Database version.
 /// </summary>
-public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
+public readonly struct MigrationVersion : IComparable, IEquatable<MigrationVersion>
 {
     private static readonly Regex Regex = new(MigrationConstants.VersionPattern, RegexOptions.IgnoreCase);
 
@@ -28,8 +28,8 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     /// </remarks>
     public short Minor { get; }
 
-    /// <inheritdoc cref="DbVersion"/>
-    public DbVersion(long major, short minor = 0) : this()
+    /// <inheritdoc cref="MigrationVersion"/>
+    public MigrationVersion(long major, short minor = 0) : this()
     {
         AssertMajor(major);
         AssertMinor(minor);
@@ -40,8 +40,8 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
         _version = $"{Major:D4}.{Minor:D2}";
     }
 
-    /// <inheritdoc cref="DbVersion"/>
-    public DbVersion(string version) : this()
+    /// <inheritdoc cref="MigrationVersion"/>
+    public MigrationVersion(string version) : this()
     {
         if (!TryParse(version, out var validVersion))
             throw new ArgumentException($"Incorrect version. Version must be parsed by this regexp: {MigrationConstants.VersionPattern}");
@@ -67,11 +67,11 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is DbVersion version && Equals(version);
+        return obj is MigrationVersion version && Equals(version);
     }
 
     /// <inheritdoc />
-    public bool Equals(DbVersion other)
+    public bool Equals(MigrationVersion other)
     {
         return Major == other.Major && Minor == other.Minor;
     }
@@ -87,7 +87,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
     {
         if (obj == null) return -1;
 
-        var version = (DbVersion)obj;
+        var version = (MigrationVersion)obj;
 
         var result = Major.CompareTo(version.Major);
         if (result != 0)
@@ -111,53 +111,53 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
 
     /// <summary>
     /// </summary>
-    public static bool operator ==(DbVersion version1, DbVersion version2)
+    public static bool operator ==(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) == 0;
     }
 
     /// <summary>
     /// </summary>
-    public static bool operator !=(DbVersion version1, DbVersion version2)
+    public static bool operator !=(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) != 0;
     }
 
     /// <summary>
     /// </summary>
-    public static bool operator <(DbVersion version1, DbVersion version2)
+    public static bool operator <(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) < 0;
     }
 
     /// <summary>
     /// </summary>
-    public static bool operator >(DbVersion version1, DbVersion version2)
+    public static bool operator >(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) > 0;
     }
 
     /// <summary>
     /// </summary>
-    public static bool operator <=(DbVersion version1, DbVersion version2)
+    public static bool operator <=(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) <= 0;
     }
 
     /// <summary>
     /// </summary>
-    public static bool operator >=(DbVersion version1, DbVersion version2)
+    public static bool operator >=(MigrationVersion version1, MigrationVersion version2)
     {
         return version1.CompareTo(version2) >= 0;
     }
 
     /// <summary>
-    /// Tries parse <see cref="DbVersion"/> from <see cref="String"/>
+    /// Tries parse <see cref="MigrationVersion"/> from <see cref="String"/>
     /// </summary>
-    /// <param name="source">Text presentation of <see cref="DbVersion"/></param>
+    /// <param name="source">Text presentation of <see cref="MigrationVersion"/></param>
     /// <param name="version">Database version</param>
     /// <returns>Result of parsing</returns>
-    public static bool TryParse(string source, out DbVersion version)
+    public static bool TryParse(string source, out MigrationVersion version)
     {
         version = default;
 
@@ -202,7 +202,7 @@ public readonly struct DbVersion : IComparable, IEquatable<DbVersion>
             }
         }
 
-        version = new DbVersion(major, minor);
+        version = new MigrationVersion(major, minor);
 
         return result;
     }

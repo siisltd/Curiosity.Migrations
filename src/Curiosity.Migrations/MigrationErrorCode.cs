@@ -56,7 +56,7 @@ public enum MigrationErrorCode
     MigratingError = 71,
 
     /// <summary>
-    /// Migration with specified <see cref="DbVersion"/> not found.
+    /// Migration with specified <see cref="MigrationVersion"/> not found.
     /// </summary>
     /// <remarks>
     /// Check loaded migration from file, assembly, etc.

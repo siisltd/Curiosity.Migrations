@@ -7,7 +7,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations;
 public class CodeMigration_2_0 : CodeMigration
 {
     /// <inheritdoc />
-    public override DbVersion Version { get; } = new(2);
+    public override MigrationVersion Version { get; } = new(2);
 
     /// <inheritdoc />
     public override string Comment => "Correct script via provider";

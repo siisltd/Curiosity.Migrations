@@ -12,7 +12,7 @@ public interface IMigration
     /// <summary>
     /// Migration's version.
     /// </summary>
-    DbVersion Version { get; }
+    MigrationVersion Version { get; }
 
     /// <summary>
     /// Migration's comment.

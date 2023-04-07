@@ -22,7 +22,7 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
     public DowngradeScriptMigration(
         ILogger? migrationLogger,
         IMigrationConnection migrationConnection,
-        DbVersion version,
+        MigrationVersion version,
         IReadOnlyList<ScriptMigrationBatch> upScripts,
         IReadOnlyList<ScriptMigrationBatch>? downScripts,
         string? comment,

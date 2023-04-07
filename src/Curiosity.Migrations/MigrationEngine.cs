@@ -18,9 +18,9 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
     private readonly MigrationPolicy _upgradePolicy;
     private readonly MigrationPolicy _downgradePolicy;
-    private readonly DbVersion? _targetVersion;
+    private readonly MigrationVersion? _targetVersion;
 
-    private readonly IReadOnlyDictionary<DbVersion, IMigration> _availableMigrationsMap;
+    private readonly IReadOnlyDictionary<MigrationVersion, IMigration> _availableMigrationsMap;
     private readonly IReadOnlyList<IMigration> _availablePreMigrations;
 
     /// <inheritdoc cref="MigrationEngine"/>
@@ -37,7 +37,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         MigrationPolicy upgradePolicy,
         MigrationPolicy downgradePolicy,
         IReadOnlyList<IMigration>? preMigrations = null,
-        DbVersion? targetVersion = null,
+        MigrationVersion? targetVersion = null,
         ILogger? logger = null)
     {
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
@@ -46,7 +46,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _migrationConnection = migrationConnection;
         _logger = logger;
 
-        var migrationMap = new Dictionary<DbVersion, IMigration>();
+        var migrationMap = new Dictionary<MigrationVersion, IMigration>();
         foreach (var migration in migrations)
         {
             if (migrationMap.ContainsKey(migration.Version))
@@ -63,7 +63,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _targetVersion = targetVersion;
 
         _availablePreMigrations = preMigrations ?? Array.Empty<IMigration>();
-        var preMigrationCheckMap = new HashSet<DbVersion>();
+        var preMigrationCheckMap = new HashSet<MigrationVersion>();
         for (var i = 0; i < _availablePreMigrations.Count; i++)
         {
             var migration = _availablePreMigrations[i];
@@ -233,7 +233,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
         // build list of migrations to apply
 
-        var availableMigrationVersions = new HashSet<DbVersion>(_availableMigrationsMap.Values.Select(x => x.Version));
+        var availableMigrationVersions = new HashSet<MigrationVersion>(_availableMigrationsMap.Values.Select(x => x.Version));
 
         var migrationsToApply = new List<IMigration>();
 

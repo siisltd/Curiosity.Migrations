@@ -10,7 +10,7 @@ namespace Curiosity.Migrations.TransactionTests.CodeMigrations;
 public class CodeMigration_3_0 : CodeMigration
 {
     /// <inheritdoc />
-    public override DbVersion Version { get; } = new(3);
+    public override MigrationVersion Version { get; } = new(3);
 
     /// <inheritdoc />
     public override string Comment { get; } = "Migration using multiple EF context with one connection";

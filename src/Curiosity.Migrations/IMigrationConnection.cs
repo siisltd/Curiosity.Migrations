@@ -103,14 +103,14 @@ public interface IMigrationConnection : IDisposable
     /// <param name="cancellationToken">Cancellation token</param>
     /// <exception cref="InvalidOperationException">If migration history table has incorrect DB version.</exception>
     /// <returns>Collection of applied migration version ordered ascending by version</returns>
-    Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<MigrationVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds applied migration info to migrations history table.
     /// </summary>
     /// <exception cref="MigrationException"></exception>
     Task SaveAppliedMigrationVersionAsync(
-        DbVersion version,
+        MigrationVersion version,
         string? migrationName,
         CancellationToken cancellationToken = default);
 
@@ -119,7 +119,7 @@ public interface IMigrationConnection : IDisposable
     /// </summary>
     /// <exception cref="MigrationException"></exception>
     Task DeleteAppliedMigrationVersionAsync(
-        DbVersion version,
+        MigrationVersion version,
         CancellationToken cancellationToken = default);
 
     /// <summary>

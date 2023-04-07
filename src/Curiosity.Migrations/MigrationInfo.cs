@@ -8,7 +8,7 @@ public struct MigrationInfo
     /// <summary>
     /// Migration's version.
     /// </summary>
-    public DbVersion Version { get; }
+    public MigrationVersion Version { get; }
 
     /// <summary>
     /// Migration's comment.
@@ -16,7 +16,7 @@ public struct MigrationInfo
     public string? Comment { get; }
 
     /// <inheritdoc cref="MigrationInfo"/>
-    public MigrationInfo(DbVersion version, string? comment)
+    public MigrationInfo(MigrationVersion version, string? comment)
     {
         Version = version;
         Comment = comment;

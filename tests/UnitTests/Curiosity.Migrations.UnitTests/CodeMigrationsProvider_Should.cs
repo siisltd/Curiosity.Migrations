@@ -38,21 +38,21 @@ public class CodeMigrationsProvider_Should
         Assert.Equal(4, migrations.Count);
             
         Assert.True(migrations[0] is CodeMigration);
-        Assert.Equal(new DbVersion(1), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
             
             
         Assert.True(migrations[1] is CodeMigration);
-        Assert.Equal(new DbVersion(1,1), migrations[1].Version);
+        Assert.Equal(new MigrationVersion(1,1), migrations[1].Version);
         Assert.Equal("comment", migrations[1].Comment);
             
             
         Assert.True(migrations[2] is CodeMigration);
-        Assert.Equal(new DbVersion(1,2), migrations[2].Version);
+        Assert.Equal(new MigrationVersion(1,2), migrations[2].Version);
         Assert.Equal("comment", migrations[2].Comment);
             
         Assert.True(migrations[3] is CodeMigration);
-        Assert.Equal(new DbVersion(1,3), migrations[3].Version);
+        Assert.Equal(new MigrationVersion(1,3), migrations[3].Version);
         Assert.Equal("comment", migrations[3].Comment);
     }
 
@@ -87,7 +87,7 @@ public class CodeMigrationsProvider_Should
         Assert.Single(migrations);
             
         Assert.True(migrations[0] is CodeMigration);
-        Assert.Equal(new DbVersion(1,3), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(1,3), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
             
     }
@@ -116,11 +116,11 @@ public class CodeMigrationsProvider_Should
         Assert.Equal(2, migrations.Count);
             
         Assert.True(migrations[0] is CodeMigration);
-        Assert.Equal(new DbVersion(1,1), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(1,1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
             
         Assert.True(migrations[1] is CodeMigration);
-        Assert.Equal(new DbVersion(1,2), migrations[1].Version);
+        Assert.Equal(new MigrationVersion(1,2), migrations[1].Version);
         Assert.Equal("comment", migrations[1].Comment);
             
     }

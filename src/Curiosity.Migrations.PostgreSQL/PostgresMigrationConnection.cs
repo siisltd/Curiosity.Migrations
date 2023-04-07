@@ -521,7 +521,7 @@ SELECT EXISTS (
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<DbVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<MigrationVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default)
     {
         PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
@@ -538,17 +538,17 @@ SELECT EXISTS (
                 {
                     LogCommand(command);
 
-                    var appliedMigrations = new List<DbVersion>();
+                    var appliedMigrations = new List<MigrationVersion>();
 
                     await using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                     {
-                        if (!reader.HasRows) return Array.Empty<DbVersion>();
+                        if (!reader.HasRows) return Array.Empty<MigrationVersion>();
 
                         while (await reader.ReadAsync(cancellationToken))
                         {
                             var stringVersion = reader.GetString(0);
 
-                            if (!DbVersion.TryParse(stringVersion, out var version))
+                            if (!MigrationVersion.TryParse(stringVersion, out var version))
                                 throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
 
                             appliedMigrations.Add(version);
@@ -561,7 +561,7 @@ SELECT EXISTS (
                 {
                     // Migration table does not exist.
                     if (e.SqlState == "42P01")
-                        return Array.Empty<DbVersion>();
+                        return Array.Empty<MigrationVersion>();
 
                     throw;
                 }
@@ -571,7 +571,7 @@ SELECT EXISTS (
     }
     /// <inheritdoc />
     public Task SaveAppliedMigrationVersionAsync(
-        DbVersion version,
+        MigrationVersion version,
         string? migrationName,
         CancellationToken cancellationToken = default)
     {
@@ -598,7 +598,7 @@ VALUES (@migrationName, @version)";
     }
 
     /// <inheritdoc />
-    public Task DeleteAppliedMigrationVersionAsync(DbVersion version, CancellationToken cancellationToken = default)
+    public Task DeleteAppliedMigrationVersionAsync(MigrationVersion version, CancellationToken cancellationToken = default)
     {
         PostgresqlGuard.AssertConnection(NpgsqlConnection);
 

@@ -20,7 +20,7 @@ public class ScriptMigration : IMigration
     // ReSharper restore MemberCanBePrivate.Global
         
     /// <inheritdoc />
-    public DbVersion Version { get; }
+    public MigrationVersion Version { get; }
 
     /// <inheritdoc />
     public string? Comment { get; }
@@ -42,7 +42,7 @@ public class ScriptMigration : IMigration
     public ScriptMigration(
         ILogger? migrationLogger,
         IMigrationConnection migrationConnection,
-        DbVersion version,
+        MigrationVersion version,
         IReadOnlyList<ScriptMigrationBatch> upScripts,
         string? comment,
         bool isTransactionRequired = true,

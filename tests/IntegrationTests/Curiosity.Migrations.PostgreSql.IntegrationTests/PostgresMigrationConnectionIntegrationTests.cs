@@ -37,7 +37,7 @@ public class PostgresMigrationConnectionIntegrationTests : IClassFixture<Postgre
         isTableExist = await provider.CheckIfTableExistsAsync(_fixture.MigrationConnection.MigrationHistoryTableName);
         Assert.True(isTableExist);
 
-        var desiredDbVersion = new DbVersion(1);
+        var desiredDbVersion = new MigrationVersion(1);
 
         await provider.SaveAppliedMigrationVersionAsync(desiredDbVersion, $"Version {desiredDbVersion.Major}.{desiredDbVersion.Minor}");
         var actualAppliedMigrations = await provider.GetAppliedMigrationVersionsAsync();

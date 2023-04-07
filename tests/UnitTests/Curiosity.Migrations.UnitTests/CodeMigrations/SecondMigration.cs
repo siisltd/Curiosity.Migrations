@@ -7,7 +7,7 @@ namespace Curiosity.Migrations.UnitTests.CodeMigrations;
 public class SecondMigration : CodeMigration, ISpecificCodeMigrations, IDowngradeMigration
 {
     /// <inheritdoc />
-    public override DbVersion Version { get; } = new(1,1);
+    public override MigrationVersion Version { get; } = new(1,1);
     /// <inheritdoc />
     public override string Comment => "comment";
 

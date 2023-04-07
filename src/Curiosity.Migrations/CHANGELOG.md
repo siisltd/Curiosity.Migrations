@@ -14,6 +14,7 @@
 - Renamed `MigrationError`->`MigrationErrorCode`.
 - Extended ranges of `MigrationErrorCode`.
 - Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
+- Renamed `DbVersion` -> `MigrationVersion`.
 
 ### Removed
 

@@ -20,13 +20,13 @@ public class DbMigrator_Should
     [Fact]
     public async Task SkipMigration_On_MigrateAsync()
     {
-        var initialDbVersion = new DbVersion(1);
+        var initialDbVersion = new MigrationVersion(1);
 
         var provider = new Mock<IMigrationConnection>();
 
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new[] { initialDbVersion } as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(new[] { initialDbVersion } as IReadOnlyCollection<MigrationVersion>));
 
         provider
             .Setup(x => x.BeginTransaction())
@@ -43,7 +43,7 @@ public class DbMigrator_Should
         var result = await migrator.MigrateAsync();
 
         provider.Verify(x => x.SaveAppliedMigrationVersionAsync(
-                It.IsAny<DbVersion>(),
+                It.IsAny<MigrationVersion>(),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
@@ -58,22 +58,22 @@ public class DbMigrator_Should
     [Fact]
     public async Task UpgradeToSpecifiedTarget_On_MigrateAsync()
     {
-        var initialDbVersion = new DbVersion(1);
-        var targetDbVersion = new DbVersion(1,1);
+        var initialDbVersion = new MigrationVersion(1);
+        var targetDbVersion = new MigrationVersion(1,1);
         var policy = MigrationPolicy.AllAllowed;
         
-        var actualAppliedMigrations = new HashSet<DbVersion>();
+        var actualAppliedMigrations = new HashSet<MigrationVersion>();
             
         var provider = new Mock<IMigrationConnection>();
         
         provider
-            .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<DbVersion, string, CancellationToken>((version, _, _) => actualAppliedMigrations.Add(version))
+            .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<MigrationVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Callback<MigrationVersion, string, CancellationToken>((version, _, _) => actualAppliedMigrations.Add(version))
             .Returns(() => Task.CompletedTask);
             
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
             
         provider
             .Setup(x => x.BeginTransaction())
@@ -82,15 +82,15 @@ public class DbMigrator_Should
         var firstMigration = new Mock<IMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
             
         var migrations = new List<IMigration>
         {
@@ -99,7 +99,7 @@ public class DbMigrator_Should
             thirdMigration.Object
         };
             
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             migrations[1].Version
         };
@@ -121,21 +121,21 @@ public class DbMigrator_Should
     [Fact]
     public async Task UpgradeWithNotSpecifiedTarget_On_MigrateAsync()
     {
-        var initialDbVersion = new DbVersion(1);
+        var initialDbVersion = new MigrationVersion(1);
         var policy = MigrationPolicy.AllAllowed;
         
-        var actualAppliedMigrations = new HashSet<DbVersion>();
+        var actualAppliedMigrations = new HashSet<MigrationVersion>();
             
         var provider = new Mock<IMigrationConnection>();
         
         provider
-            .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<DbVersion, string, CancellationToken>((version, _, _) => actualAppliedMigrations.Add(version))
+            .Setup(x => x.SaveAppliedMigrationVersionAsync(It.IsAny<MigrationVersion>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Callback<MigrationVersion, string, CancellationToken>((version, _, _) => actualAppliedMigrations.Add(version))
             .Returns(() => Task.CompletedTask);
             
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
         
         provider
             .Setup(x => x.BeginTransaction())
@@ -144,15 +144,15 @@ public class DbMigrator_Should
         var firstMigration = new Mock<IMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
             
         var migrations = new List<IMigration>
         {
@@ -161,7 +161,7 @@ public class DbMigrator_Should
             thirdMigration.Object
         };
             
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             migrations[1].Version,
             migrations[2].Version
@@ -182,8 +182,8 @@ public class DbMigrator_Should
     [Fact]
     public async Task ForbidMigration_On_MigrateAsync()
     {
-        var initialDbVersion = new DbVersion(1);
-        var targetDbVersion = new DbVersion(2);
+        var initialDbVersion = new MigrationVersion(1);
+        var targetDbVersion = new MigrationVersion(2);
         var policy = MigrationPolicy.AllForbidden;
         
         var provider = new Mock<IMigrationConnection>();
@@ -194,24 +194,24 @@ public class DbMigrator_Should
             
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(new []{initialDbVersion} as IReadOnlyCollection<MigrationVersion>));
         
         var firstMigration = new Mock<IMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
         var fourthMigration = new Mock<IMigration>();
         fourthMigration 
             .Setup(x => x.Version)
-            .Returns(new DbVersion(2));
+            .Returns(new MigrationVersion(2));
             
         var migrations = new List<IMigration>
         {
@@ -239,7 +239,7 @@ public class DbMigrator_Should
     [Fact]
     public void ThrowException_When_NotEnoughMigrations_On_MigrateAsync()
     {
-        var targetDbVersion = new DbVersion(3);
+        var targetDbVersion = new MigrationVersion(3);
         var policy = MigrationPolicy.AllAllowed;
         
         var provider = new Mock<IMigrationConnection>();
@@ -247,19 +247,19 @@ public class DbMigrator_Should
         var firstMigration = new Mock<IMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
         var fourthMigration = new Mock<IMigration>();
         fourthMigration 
             .Setup(x => x.Version)
-            .Returns(new DbVersion(2));
+            .Returns(new MigrationVersion(2));
             
         var migrations = new List<IMigration>
         {
@@ -444,7 +444,7 @@ public class DbMigrator_Should
 
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(totalAppliedMigrations.Select(x => x.Version).ToList() as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(totalAppliedMigrations.Select(x => x.Version).ToList() as IReadOnlyCollection<MigrationVersion>));
 
         var migrator = new MigrationEngine(
             provider.Object,
@@ -463,7 +463,7 @@ public class DbMigrator_Should
         var migration = new Mock<IMigration>();
         migration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(version));
+            .Returns(new MigrationVersion(version));
 
         return migration.Object;
     }
@@ -475,16 +475,16 @@ public class DbMigrator_Should
     [Fact]
     public async Task MigrateAsync_Downgrade_Ok()
     {
-        var targetDbVersion = new DbVersion(1);
+        var targetDbVersion = new MigrationVersion(1);
         var policy = MigrationPolicy.AllAllowed;
         
-        var actualAppliedMigrations = new HashSet<DbVersion>();
+        var actualAppliedMigrations = new HashSet<MigrationVersion>();
             
         var provider = new Mock<IMigrationConnection>();
         
         provider
-            .Setup(x => x.DeleteAppliedMigrationVersionAsync(It.IsAny<DbVersion>(), It.IsAny<CancellationToken>()))
-            .Callback<DbVersion, CancellationToken>((version, _) => actualAppliedMigrations.Add(version))
+            .Setup(x => x.DeleteAppliedMigrationVersionAsync(It.IsAny<MigrationVersion>(), It.IsAny<CancellationToken>()))
+            .Callback<MigrationVersion, CancellationToken>((version, _) => actualAppliedMigrations.Add(version))
             .Returns(() => Task.CompletedTask);
             
         provider
@@ -494,15 +494,15 @@ public class DbMigrator_Should
         var firstMigration = new Mock<IDowngradeMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IDowngradeMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IDowngradeMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
             
         var migrations = new List<IMigration>
         {
@@ -513,9 +513,9 @@ public class DbMigrator_Should
             
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<MigrationVersion>));
 
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             migrations[1].Version,
             migrations[2].Version
@@ -541,7 +541,7 @@ public class DbMigrator_Should
     [Fact]
     public async Task MigrateAsync_DowngradeForbidden_Error()
     {
-        var targetDbVersion = new DbVersion(1);
+        var targetDbVersion = new MigrationVersion(1);
         var policy = MigrationPolicy.AllForbidden;
         
         var provider = new Mock<IMigrationConnection>();
@@ -553,19 +553,19 @@ public class DbMigrator_Should
         var firstMigration = new Mock<IDowngradeMigration>();
         firstMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1));
+            .Returns(new MigrationVersion(1));
         var secondMigration = new Mock<IDowngradeMigration>();
         secondMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 1));
+            .Returns(new MigrationVersion(1, 1));
         var thirdMigration = new Mock<IDowngradeMigration>();
         thirdMigration
             .Setup(x => x.Version)
-            .Returns(new DbVersion(1, 2));
+            .Returns(new MigrationVersion(1, 2));
         var fourthMigration = new Mock<IDowngradeMigration>();
         fourthMigration 
             .Setup(x => x.Version)
-            .Returns(new DbVersion(2));
+            .Returns(new MigrationVersion(2));
             
         var migrations = new List<IMigration>
         {
@@ -577,7 +577,7 @@ public class DbMigrator_Should
             
         provider
             .Setup(x => x.GetAppliedMigrationVersionsAsync(It.IsAny<CancellationToken>()))
-            .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<DbVersion>));
+            .Returns(() => Task.FromResult(migrations.Select(x => x.Version).ToArray() as IReadOnlyCollection<MigrationVersion>));
 
         var migrator = new MigrationEngine(
             provider.Object, 

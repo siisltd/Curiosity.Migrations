@@ -32,24 +32,24 @@ public class ScriptMigrationsProvider_Should
         Assert.Equal(5, migrations.Count);
             
         Assert.True(migrations[0] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
             
         Assert.True(migrations[1] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1,1), migrations[1].Version);
+        Assert.Equal(new MigrationVersion(1,1), migrations[1].Version);
         Assert.True(String.IsNullOrEmpty(migrations[1].Comment));
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[1]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[1]).DownScripts[0].Script);
 
         Assert.True(migrations[2] is ScriptMigration);
-        Assert.Equal(new DbVersion(1,2), migrations[2].Version);
+        Assert.Equal(new MigrationVersion(1,2), migrations[2].Version);
         Assert.Equal("comment", migrations[2].Comment);
         Assert.Equal("up", ((ScriptMigration)migrations[2]).UpScripts[0].Script);
             
         Assert.True(migrations[3] is ScriptMigration);
-        Assert.Equal(new DbVersion(1,3), migrations[3].Version);
+        Assert.Equal(new MigrationVersion(1,3), migrations[3].Version);
         Assert.True(String.IsNullOrEmpty(migrations[3].Comment));
         Assert.Equal("up", ((ScriptMigration)migrations[3]).UpScripts[0].Script);
     }
@@ -71,7 +71,7 @@ public class ScriptMigrationsProvider_Should
         Assert.Single(migrations);
             
         Assert.True(migrations[0] is ScriptMigration);
-        Assert.Equal(new DbVersion(0,1), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(0,1), migrations[0].Version);
         Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
         Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScripts[0].Script);
     }
@@ -92,32 +92,32 @@ public class ScriptMigrationsProvider_Should
         Assert.Equal(5, migrations.Count);
             
         Assert.True(migrations[0] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(1), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[0]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[0]).DownScripts[0].Script);
             
             
         Assert.True(migrations[1] is DowngradeScriptMigration);
-        Assert.Equal(new DbVersion(1,1), migrations[1].Version);
+        Assert.Equal(new MigrationVersion(1,1), migrations[1].Version);
         Assert.True(String.IsNullOrEmpty(migrations[1].Comment));
         Assert.Equal("up", ((DowngradeScriptMigration)migrations[1]).UpScripts[0].Script);
         Assert.Equal("down", ((DowngradeScriptMigration)migrations[1]).DownScripts[0].Script);
             
             
         Assert.True(migrations[2] is ScriptMigration);
-        Assert.Equal(new DbVersion(1,2), migrations[2].Version);
+        Assert.Equal(new MigrationVersion(1,2), migrations[2].Version);
         Assert.Equal("comment", migrations[2].Comment);
         Assert.Equal("up", ((ScriptMigration)migrations[2]).UpScripts[0].Script);
             
         Assert.True(migrations[3] is ScriptMigration);
-        Assert.Equal(new DbVersion(1,3), migrations[3].Version);
+        Assert.Equal(new MigrationVersion(1,3), migrations[3].Version);
         Assert.True(String.IsNullOrEmpty(migrations[3].Comment));
         Assert.Equal("up", ((ScriptMigration)migrations[3]).UpScripts[0].Script);
             
             
         Assert.True(migrations[4] is ScriptMigration);
-        Assert.Equal(new DbVersion(2), migrations[4].Version);
+        Assert.Equal(new MigrationVersion(2), migrations[4].Version);
         Assert.True(String.IsNullOrEmpty(migrations[4].Comment));
         Assert.Equal("prefix", ((ScriptMigration)migrations[4]).UpScripts[0].Script);
     }
@@ -138,7 +138,7 @@ public class ScriptMigrationsProvider_Should
         Assert.Single(migrations);
             
         Assert.True(migrations[0] is ScriptMigration);
-        Assert.Equal(new DbVersion(2), migrations[0].Version);
+        Assert.Equal(new MigrationVersion(2), migrations[0].Version);
         Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
         Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScripts[0].Script);
     }

@@ -18,7 +18,7 @@ namespace Curiosity.Migrations;
 public abstract class CodeMigration : IMigration
 {
     /// <inheritdoc />
-    public abstract DbVersion Version { get; }
+    public abstract MigrationVersion Version { get; }
 
     /// <inheritdoc />
     public abstract string? Comment { get; }

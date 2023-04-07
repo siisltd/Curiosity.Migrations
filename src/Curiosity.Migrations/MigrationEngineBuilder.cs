@@ -23,7 +23,7 @@ public class MigrationEngineBuilder
     private readonly ICollection<IMigrationsProvider> _preMigrationsProviders;
 
     private IMigrationConnectionFactory? _dbProviderFactory;
-    private DbVersion? _targetVersion;
+    private MigrationVersion? _targetVersion;
     private ILogger? _logger;
 
     /// <summary>
@@ -165,15 +165,15 @@ public class MigrationEngineBuilder
     /// <summary>
     /// Setup target version of migration
     /// </summary>
-    /// <param name="targetDbVersion">Target database version</param>
+    /// <param name="targetMigrationVersion">Target database version</param>
     /// <returns></returns>
     /// <remarks>
-    /// If <paramref name="targetDbVersion"></paramref> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
-    /// If <paramref name="targetDbVersion"></paramref> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
+    /// If <paramref name="targetMigrationVersion"></paramref> is not specified, migrator will upgrade database to the most newest migration, provided by <see cref="IMigrationsProvider"/>
+    /// If <paramref name="targetMigrationVersion"></paramref> is specified, migrator will upgrade or downgrade database depending on the current DB version and the specified
     /// </remarks>
-    public MigrationEngineBuilder SetUpTargetVersion(DbVersion targetDbVersion)
+    public MigrationEngineBuilder SetUpTargetVersion(MigrationVersion targetMigrationVersion)
     {
-        _targetVersion = targetDbVersion;
+        _targetVersion = targetMigrationVersion;
         return this;
     }
 

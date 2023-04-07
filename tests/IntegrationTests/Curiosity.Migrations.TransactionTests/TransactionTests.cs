@@ -24,7 +24,7 @@ public class TransactionTests
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
         builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
-        builder.SetUpTargetVersion(new DbVersion(3));
+        builder.SetUpTargetVersion(new MigrationVersion(3));
 
         var migrator = builder.Build();
 
@@ -35,7 +35,7 @@ public class TransactionTests
         var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
         await migrationProvider.CloseConnectionAsync();
 
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             new(1),
             new(2),
@@ -59,7 +59,7 @@ public class TransactionTests
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
         builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
-        builder.SetUpTargetVersion(new DbVersion(5));
+        builder.SetUpTargetVersion(new MigrationVersion(5));
 
         var migrator = builder.Build();
 
@@ -70,7 +70,7 @@ public class TransactionTests
         var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
         await migrationProvider.CloseConnectionAsync();
 
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             new(1),
             new(2),
@@ -95,7 +95,7 @@ public class TransactionTests
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
         builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
-        builder.SetUpTargetVersion(new DbVersion(6));
+        builder.SetUpTargetVersion(new MigrationVersion(6));
 
         var migrator = builder.Build();
 
@@ -116,7 +116,7 @@ public class TransactionTests
         var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
         await migrationProvider.CloseConnectionAsync();
 
-        var expectedAppliedMigrations = new HashSet<DbVersion>
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
             new(1),
             new(2),

@@ -120,7 +120,7 @@ public class CodeMigrationsProvider : IMigrationsProvider
             migrations.Add(migration);
         }
 
-        var migrationCheckMap = new HashSet<DbVersion>();
+        var migrationCheckMap = new HashSet<MigrationVersion>();
         foreach (var migration in migrations)
         {
             if (migrationCheckMap.Contains(migration.Version))

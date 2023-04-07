@@ -153,7 +153,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
         Guard.AssertNotNull(variables, nameof(variables));
 
-        var scripts = new Dictionary<DbVersion, MigrationScriptInfo>();
+        var scripts = new Dictionary<MigrationVersion, MigrationScriptInfo>();
 
         var regex = String.IsNullOrWhiteSpace(prefix)
             ? new Regex($"{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase)
@@ -180,7 +180,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 continue;
             }
 
-            if (!DbVersion.TryParse(match.Groups[1].Value, out var version))
+            if (!MigrationVersion.TryParse(match.Groups[1].Value, out var version))
             {
                 migrationLogger?.LogWarning($"\"{fileName}\" has incorrect version migration.");
                 continue;
@@ -303,14 +303,14 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// <summary>
     /// Creates script migration. Replace variables placeholders with real values
     /// </summary>
-    /// <param name="dbVersion"></param>
+    /// <param name="migrationVersion"></param>
     /// <param name="migrationScriptInfo"></param>
     /// <param name="migrationConnection"></param>
     /// <param name="variables"></param>
     /// <param name="migrationLogger"></param>
     /// <returns></returns>
     private IMigration CreateScriptMigration(
-        DbVersion dbVersion,
+        MigrationVersion migrationVersion,
         MigrationScriptInfo migrationScriptInfo,
         IMigrationConnection migrationConnection,
         IReadOnlyDictionary<string, string> variables,
@@ -340,7 +340,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
             ? new DowngradeScriptMigration(
                 migrationLogger,
                 migrationConnection,
-                dbVersion,
+                migrationVersion,
                 upScript,
                 downScript,
                 migrationScriptInfo.Comment,
@@ -349,7 +349,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
             : new ScriptMigration(
                 migrationLogger,
                 migrationConnection,
-                dbVersion,
+                migrationVersion,
                 upScript,
                 migrationScriptInfo.Comment,
                 migrationScriptInfo.Options.IsTransactionRequired,
@@ -361,12 +361,12 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// </summary>
     private class MigrationScriptInfo
     {
-        public MigrationScriptInfo(DbVersion version)
+        public MigrationScriptInfo(MigrationVersion version)
         {
             Version = version;
         }
 
-        public DbVersion Version { get; }
+        public MigrationVersion Version { get; }
 
         public string? Comment { get; set; }
 
