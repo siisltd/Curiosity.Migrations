@@ -8,7 +8,7 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity; utils</PackageTags>
         <Language>English</Language>
         
-        <PackageVersion>4.0.0</PackageVersion>
+        <PackageVersion>4.0.1</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
 
@@ -23,6 +23,8 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
         <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations.Utils/CHANGELOG.md</PackageReleaseNotes>
+        <PackageIcon>siisltd.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
@@ -38,12 +40,9 @@
       <PackageReference Include="Dapper" Version="2.0.123" />
     </ItemGroup>
 
-    <PropertyGroup>
-        <PackageIcon>siisltd.png</PackageIcon>
-    </PropertyGroup>
-
     <ItemGroup>
         <None Include="..\..\siisltd.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
