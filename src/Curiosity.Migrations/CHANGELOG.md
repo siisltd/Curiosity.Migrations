@@ -1,6 +1,16 @@
 # Changelog
 
-## [4.0.0] - 2023-04-07
+## [4.0.1] - 2023-04-10
+
+### Added
+
+- Added README.md to a package.
+
+### Changed
+
+- Downgraded MS packages to `6.0.0` version.
+
+## [4.0.0] - 2023-04-10
 
 ### Added
 

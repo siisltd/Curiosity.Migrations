@@ -9,7 +9,7 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
         <Language>English</Language>
 
-        <PackageVersion>4.0.0</PackageVersion>
+        <PackageVersion>4.0.1</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
 
@@ -24,6 +24,8 @@
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
         <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
+        <PackageIcon>siisltd.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
@@ -32,11 +34,11 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <PackageIcon>siisltd.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\..\siisltd.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -44,7 +46,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Npgsql" Version="6.0.9" />
+      <PackageReference Include="Npgsql" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
