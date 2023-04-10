@@ -29,6 +29,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\src\Curiosity.Migrations.PostgreSQL\Curiosity.Migrations.PostgreSQL.csproj" />
       <ProjectReference Include="..\..\..\src\Curiosity.Migrations\Curiosity.Migrations.csproj" />
+      <ProjectReference Include="..\..\UnitTests\Curiosity.Migrations.PostgreSQL.UnitTests\Curiosity.Migrations.PostgreSQL.UnitTests.csproj" />
     </ItemGroup>
 
     <ItemGroup>
