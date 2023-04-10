@@ -57,8 +57,9 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _logger = logger;
 
         var migrationMap = new Dictionary<MigrationVersion, IMigration>();
-        foreach (var migration in migrations)
+        for (var i = 0; i < migrations.Count; i++)
         {
+            var migration = migrations[i];
             if (migrationMap.ContainsKey(migration.Version))
                 throw new ArgumentException(
                     $"There is more than one migration with version {migration.Version}", nameof(migrations));
@@ -148,20 +149,20 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var isMigrationTableExists = await _migrationConnection.CheckIfTableExistsAsync(_migrationConnection.MigrationHistoryTableName, cancellationToken);
             if (isMigrationTableExists)
             {
-                _logger?.LogInformation($"Table \"{_migrationConnection.MigrationHistoryTableName}\" exists. ");
+                _logger?.LogInformation($"Table \"{_migrationConnection.MigrationHistoryTableName}\" exists");
             }
             else
             {
                 _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table...");
                 await _migrationConnection.CreateMigrationHistoryTableIfNotExistsAsync(cancellationToken);
-                _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table completed.");
+                _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table completed");
             }
 
-            // get applied migrations versions
+            // get migrations to apply
             var migrationsToApply = await GetMigrationsToApplyAsync(isUpgrade, false, cancellationToken);
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration.");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration");
                 return MigrationResult.CreateSuccessful(
                     Array.Empty<MigrationInfo>(),
                     Array.Empty<MigrationInfo>());
@@ -171,7 +172,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var wasPreMigrationExecuted = await ExecutePreMigrationScriptsAsync(cancellationToken);
             if (wasPreMigrationExecuted)
             {
-                _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\" completed.");
+                _logger?.LogInformation($"Executing pre-migration scripts for database \"{_migrationConnection.DatabaseName}\" completed");
 
                 // applied migration versions might be changed after pre-migration
                 migrationsToApply = await GetMigrationsToApplyAsync(isUpgrade, true, cancellationToken);
@@ -183,7 +184,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
             if (migrationsToApply.Count == 0)
             {
-                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration.");
+                _logger?.LogInformation($"Database \"{_migrationConnection.DatabaseName}\" is actual. Stop migration");
                 return MigrationResult.CreateSuccessful(
                     Array.Empty<MigrationInfo>(),
                     Array.Empty<MigrationInfo>());
@@ -236,10 +237,12 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         bool isPreMigration,
         CancellationToken token)
     {
+        var actionType = isUpgrade
+            ? "upgrade"
+            : "downgrade";
         var stageName = isPreMigration ? " (pre-migration stage)" : "";
-        _logger?.LogInformation($"Getting migrations to apply{stageName}...");
+        _logger?.LogInformation($"Getting migrations for {actionType}{stageName}...");
 
-        // build target version
         var maxAvailableMigrationVersion = _availableMigrationsMap.Values.Max(x => x.Version);
 
         // get applied migrations versions
@@ -268,7 +271,6 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
         var migrationsToApply = new List<IMigration>();
 
-        // if no target version is specified or target version is greater than max applied
         if (isUpgrade)
         {
             // we need only not applied migrations
@@ -312,7 +314,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             }
         }
 
-        _logger?.LogInformation($"Getting migrations to apply{stageName} completed. Found {migrationsToApply.Count} migrations to apply.");
+        _logger?.LogInformation($"Getting migrations for {actionType}{stageName} completed. Found {migrationsToApply.Count} migrations to apply.");
 
         return migrationsToApply;
     }

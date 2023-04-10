@@ -15,7 +15,7 @@ namespace Curiosity.Migrations;
 /// <remarks>
 /// Facade over real database connection that allows connection be used by migrator for different database types.
 /// Implements some common operations for migrations (database creation, table creation)
-/// and logs executed SQL queries if logger if specified.
+/// and logs executed SQL queries if logger is specified.
 /// </remarks>
 public interface IMigrationConnection : IDisposable
 {
@@ -148,9 +148,10 @@ public interface IMigrationConnection : IDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Executes sql script on a default database and returns scalar value.
+    /// Executes sql script on a default database and returns number of modifier rows.
     /// </summary>
     /// <inheritdoc cref="ExecuteScalarSqlAsync"/>
+    /// <returns>Number of modified rows.</returns>
     Task<int> ExecuteNonQuerySqlWithoutInitialCatalogAsync(
         string sqlQuery,
         IReadOnlyDictionary<string, object?>? queryParams,

@@ -6,7 +6,7 @@ namespace Curiosity.Migrations;
 public interface IMigrationConnectionFactory
 {
     /// <summary>
-    /// Create new instance of migration connection that implements <see cref="IMigrationConnection"/>
+    /// Creates new instance of migration connection that implements <see cref="IMigrationConnection"/>
     /// </summary>
     IMigrationConnection CreateMigrationConnection();
 }

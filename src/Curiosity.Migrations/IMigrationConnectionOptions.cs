@@ -15,7 +15,7 @@ public interface IMigrationConnectionOptions
     /// Name of migration history table.
     /// </summary>
     /// <remarks>
-    /// If property is <see langword="null"/> <see cref="IMigrationConnection"/> will used default value
+    /// If property is <see langword="null"/> default value will be used.
     /// </remarks>
     string? MigrationHistoryTableName { get; }
 }

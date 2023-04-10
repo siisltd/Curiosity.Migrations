@@ -8,7 +8,13 @@ namespace Curiosity.Migrations;
 /// </summary>
 public interface IMigrationEngine
 {
+    /// <summary>
+    /// Upgrades database according to migration configuration.
+    /// </summary>
     Task<MigrationResult> UpgradeDatabaseAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Downgrades database according to migration configuration.
+    /// </summary>
     Task<MigrationResult> DowngradeDatabaseAsync(CancellationToken cancellationToken = default);
 }
