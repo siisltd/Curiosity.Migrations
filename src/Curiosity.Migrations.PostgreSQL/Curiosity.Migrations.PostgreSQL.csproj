@@ -15,7 +15,7 @@
 
         <Authors>Maxim Markelow (@markeli), Kirill Lutsenko, Andrei Vinogradov</Authors>
         <Company>SIIS Ltd</Company>
-        <Copyright>SIIS Ltd, 2021</Copyright>
+        <Copyright>SIIS Ltd, 2023</Copyright>
 
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
