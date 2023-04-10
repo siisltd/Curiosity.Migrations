@@ -1,33 +1,40 @@
 using System;
 
-namespace Curiosity.Migrations
+namespace Curiosity.Migrations;
+
+/// <summary>
+/// Exception occured during migration
+/// </summary>
+internal class MigrationException : Exception
 {
     /// <summary>
-    /// Exception occured during migration
+    /// Code of migration error
     /// </summary>
-    public class MigrationException : Exception
+    public MigrationErrorCode ErrorCode { get; }
+
+    /// <summary>
+    /// Migration that resulted in the exception.
+    /// </summary>
+    public MigrationInfo? MigrationInfo { get; }
+
+    /// <inheritdoc />
+    public MigrationException(
+        MigrationErrorCode errorCode,
+        string message,
+        MigrationInfo? migrationInfo = null) : base(message)
     {
-        /// <summary>
-        /// Code of migration error
-        /// </summary>
-        public MigrationError Error { get; }
+        ErrorCode = errorCode;
+        MigrationInfo = migrationInfo;
+    }
 
-        /// <inheritdoc />
-        public MigrationException(MigrationError error)
-        {
-            Error = error;
-        }
-
-        /// <inheritdoc />
-        public MigrationException(MigrationError error, string message) : base(message)
-        {
-            Error = error;
-        }
-
-        /// <inheritdoc />
-        public MigrationException(MigrationError error, string message, Exception inner) : base(message, inner)
-        {
-            Error = error;
-        }
+    /// <inheritdoc />
+    public MigrationException(
+        MigrationErrorCode errorCode,
+        string message,
+        Exception inner,
+        MigrationInfo? migrationInfo = null) : base(message, inner)
+    {
+        ErrorCode = errorCode;
+        MigrationInfo = migrationInfo;
     }
 }

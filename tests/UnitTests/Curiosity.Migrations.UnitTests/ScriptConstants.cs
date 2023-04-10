@@ -1,9 +1,8 @@
-namespace Curiosity.Migrations.UnitTests
-{
-    public static class ScriptConstants
-    {
-        public static string UpScript = "up";
+namespace Curiosity.Migrations.UnitTests;
 
-        public static string DownScript = "down";
-    }
+public static class ScriptConstants
+{
+    public static string UpScript = "up";
+
+    public static string DownScript = "down";
 }

@@ -2,21 +2,30 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Curiosity.Migrations.UnitTests.CodeMigrations
-{
-    public class SecondMigration : CodeMigration, ISpecificCodeMigrations, IDowngradeMigration
-    {
-        public override DbVersion Version { get; } = new DbVersion(1,1);
-        public override string Comment { get; } = "comment";
-        
-        public override Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
-        {
-            return DbProvider.ExecuteScriptAsync(ScriptConstants.UpScript, token);
-        }
+namespace Curiosity.Migrations.UnitTests.CodeMigrations;
 
-        public Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
-        {
-            return DbProvider.ExecuteScriptAsync(ScriptConstants.DownScript, token);
-        }
+public class SecondMigration : CodeMigration, ISpecificCodeMigrations, IDowngradeMigration
+{
+    /// <inheritdoc />
+    public override MigrationVersion Version { get; } = new(1,1);
+    /// <inheritdoc />
+    public override string Comment => "comment";
+
+    /// <inheritdoc />
+    public override Task UpgradeAsync(DbTransaction transaction = null, CancellationToken token = default)
+    {
+        return MigrationConnection.ExecuteNonQuerySqlAsync(
+            ScriptConstants.UpScript,
+            null,
+            token);
+    }
+
+    /// <inheritdoc />
+    public Task DowngradeAsync(DbTransaction transaction, CancellationToken token = default)
+    {
+        return MigrationConnection.ExecuteNonQuerySqlAsync(
+            ScriptConstants.DownScript,
+            null,
+            token);
     }
 }

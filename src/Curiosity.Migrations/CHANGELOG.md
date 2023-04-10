@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.0.0] - 2023-04-07
+
+### Added
+
+- Added more comments.
+- Added options to `ServiceCollectionExtensions.AddMigrations` to control whether current instance of IServiceCollection should be used as default for dependency injection of migrator.
+- Added `onlyTargetVersion` option.
+- Added saving initial version format (before parse changes).
+
+### Changed
+
+- Upgraded to C# 11.0.
+- Refactored `MigrationPolicy`, changed existed enum values codes: improved extensibility for future changes. 
+- Renamed `MigrationError`->`MigrationErrorCode`.
+- Refactored `MigrationErrorCode`, changed existed enum values codes: improved extensibility for future changes.
+- [#22](https://github.com/siisltd/Curiosity.Migrations/issues/22): Forbid to use `-` at version's major part. Replaced it by `_`.
+- [#27](https://github.com/siisltd/Curiosity.Migrations/issues/27): Replaced `MigrateAsync` by explicit `UpgradeDatabaseAsync` and `DowngradeDatabaseAsync` methods.
+- [#28](https://github.com/siisltd/Curiosity.Migrations/issues/28): Renamed `DbVersion` -> `MigrationVersion`.
+
+### Removed
+
+- Removed `Dapper` dependency. 
+- Moved `MassUpdateCodeMigrationBase` to `Curiosity.Migration.Utils` package.
+
+### Fixed
+ 
+- [#22](https://github.com/siisltd/Curiosity.Migrations/issues/22): Fixed issue with parsing version like `20210916-1055-00`.
+
 ## [3.1.0] - 2022-07-29
 
 ### Added
@@ -83,18 +111,18 @@
 
 ### Changed
 
-- Splitted downgrade migrations into another interface for safety reasons.
-- Default `downgrade policy` is `Forbidden`
-- Supports different strategy for migration history table analysis
+- Split downgrade migrations into another interface for safety reasons.
+- Default `downgrade policy` is `Forbidden`.
+- Supports different strategy for migration history table analysis.
 
 ## [1.2.0] - 2020-04-23
 
 ### Added
-- Added logging of sql queries
+- Added logging of sql queries.
 
 ### Removed
 
-- Removed dependency from `JetBrains.Annotations`
+- Removed dependency from `JetBrains.Annotations`.
 
 ## [1.1.1] - 2020-04-01
 
@@ -119,110 +147,108 @@ Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Curiosity.Migrations).
 
 ### Added 
 
-- [#13](https://github.com/MarvinBand/Migrations/issues/13) Creating code migration from service collection
-- Extension method `AddMigration` to easy configure migration
-- Passing logger to code migration
+- [#13](https://github.com/MarvinBand/Migrations/issues/13) Creating code migration from service collection.
+- Extension method `AddMigration` to easy configure migration.
+- Passing logger to code migration.
 
 ## [0.3.2] - 2019-10-31
 
 ### Added 
 
-- Added method `ExecuteNonQueryScriptAsync` to `IDbProvider`
+- Added method `ExecuteNonQueryScriptAsync` to `IDbProvider`.
 
 ## [0.3.1] - 2019-09-16
 
 ### Fixed 
 
-- Passing variables to code migrations
+- Passing variables to code migrations.
 
 ## [0.3] - 2019-09-16
 
 ### Added 
 
-- Variables for scripts with auto substitution to script migrations 
+- Variables for scripts with auto substitution to script migrations. 
 
 ## [0.2.16] - 2018-12-19
 
 ### Added
 
-- Supports bath absolute and relative path for directories in code migrations provider
-- Supports prefix for code migration provider
+- Supports bath absolute and relative path for directories in code migrations provider.
+- Supports prefix for code migration provider.
 
 ## [0.2.15] - 2018-12-18
 
 ### Fixed
 
-- Returned `UseScriptPreMigrations`
+- Returned `UseScriptPreMigrations`.
 
 ## [0.2.14] - 2018-12-18
 
 ### Added
 
-- Support script migrations embedded into specified assembly
-- FluentAPI style for migrations providers
-- Script migrations providers supports many directories as targets
-
-
+- Support script migrations embedded into specified assembly.
+- FluentAPI style for migrations providers.
+- Script migrations providers supports many directories as targets.
 
 ## [0.2.13] - 2018-12-17
 
 ### Changed
 
-- Fixing incorrect cotnracts in package
+- Fixing incorrect contracts in a Nuget package.
 
 ## [0.2.12] - 2018-12-17
 
 ### Changed
 
-- Using `DbTransaction` instead `ComittableTransaction`
+- Using `DbTransaction` instead `ComittableTransaction`.
 
 ## [0.2.11] - 2018-12-17
 
 ### Added
 
-- Each migration executed in transaction
+- Each migration executed in transaction.
 
 ## [0.2.10] - 2018-11-30
 
 ### Fixed
 
-- Executing current version migration downgrade, stopping executing on target version
+- Executing current version migration downgrade, stopping executing on target version.
 
 ## [0.2.9] - 2018-11-15
 
 ### Fixed
 
-- Error on check db version before pre-migrations
+- Error on check db version before pre-migrations.
 
 ## [0.2.8] - 2018-11-09
 
 ### Added
 
-- Added property `ConnectionString` to `IDbProvider`
+- Added property `ConnectionString` to `IDbProvider`.
 
 ## [0.2.7] - 2018-11-07
 
 ### Fixed
 
-- Error logging
+- Error logging.
 
 ## [0.2.6] - 2018-11-07
 
 ### Changed
 
-- Open connection after creating database
+- Open connection after creating database.
 
 ## [0.2.5] - 2018-11-07
 
 ### Fixed
 
-- Fixed release notes link in nuget package
+- Fixed release notes link in nuget package.
 
 ## [0.2.4] - 2018-11-07
 
 ### Changed
 
-- Creating `MigrationHistory` table after executing premigrations
+- Creating `MigrationHistory` table after executing pre-migrations.
 
 ## [0.2.3] - 2018-11-06
 
@@ -234,18 +260,17 @@ Moved to [SIIS Ltd](https://github.com/SIIS-Ltd/Curiosity.Migrations).
 
 ### Fixed
 
-- Fixed nuget package target
+- Fixed nuget package target.
 
 ## [0.2.1] - 2018-11-02
 
 ### Added
 
-- Additional methods to check database and table existence
+- Additional methods to check database and table existence.
 
 ## [0.2] - 2018-11-02
 
 ### Added
 
-- Added premigration scripts
-- Added options for `IDbProvider` and factory to create `IDbProvider`
-
+- Added pre-migration scripts
+- Added options for `IDbProvider` and factory to create `IDbProvider`.

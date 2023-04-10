@@ -1,8 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-        
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        
         <PackageId>Curiosity.Migrations</PackageId>
         <Title>Curiosity.Migrations is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.</Title>
         <Description>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Description>
@@ -10,13 +7,13 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
         <Language>English</Language>
 
-        <PackageVersion>3.1.0</PackageVersion>
+        <PackageVersion>4.0.0</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
         
         <Authors>Maxim Markelow (@markeli), Kirill Lutsenko, Andrei Vinogradov</Authors>
         <Company>SIIS Ltd</Company>
-        <Copyright>SIIS Ltd, 2021</Copyright>
+        <Copyright>SIIS Ltd, 2023</Copyright>
 
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -26,9 +23,10 @@
         <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
         <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
 
-        <LangVersion>8</LangVersion>
+        <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
+        <TargetFrameworks>net6.0;net7.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -40,10 +38,9 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="Dapper" Version="2.0.123" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
     </ItemGroup>
     <PropertyGroup>
         <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>

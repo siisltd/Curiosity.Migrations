@@ -6,125 +6,125 @@ using System.Threading.Tasks;
 using Curiosity.Migrations.PostgreSQL;
 using Xunit;
 
-namespace Curiosity.Migrations.TransactionTests
+namespace Curiosity.Migrations.TransactionTests;
+
+public class TransactionTests
 {
-    public class TransactionTests
+    [Fact]
+    public async Task Migrate_AllScriptOk_NoRollback()
     {
-        [Fact]
-        public async Task Migrate_AllScriptOk_NoRollback()
+        var config = ConfigProvider.GetConfig();
+        var connectionString = String.Format(config.ConnectionStringMask, "test_ok");
+
+
+        var builder = new MigrationEngineBuilder();
+        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.ConfigureForPostgreSql(connectionString);
+
+        builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.SetUpTargetVersion(new MigrationVersion(3));
+
+        var migrator = builder.Build();
+
+        var result = await migrator.UpgradeDatabaseAsync();
+
+        var migrationProvider = new PostgresMigrationConnection(new PostgresMigrationConnectionOptions(connectionString));
+        await migrationProvider.OpenConnectionAsync();
+        var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
+        await migrationProvider.CloseConnectionAsync();
+
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
-            var config = ConfigProvider.GetConfig();
-            var connectionString = String.Format(config.ConnectionStringMask, "test_ok");
-            
-            
-            var builder = new MigratorBuilder();
-            builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-            builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
-            builder.UsePostgreSQL(connectionString);
+            new(1),
+            new(2),
+            new(3)
+        };
+        Assert.True(result.IsSuccessfully);
+        Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
+    }
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.SetUpTargetVersion(new DbVersion(3, 0));
+    [Fact]
+    public async Task Migrate_AllScriptOk_SwitchedOffTransaction()
+    {
+        var config = ConfigProvider.GetConfig();
+        var connectionString = String.Format(config.ConnectionStringMask, "test_without_transactions");
 
-            var migrator = builder.Build();
 
-            await migrator.MigrateAsync();
-            
-            var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
-            await migrationProvider.OpenConnectionAsync();
-            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
-            await migrationProvider.CloseConnectionAsync();
-            
-            var expectedAppliedMigrations = new HashSet<DbVersion>
-            {
-                new DbVersion(1,0),
-                new DbVersion(2,0),
-                new DbVersion(3,0)
-            };
-            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
-        }
-                
-        [Fact]
-        public async Task Migrate_AllScriptOk_SwitchedOffTransaction()
+        var builder = new MigrationEngineBuilder();
+        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.ConfigureForPostgreSql(connectionString);
+
+        builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.SetUpTargetVersion(new MigrationVersion(5));
+
+        var migrator = builder.Build();
+
+        await migrator.UpgradeDatabaseAsync();
+
+        var migrationProvider = new PostgresMigrationConnection(new PostgresMigrationConnectionOptions(connectionString));
+        await migrationProvider.OpenConnectionAsync();
+        var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
+        await migrationProvider.CloseConnectionAsync();
+
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
         {
-            var config = ConfigProvider.GetConfig();
-            var connectionString = String.Format(config.ConnectionStringMask, "test_without_transactions");
-            
-            
-            var builder = new MigratorBuilder();
-            builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-            builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
-            builder.UsePostgreSQL(connectionString);
+            new(1),
+            new(2),
+            new(3),
+            new(4),
+            new(5)
+        };
+        Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
+    }
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.SetUpTargetVersion(new DbVersion(5, 0));
+    [Fact]
+    public async Task Migrate_AllScriptOk_Rollback()
+    {
+        var config = ConfigProvider.GetConfig();
+        var connectionString = String.Format(config.ConnectionStringMask, "test_rollback");
 
-            var migrator = builder.Build();
 
-            await migrator.MigrateAsync();
-            
-            var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
-            await migrationProvider.OpenConnectionAsync();
-            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
-            await migrationProvider.CloseConnectionAsync();
-            
-            var expectedAppliedMigrations = new HashSet<DbVersion>
-            {
-                new DbVersion(1,0),
-                new DbVersion(2,0),
-                new DbVersion(3,0),
-                new DbVersion(4,0),
-                new DbVersion(5,0)
-            };
-            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
-        }
-        
-        [Fact]
-        public async Task Migrate_AllScriptOk_Rollback()
+        var builder = new MigrationEngineBuilder();
+        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.ConfigureForPostgreSql(connectionString);
+
+        builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.UseDowngradeMigrationPolicy(MigrationPolicy.AllAllowed);
+        builder.SetUpTargetVersion(new MigrationVersion(6));
+
+        var migrator = builder.Build();
+
+        try
         {
-            var config = ConfigProvider.GetConfig();
-            var connectionString = String.Format(config.ConnectionStringMask, "test_rollback");
-            
-            
-            var builder = new MigratorBuilder();
-            builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-            builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
-            builder.UsePostgreSQL(connectionString);
+            await migrator.UpgradeDatabaseAsync();
 
-            builder.UseUpgradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.UseDowngradeMigrationPolicy(MigrationPolicy.Allowed);
-            builder.SetUpTargetVersion(new DbVersion(6, 0));
-
-            var migrator = builder.Build();
-
-            try
-            {
-                await migrator.MigrateAsync();
-                
-                // last migration is incorrect, can not go here
-                Assert.False(true);
-            }
-            catch
-            {
-                // ignored
-            }
-
-            var migrationProvider = new PostgreDbProvider(new PostgreDbProviderOptions(connectionString));
-            await migrationProvider.OpenConnectionAsync();
-            var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionAsync();
-            await migrationProvider.CloseConnectionAsync();
-            
-            var expectedAppliedMigrations = new HashSet<DbVersion>
-            {
-                new DbVersion(1,0),
-                new DbVersion(2,0),
-                new DbVersion(3,0),
-                new DbVersion(4,0),
-                new DbVersion(5,0)
-            };
-            
-            Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
+            // last migration is incorrect, can not go here
+            Assert.False(true);
         }
+        catch
+        {
+            // ignored
+        }
+
+        var migrationProvider = new PostgresMigrationConnection(new PostgresMigrationConnectionOptions(connectionString));
+        await migrationProvider.OpenConnectionAsync();
+        var actualAppliedMigrations = await migrationProvider.GetAppliedMigrationVersionsAsync();
+        await migrationProvider.CloseConnectionAsync();
+
+        var expectedAppliedMigrations = new HashSet<MigrationVersion>
+        {
+            new(1),
+            new(2),
+            new(3),
+            new(4),
+            new(5)
+        };
+
+        Assert.Equal(expectedAppliedMigrations, actualAppliedMigrations);
     }
 }
