@@ -129,7 +129,7 @@ public class ScriptMigrationsProvider_Should
         var logger = Mock.Of<ILogger>();
 
         var migrationsProvider = new ScriptMigrationsProvider();
-        migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly(), "PreMigration.");
+        migrationsProvider.FromAssembly(typeof(ScriptConstants).Assembly, "ScriptAsResources.PreMigration.");
 
         var migrations = migrationsProvider
             .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)

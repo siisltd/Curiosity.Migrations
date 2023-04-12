@@ -155,6 +155,9 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         var scripts = new Dictionary<MigrationVersion, MigrationScriptInfo>();
 
         var regex = new Regex(MigrationConstants.MigrationFileNamePattern, RegexOptions.IgnoreCase);
+        var regexWithPrefix = String.IsNullOrWhiteSpace(scriptParsingOptions.Prefix)
+            ? null
+            : new Regex($"{scriptParsingOptions.Prefix}{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
 
         for (var i = 0; i < fileNames.Count; i++)
         {
@@ -162,7 +165,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
             if (fileName.ToLower().EndsWith("sql"))
             {
-                if (!String.IsNullOrWhiteSpace(scriptParsingOptions.Prefix) && !fileName.StartsWith(scriptParsingOptions.Prefix))
+                if (regexWithPrefix != null && !regexWithPrefix.IsMatch(fileName))
                 {
                     migrationLogger?.LogTrace($"\"{fileName}\" skipped because of incorrect prefix. Prefix \"{scriptParsingOptions.Prefix}\" is expected");
                     continue;
@@ -198,12 +201,11 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                     continue;
                 }
 
-                if (!scripts.ContainsKey(version))
+                if (!scripts.TryGetValue(version, out var scriptInfo))
                 {
-                    scripts[version] = new MigrationScriptInfo();
+                    scriptInfo = new MigrationScriptInfo();
+                    scripts[version] = scriptInfo;
                 }
-
-                var scriptInfo = scripts[version];
 
                 var script = sqlScriptReadFunc.Invoke(fileName);
 
