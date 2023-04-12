@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.0] - 2023-04-12
+
+### Added
+
+- Added `ScriptIncorrectNamingAction` for `ScriptProvider` to specify what should migrator do with scripts with incorrect name.
+
 ## [4.0.1] - 2023-04-10
 
 ### Added

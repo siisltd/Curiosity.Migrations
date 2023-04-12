@@ -64,6 +64,11 @@ public enum MigrationErrorCode
     MigrationNotFound = 90,
 
     /// <summary>
+    /// File with migration's script has incorrect name.
+    /// </summary>
+    IncorrectMigrationFileName = 91,
+
+    /// <summary>
     /// Policy restricts migration.
     /// </summary>
     /// <remarks>
