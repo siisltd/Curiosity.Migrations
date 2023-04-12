@@ -154,10 +154,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
         var scripts = new Dictionary<MigrationVersion, MigrationScriptInfo>();
 
-        var regexPattern = String.IsNullOrWhiteSpace(scriptParsingOptions.Prefix)
-            ? $"{MigrationConstants.MigrationFileNamePattern}"
-            : $"{scriptParsingOptions.Prefix}{MigrationConstants.MigrationFileNamePattern}";
-        var regex = new Regex(regexPattern, RegexOptions.IgnoreCase);
+        var regex = new Regex(MigrationConstants.MigrationFileNamePattern, RegexOptions.IgnoreCase);
 
         for (var i = 0; i < fileNames.Count; i++)
         {
@@ -165,10 +162,16 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
             if (fileName.ToLower().EndsWith("sql"))
             {
+                if (!String.IsNullOrWhiteSpace(scriptParsingOptions.Prefix) && !fileName.StartsWith(scriptParsingOptions.Prefix))
+                {
+                    migrationLogger?.LogTrace($"\"{fileName}\" skipped because of incorrect prefix. Prefix \"{scriptParsingOptions.Prefix}\" is expected");
+                    continue;
+                }
+
                 var match = regex.Match(fileName);
                 if (!match.Success)
                 {
-                    var message = $"\"{fileName}\" has incorrect name for script migration. File must matches this regex patter - \"{regexPattern}\"";
+                    var message = $"\"{fileName}\" has incorrect name for script migration. File must matches this regex pattern - \"{MigrationConstants.MigrationFileNamePattern}\"";
                     switch (scriptParsingOptions.ScriptIncorrectNamingAction)
                     {
                         case ScriptIncorrectNamingAction.Ignore:

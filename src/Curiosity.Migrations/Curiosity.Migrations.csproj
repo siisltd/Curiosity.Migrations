@@ -7,7 +7,7 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity</PackageTags>
         <Language>English</Language>
 
-        <PackageVersion>4.1.1</PackageVersion>
+        <PackageVersion>4.1.2</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
         
