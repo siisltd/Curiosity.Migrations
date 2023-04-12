@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.1] - 2023-04-12
+
+### Fixed
+
+- Fixed migrations order at engines constructor.
+
 ## [4.1.0] - 2023-04-12
 
 ### Added

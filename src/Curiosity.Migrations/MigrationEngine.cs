@@ -57,7 +57,8 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _logger = logger;
 
         var migrationMap = new Dictionary<MigrationVersion, IMigration>();
-        for (var i = 0; i < migrations.Count; i++)
+        var temp = migrations.OrderBy(x => x.Version).ToArray();
+        for (var i = 0; i < temp.Length; i++)
         {
             var migration = migrations[i];
             if (migrationMap.ContainsKey(migration.Version))
@@ -74,7 +75,8 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         _targetVersion = targetVersion;
         _onlyTargetVersion = onlyTargetVersion;
 
-        _availablePreMigrations = preMigrations ?? Array.Empty<IMigration>();
+        _availablePreMigrations = preMigrations?.OrderBy(x => x.Version).ToArray()
+                                  ?? Array.Empty<IMigration>();
         var preMigrationCheckMap = new HashSet<MigrationVersion>();
         for (var i = 0; i < _availablePreMigrations.Count; i++)
         {
