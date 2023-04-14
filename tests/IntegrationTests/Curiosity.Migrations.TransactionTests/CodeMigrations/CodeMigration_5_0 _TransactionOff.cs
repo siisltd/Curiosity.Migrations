@@ -20,7 +20,7 @@ public class CodeMigration_5_0 : CodeMigration
         IsTransactionRequired = false;
     }
 
-    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
+    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
         tempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
@@ -58,8 +58,8 @@ public class CodeMigration_5_0 : CodeMigration
             tempContext.Requests.Add(request1);
             anotherContext.Requests.Add(request2);
 
-            await tempContext.SaveChangesAsync(token);
-            await anotherContext.SaveChangesAsync(token);
+            await tempContext.SaveChangesAsync(cancellationToken);
+            await anotherContext.SaveChangesAsync(cancellationToken);
         }
     }
 

@@ -16,7 +16,7 @@ public class CodeMigration_3_0 : CodeMigration
     public override string Comment { get; } = "Migration using multiple EF context with one connection";
 
     /// <inheritdoc />
-    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
+    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
         tempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
@@ -27,8 +27,8 @@ public class CodeMigration_3_0 : CodeMigration
         await using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
         await using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))
         {
-            await tempContext.Database.UseTransactionAsync(transaction, token);
-            await anotherContext.Database.UseTransactionAsync(transaction, token);
+            await tempContext.Database.UseTransactionAsync(transaction, cancellationToken);
+            await anotherContext.Database.UseTransactionAsync(transaction, cancellationToken);
                 
             var request1 = new BackgroundProcessorRequestEntity
             {

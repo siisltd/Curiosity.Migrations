@@ -40,7 +40,7 @@ public interface IMigration
     /// Upgrades database to the version specified in <see cref="Version"/>.
     /// </summary>
     /// <param name="transaction">Transaction in which operation must be executed. Optional. Use it when you need attach transaction to Entity Framework data context.</param>
-    /// <param name="token">Cancellation token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task associated with upgrade.</returns>
-    Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
+    Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default);
 }

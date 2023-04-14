@@ -67,5 +67,5 @@ public abstract class CodeMigration : IMigration
     }
 
     /// <inheritdoc />
-    public abstract Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default);
+    public abstract Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default);
 }

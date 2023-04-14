@@ -62,9 +62,9 @@ public class ScriptMigration : IMigration
     }
 
     /// <inheritdoc />
-    public async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
+    public async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
-        await RunBatchesAsync(UpScripts, token);
+        await RunBatchesAsync(UpScripts, cancellationToken);
     }
 
     /// <summary>

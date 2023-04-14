@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.1.3] - 2023-04-14
+
+### Changed
+
+- Renamed cancellation token param.
+
 ## [4.1.2] - 2023-04-12
 
 ### Fixed

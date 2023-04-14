@@ -12,12 +12,12 @@ public class SecondMigration : CodeMigration, ISpecificCodeMigrations, IDowngrad
     public override string Comment => "comment";
 
     /// <inheritdoc />
-    public override Task UpgradeAsync(DbTransaction transaction = null, CancellationToken token = default)
+    public override Task UpgradeAsync(DbTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         return MigrationConnection.ExecuteNonQuerySqlAsync(
             ScriptConstants.UpScript,
             null,
-            token);
+            cancellationToken);
     }
 
     /// <inheritdoc />

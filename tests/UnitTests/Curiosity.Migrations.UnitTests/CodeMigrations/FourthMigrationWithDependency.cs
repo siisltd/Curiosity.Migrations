@@ -22,12 +22,12 @@ public class FourthMigrationWithDependency : CustomBaseCodeMigration, IDowngrade
 
 
     /// <inheritdoc />
-    public override Task UpgradeAsync(DbTransaction transaction, CancellationToken token = default)
+    public override Task UpgradeAsync(DbTransaction transaction, CancellationToken cancellationToken = default)
     {
         return MigrationConnection.ExecuteNonQuerySqlAsync(
             ScriptConstants.UpScript,
             null,
-            token);
+            cancellationToken);
     }
 
     /// <inheritdoc />

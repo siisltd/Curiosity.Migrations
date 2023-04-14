@@ -13,8 +13,8 @@ public class CodeMigration_2_0 : CodeMigration
     public override string Comment => "Correct script via provider";
 
     /// <inheritdoc />
-    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken token = default)
+    public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
-        await MigrationConnection.ExecuteNonQuerySqlAsync("select 1;", null, token);
+        await MigrationConnection.ExecuteNonQuerySqlAsync("select 1;", null, cancellationToken);
     }
 }

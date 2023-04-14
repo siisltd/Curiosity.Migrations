@@ -13,12 +13,12 @@ public class ThirdMigration : CodeMigration, ISpecificCodeMigrations, IDowngrade
     public override string Comment => "comment";
 
     /// <inheritdoc />
-    public override Task UpgradeAsync(DbTransaction transaction = null, CancellationToken token = default)
+    public override Task UpgradeAsync(DbTransaction transaction = null, CancellationToken cancellationToken = default)
     {
         return MigrationConnection.ExecuteNonQuerySqlAsync(
             ScriptConstants.UpScript,
             null,
-            token);
+            cancellationToken);
     }
 
     /// <inheritdoc />
