@@ -89,9 +89,7 @@ public class CodeMigrationsProvider_Should
         Assert.True(migrations[0] is CodeMigration);
         Assert.Equal(new MigrationVersion(1,3), migrations[0].Version);
         Assert.Equal("comment", migrations[0].Comment);
-            
     }
-        
         
     /// <summary>
     /// Checks if provider returns only code migrations from specified assembly that implemented desired interface

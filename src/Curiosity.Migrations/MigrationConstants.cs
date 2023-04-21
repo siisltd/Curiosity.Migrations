@@ -13,6 +13,6 @@ public static class MigrationConstants
     /// <summary>
     /// Regex pattern for scanning files with sql migrations.
     /// </summary>
-    public static readonly string MigrationFileNamePattern = $@"({VersionPattern})(.(down)|.(up))?(-([\w]*))?\.sql$";
+    public static readonly string MigrationFileNamePattern = $@"^({VersionPattern})(.(down)|.(up))?(-([\w]*))?\.sql$";
 }
 

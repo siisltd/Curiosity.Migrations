@@ -30,13 +30,14 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     /// <summary>
     /// Setup directory to scan for migrations
     /// </summary>
-    /// <param name="path">Path to directory where scripts are located. Can be relative and absolute.</param>
-    /// <param name="prefix">Specific part of name or path. If no prefix specified provider will process only files without any prefix</param>
+    /// <param name="path">
+    /// Path to directory where scripts are located. Can be relative and absolute.
+    /// If relative, <see cref="Directory.GetCurrentDirectory"/> will be used to specify full path to migrations.
+    /// </param>
     /// <param name="scriptIncorrectNamingAction">What should we do if found script file with incorrect naming?</param>
     /// <exception cref="ArgumentNullException"></exception>
     public ScriptMigrationsProvider FromDirectory(
         string path,
-        string? prefix = null,
         ScriptIncorrectNamingAction scriptIncorrectNamingAction = DefaultScriptIncorrectNamingAction)
     {
         Guard.AssertNotEmpty(path, nameof(path));
@@ -45,27 +46,29 @@ public class ScriptMigrationsProvider : IMigrationsProvider
             ? path
             : Path.Combine(Directory.GetCurrentDirectory(), path);
 
-        _absoluteDirectoriesPathParsingOptions[innerPath] = new ScriptParsingOptions(prefix, scriptIncorrectNamingAction);
+        _absoluteDirectoriesPathParsingOptions[innerPath] = new ScriptParsingOptions(
+            innerPath,
+            scriptIncorrectNamingAction);
 
         return this;
     }
 
     /// <summary>
-    /// Setup assembly where script migrations embedded
+    /// Setup assembly where script migrations embedded.
     /// </summary>
-    /// <param name="assembly"></param>
-    /// <param name="prefix">Specific part of name or namespace part. If no prefix specified provider will process only files without any prefix</param>
-    /// <param name="scriptIncorrectNamingAction">What should we do if found script file with incorrect naming?</param>
-    /// <returns></returns>
+    /// <param name="assembly">Assembly with script migrations files.</param>
+    /// <param name="migrationsNamespace">Namespace for script migration embedded files.</param>
     /// <exception cref="ArgumentNullException"></exception>
     public ScriptMigrationsProvider FromAssembly(
         Assembly assembly,
-        string? prefix = null,
+        string migrationsNamespace,
         ScriptIncorrectNamingAction scriptIncorrectNamingAction = DefaultScriptIncorrectNamingAction)
     {
         Guard.AssertNotNull(assembly, nameof(assembly));
+        Guard.AssertNotEmpty(migrationsNamespace, nameof(migrationsNamespace));
 
-        _assembliesParsingOptions[assembly] = new ScriptParsingOptions(prefix, scriptIncorrectNamingAction);
+        _assembliesParsingOptions[assembly] =
+            new ScriptParsingOptions($"{migrationsNamespace.TrimEnd('.')}.", scriptIncorrectNamingAction);
 
         return this;
     }
@@ -99,6 +102,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
             var directoryMigrations = GetMigrations(
                 fileNames,
                 File.ReadAllText,
+                Path.GetFileName,
                 migrationConnection,
                 parsingOptions,
                 variables,
@@ -126,6 +130,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                     using var reader = new StreamReader(stream);
                     return reader.ReadToEnd();
                 },
+                name => name.Replace(scriptParsingOptions.MigrationNamePrefix, String.Empty),
                 migrationConnection,
                 scriptParsingOptions,
                 variables,
@@ -142,6 +147,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     private ICollection<IMigration> GetMigrations(
         IReadOnlyList<string> fileNames,
         Func<string, string> sqlScriptReadFunc,
+        Func<string, string> getCleanedNameFunc,
         IMigrationConnection migrationConnection,
         ScriptParsingOptions scriptParsingOptions,
         IReadOnlyDictionary<string, string> variables,
@@ -149,15 +155,13 @@ public class ScriptMigrationsProvider : IMigrationsProvider
     {
         Guard.AssertNotNull(fileNames, nameof(fileNames));
         Guard.AssertNotNull(sqlScriptReadFunc, nameof(sqlScriptReadFunc));
+        Guard.AssertNotNull(getCleanedNameFunc, nameof(getCleanedNameFunc));
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
         Guard.AssertNotNull(variables, nameof(variables));
 
         var scripts = new Dictionary<MigrationVersion, MigrationScriptInfo>();
 
         var regex = new Regex(MigrationConstants.MigrationFileNamePattern, RegexOptions.IgnoreCase);
-        var regexWithPrefix = String.IsNullOrWhiteSpace(scriptParsingOptions.Prefix)
-            ? null
-            : new Regex($"{scriptParsingOptions.Prefix}{MigrationConstants.MigrationFileNamePattern}", RegexOptions.IgnoreCase);
 
         for (var i = 0; i < fileNames.Count; i++)
         {
@@ -165,13 +169,14 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
             if (fileName.ToLower().EndsWith("sql"))
             {
-                if (regexWithPrefix != null && !regexWithPrefix.IsMatch(fileName))
+                if (!fileName.ToLower().StartsWith(scriptParsingOptions.MigrationNamePrefix.ToLower()))
                 {
-                    migrationLogger?.LogTrace($"\"{fileName}\" skipped because of incorrect prefix. Prefix \"{scriptParsingOptions.Prefix}\" is expected");
+                    migrationLogger?.LogTrace($"\"{fileName}\" skipped because of incorrect prefix. Prefix \"{scriptParsingOptions.MigrationNamePrefix}\" is expected");
                     continue;
                 }
 
-                var match = regex.Match(fileName);
+                var cleanedFileName = getCleanedNameFunc(fileName);
+                var match = regex.Match(cleanedFileName);
                 if (!match.Success)
                 {
                     var message = $"\"{fileName}\" has incorrect name for script migration. File must matches this regex pattern - \"{MigrationConstants.MigrationFileNamePattern}\"";
@@ -378,15 +383,18 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
     private struct ScriptParsingOptions
     {
-        public string? Prefix { get; }
+        /// <summary>
+        /// Directory name with migration files or namespace of folder with migration embedded resources. 
+        /// </summary>
+        public string MigrationNamePrefix { get; }
 
         public ScriptIncorrectNamingAction ScriptIncorrectNamingAction { get; }
 
-        public ScriptParsingOptions(
-            string? prefix,
+        internal ScriptParsingOptions(
+            string migrationNamePrefix,
             ScriptIncorrectNamingAction scriptIncorrectNamingAction)
         {
-            Prefix = prefix;
+            MigrationNamePrefix = migrationNamePrefix;
             ScriptIncorrectNamingAction = scriptIncorrectNamingAction;
         }
     }

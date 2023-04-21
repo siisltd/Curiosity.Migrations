@@ -28,7 +28,9 @@ public class Services_Should
         {
             options
                 .UseScriptMigrations()
-                .FromAssembly(Assembly.GetExecutingAssembly());
+                .FromAssembly(
+                    Assembly.GetExecutingAssembly(),
+                    "Curiosity.Migrations.UnitTests.ScriptsAsResources.Main");
             options
                 .UseMigrationConnectionFactory(CreateDbProviderFactory());
         });
@@ -71,7 +73,9 @@ public class Services_Should
         {
             options
                 .UseScriptMigrations()
-                .FromAssembly(Assembly.GetExecutingAssembly());
+                .FromAssembly(
+                    Assembly.GetExecutingAssembly(),
+                    "Curiosity.Migrations.UnitTests.ScriptsAsResources.Main");
             options
                 .UseMigrationConnectionFactory(CreateDbProviderFactory());
         });

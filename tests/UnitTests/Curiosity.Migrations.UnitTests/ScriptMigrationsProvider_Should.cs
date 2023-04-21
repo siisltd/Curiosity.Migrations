@@ -16,13 +16,13 @@ namespace Curiosity.Migrations.UnitTests;
 public class ScriptMigrationsProvider_Should
 {
     [Fact]
-    public void GetMigrations_FromDirectory_WithoutPrefix_Ok()
+    public void GetMigrations_FromDirectory_Ok()
     {
         var dbProvider = Mock.Of<IMigrationConnection>();
         var logger = Mock.Of<ILogger>();
 
         var migrationsProvider = new ScriptMigrationsProvider();
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "ScriptsAsFiles");
         migrationsProvider.FromDirectory(path);
 
         var migrations = migrationsProvider
@@ -53,43 +53,23 @@ public class ScriptMigrationsProvider_Should
         Assert.True(String.IsNullOrEmpty(migrations[3].Comment));
         Assert.Equal("up", ((ScriptMigration)migrations[3]).UpScripts[0].Script);
     }
-        
+
     [Fact]
-    public void GetMigrations_FromDirectory_WithPrefix_Ok()
+    public void GetMigrations_FromAssembly_Ok()
     {
         var dbProvider = Mock.Of<IMigrationConnection>();
         var logger = Mock.Of<ILogger>();
 
         var migrationsProvider = new ScriptMigrationsProvider();
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "ScriptsWithPrefix");
-        migrationsProvider.FromDirectory(path, "prefix-");
+        migrationsProvider.FromAssembly(
+            Assembly.GetExecutingAssembly(),
+            "Curiosity.Migrations.UnitTests.ScriptsAsResources.Main");
 
         var migrations = migrationsProvider
             .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
             .ToList();
             
-        Assert.Single(migrations);
-            
-        Assert.True(migrations[0] is ScriptMigration);
-        Assert.Equal(new MigrationVersion(0,1), migrations[0].Version);
-        Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
-        Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScripts[0].Script);
-    }
-        
-    [Fact]
-    public void GetMigrations_FromAssembly_WithoutPrefix_Ok()
-    {
-        var dbProvider = Mock.Of<IMigrationConnection>();
-        var logger = Mock.Of<ILogger>();
-
-        var migrationsProvider = new ScriptMigrationsProvider();
-        migrationsProvider.FromAssembly(Assembly.GetExecutingAssembly());
-
-        var migrations = migrationsProvider
-            .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
-            .ToList();
-            
-        Assert.Equal(5, migrations.Count);
+        Assert.Equal(4, migrations.Count);
             
         Assert.True(migrations[0] is DowngradeScriptMigration);
         Assert.Equal(new MigrationVersion(1), migrations[0].Version);
@@ -114,35 +94,8 @@ public class ScriptMigrationsProvider_Should
         Assert.Equal(new MigrationVersion(1,3), migrations[3].Version);
         Assert.True(String.IsNullOrEmpty(migrations[3].Comment));
         Assert.Equal("up", ((ScriptMigration)migrations[3]).UpScripts[0].Script);
-            
-            
-        Assert.True(migrations[4] is ScriptMigration);
-        Assert.Equal(new MigrationVersion(2), migrations[4].Version);
-        Assert.True(String.IsNullOrEmpty(migrations[4].Comment));
-        Assert.Equal("prefix", ((ScriptMigration)migrations[4]).UpScripts[0].Script);
     }
-        
-    [Fact]
-    public void GetMigrations_FromAssembly_WithPrefix_Ok()
-    {
-        var dbProvider = Mock.Of<IMigrationConnection>();
-        var logger = Mock.Of<ILogger>();
-
-        var migrationsProvider = new ScriptMigrationsProvider();
-        migrationsProvider.FromAssembly(typeof(ScriptConstants).Assembly, "ScriptAsResources.PreMigration.");
-
-        var migrations = migrationsProvider
-            .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
-            .ToList();
-            
-        Assert.Single(migrations);
-            
-        Assert.True(migrations[0] is ScriptMigration);
-        Assert.Equal(new MigrationVersion(2), migrations[0].Version);
-        Assert.True(String.IsNullOrEmpty(migrations[0].Comment));
-        Assert.Equal("prefix", ((ScriptMigration)migrations[0]).UpScripts[0].Script);
-    }
-        
+       
     [Fact]
     public void SubstituteVariableToTemplate()
     {
@@ -151,7 +104,7 @@ public class ScriptMigrationsProvider_Should
         var logger = Mock.Of<ILogger>();
 
         var migrationsProvider = new ScriptMigrationsProvider();
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "Scripts");
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "ScriptsAsFiles");
         migrationsProvider.FromDirectory(path);
 
         var userName = "user";
@@ -170,5 +123,26 @@ public class ScriptMigrationsProvider_Should
 
         ((ScriptMigration) migrations[4]).UpScripts[0].Script.Should()
             .BeEquivalentTo(userName, "because script contains only template");
+    }
+
+
+    [Fact]
+    public void Should_ThrowException_BecauseOfIncorrectNaming()
+    {
+        var dbProvider = Mock.Of<IMigrationConnection>();
+        var logger = Mock.Of<ILogger>();
+
+        var migrationsProvider = new ScriptMigrationsProvider();
+        migrationsProvider.FromAssembly(
+            typeof(ScriptConstants).Assembly,
+            "Curiosity.Migrations.UnitTests.ScriptsAsResources.IncorrectNamingTest",
+            ScriptIncorrectNamingAction.ThrowException);
+
+        Assert.Throws<MigrationException>(() =>
+        {
+            var _ = migrationsProvider
+                .GetMigrations(dbProvider, new Dictionary<string, string>(), logger)
+                .ToList();
+        });
     }
 }

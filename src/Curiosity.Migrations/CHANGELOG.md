@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.2.0] - 2023-04-21
+
+### Changed
+
+- Improved detecting incorrect migration files names.
+
 ## [4.1.3] - 2023-04-14
 
 ### Changed
