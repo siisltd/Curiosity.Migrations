@@ -33,6 +33,10 @@ public class ScriptMigration : IMigration
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
     public bool IsLongRunning { get; protected set; }
 
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    public List<string> Dependencies { get; protected set;} = new();
+
     /// <summary>
     /// SQL script to apply migration split into batches.
     /// </summary>

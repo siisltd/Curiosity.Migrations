@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,6 +36,14 @@ public interface IMigration
     ///
     /// </remarks>
     bool IsLongRunning { get; }
+    
+    /// <summary>
+    /// Migrations, that should be applied before
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    List<string> Dependencies { get; }
 
     /// <summary>
     /// Upgrades database to the version specified in <see cref="Version"/>.

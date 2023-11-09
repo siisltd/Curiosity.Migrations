@@ -317,6 +317,15 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                     }
 
                     break;
+                case "DEPENDENCIES":
+                    var migrationDependencies = optionsMatch.Groups[2].Value.ToUpper().Trim().TrimEnd(';');
+                    
+                    if(string.IsNullOrWhiteSpace(migrationDependencies))
+                        throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
+
+                    options.Dependencies.AddRange(migrationDependencies.Split(' '));
+
+                    break;
                 default:
                     throw new InvalidOperationException($"Option \"{optionsMatch.Groups[1].Value}\" is unknown");
             }
@@ -418,5 +427,6 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         public bool IsTransactionRequired { get; set; } = true;
 
         public bool IsLongRunning { get; set; }
+        public List<string> Dependencies { get; set; } = new();
     }
 }

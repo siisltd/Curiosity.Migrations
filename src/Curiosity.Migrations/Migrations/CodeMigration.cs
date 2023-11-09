@@ -29,6 +29,10 @@ public abstract class CodeMigration : IMigration
     /// <inheritdoc />
     public bool IsLongRunning { get; protected set; } = false;
 
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    public List<string> Dependencies { get; protected set;} = new();
+
     /// <summary>
     /// Provides access to underlying database.
     /// </summary>
