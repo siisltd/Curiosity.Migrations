@@ -421,6 +421,17 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 continue;
             }
 
+            if (migration.Dependencies.Any())
+            {
+                if (!migration.Dependencies.TrueForAll(x =>
+                        appliedMigrations.Any(aM =>
+                            string.Equals(aM.Version.ToString(), x, StringComparison.OrdinalIgnoreCase))))
+                {
+                    throw new MigrationException(MigrationErrorCode.MigrationNotFound, 
+                        $"Migration with version \"{migration.Version}\" depends on unapplied migrations \"{string.Join(" ", migration.Dependencies)}\"");
+                }
+            }
+
             DbTransaction? transaction = null;
 
             try
