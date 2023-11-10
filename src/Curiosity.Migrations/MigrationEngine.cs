@@ -423,12 +423,12 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
 
             if (migration.Dependencies.Any())
             {
-                if (!migration.Dependencies.TrueForAll(x =>
-                        appliedMigrations.Any(aM =>
-                            string.Equals(aM.Version.ToString(), x, StringComparison.OrdinalIgnoreCase))))
+                foreach (var dependency in migration.Dependencies)
                 {
-                    throw new MigrationException(MigrationErrorCode.MigrationNotFound, 
-                        $"Migration with version \"{migration.Version}\" depends on unapplied migrations \"{string.Join(" ", migration.Dependencies)}\"");
+                    if(!appliedMigrations.Any(x => string.Equals(x.Version.ToString(), dependency, StringComparison.OrdinalIgnoreCase)))
+                        throw new MigrationException(MigrationErrorCode.MigratingError, 
+                            $"Migration with version \"{migration.Version}\" depends on unapplied migration \"{dependency}\"");
+
                 }
             }
 
