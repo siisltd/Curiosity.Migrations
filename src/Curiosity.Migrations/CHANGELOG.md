@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.2.1] - 2020-09-21
+
+### Added
+
+- Options for migration dependencies.
+```
+--CURIOSITY:Dependencies=Major1.Minor1 Major2.Minor2
+```
+
+### Changed
+
+- New parameter at ScriptMigration constructor.
+
 ## [4.2.0] - 2023-04-21
 
 ### Changed
