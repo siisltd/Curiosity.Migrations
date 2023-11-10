@@ -14,7 +14,7 @@ public class DependencyTests
     public async Task Migrate_Script_OkDependencies()
     {
         var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_ok");
+        var connectionString = String.Format(config.ConnectionStringMask, "test_script_code_ok");
 
 
         var builder = new MigrationEngineBuilder();
