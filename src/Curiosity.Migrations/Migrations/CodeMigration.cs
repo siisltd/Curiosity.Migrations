@@ -31,7 +31,7 @@ public abstract class CodeMigration : IMigration
 
     /// <inheritdoc />
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-    public List<string> Dependencies { get; protected set;} = new();
+    public List<MigrationVersion> Dependencies { get; protected set;} = new();
 
     /// <summary>
     /// Provides access to underlying database.

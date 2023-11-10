@@ -1,6 +1,4 @@
---CURIOSITY:Dependencies=6.0-incorrect_script 4.0-script_without_transction
-
-CREATE TABLE public.background_processor_requests2
+CREATE TABLE public.background_processor_requests
 (
     id bigserial NOT NULL,
     created timestamp(6) without time zone DEFAULT timezone('UTC'::text, now()) NOT NULL,
@@ -17,8 +15,8 @@ CREATE TABLE public.background_processor_requests2
     log text,
     params_data_json text,
     result_data_json text,
-    CONSTRAINT background_processor_requests1_pkey PRIMARY KEY (id)
+    CONSTRAINT background_processor_requests_pkey PRIMARY KEY (id)
 );
 
-ALTER TABLE public.background_processor_requests1
+ALTER TABLE public.background_processor_requests
     OWNER to %USER%;

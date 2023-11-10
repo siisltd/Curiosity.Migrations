@@ -43,7 +43,7 @@ public interface IMigration
     /// <remarks>
     /// 
     /// </remarks>
-    List<string> Dependencies { get; }
+    List<MigrationVersion> Dependencies { get; }
 
     /// <summary>
     /// Upgrades database to the version specified in <see cref="Version"/>.

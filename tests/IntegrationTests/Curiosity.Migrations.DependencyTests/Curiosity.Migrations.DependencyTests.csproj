@@ -33,11 +33,22 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="CodeMigrations\" />
-    </ItemGroup>
-    
-    <ItemGroup>
       <None Update="config.yml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ScriptMigrations\1.0-correct_script.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ScriptMigrations\4.0-script_without_transction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ScriptMigrations\4.0-script_without_transaction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ScriptMigrations\7.0-script_with_not_ok_dependencies.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="ScriptMigrations\4.0-script_with_ok_dependencies.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
