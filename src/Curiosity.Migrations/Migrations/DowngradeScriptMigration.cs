@@ -28,7 +28,7 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
         string? comment,
         bool isTransactionRequired = true,
         bool isLongRunning = false,
-        List<MigrationVersion> dependencies = null)
+        List<MigrationVersion>? dependencies = null)
         : base(
             migrationLogger,
             migrationConnection,

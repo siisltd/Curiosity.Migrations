@@ -51,7 +51,7 @@ public class ScriptMigration : IMigration
         string? comment,
         bool isTransactionRequired = true,
         bool isLongRunning = false,
-        List<MigrationVersion> dependencies = null
+        List<MigrationVersion>? dependencies = null
         )
     {
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
@@ -65,7 +65,7 @@ public class ScriptMigration : IMigration
         Comment = comment;
         IsTransactionRequired = isTransactionRequired;
         IsLongRunning = isLongRunning;
-        Dependencies = dependencies;
+        Dependencies = dependencies ?? new List<MigrationVersion>();
     }
 
     /// <inheritdoc />
