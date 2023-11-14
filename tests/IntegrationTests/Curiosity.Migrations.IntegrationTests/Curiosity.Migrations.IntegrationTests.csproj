@@ -45,6 +45,15 @@
       <None Update="ScriptMigrations\4.0-script_without_transction.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="TransactionScriptMigrations\1.0-correct_script.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TransactionScriptMigrations\4.0-script_without_transction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TransactionScriptMigrations\6.0-incorrect_script.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

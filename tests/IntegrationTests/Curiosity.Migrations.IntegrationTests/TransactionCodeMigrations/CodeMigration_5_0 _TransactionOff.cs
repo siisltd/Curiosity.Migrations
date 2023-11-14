@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Curiosity.Migrations.TransactionTests.CodeMigrations;
+namespace Curiosity.Migrations.TransactionTests.TransactionCodeMigrations;
 
-public class CodeMigration_5_0 : CodeMigration
+public class CodeMigration_5_0 : CodeMigration, ITransactionMigration
 {
     /// <inheritdoc />
     public override MigrationVersion Version { get; } = new(5);
