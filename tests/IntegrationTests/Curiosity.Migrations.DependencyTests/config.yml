@@ -1,2 +1,0 @@
-# Mask for connection string to DataBase. Specify all params except DB name.
-connectionStringMask: "Server=127.0.0.1;Port=5533; Database={0}; User Id=test; Password=test"
