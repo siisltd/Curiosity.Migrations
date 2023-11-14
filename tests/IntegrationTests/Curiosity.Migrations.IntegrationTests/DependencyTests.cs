@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Curiosity.Migrations.IntegrationTests.DependencyCodeMigrations;
 using Curiosity.Migrations.PostgreSQL;
 using Xunit;
 
-namespace Curiosity.Migrations.DependencyTests;
+namespace Curiosity.Migrations.IntegrationTests;
 
 public class DependencyTests
 {
@@ -18,8 +19,8 @@ public class DependencyTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "DependencyScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
@@ -54,8 +55,8 @@ public class DependencyTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "DependencyScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
@@ -90,8 +91,8 @@ public class DependencyTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "DependencyScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.ShortRunningAllowed);

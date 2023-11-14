@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Curiosity.Migrations.IntegrationTests.TransactionCodeMigrations;
 using Curiosity.Migrations.PostgreSQL;
-using Curiosity.Migrations.TransactionTests.TransactionCodeMigrations;
 using Xunit;
 
-namespace Curiosity.Migrations.TransactionTests;
+namespace Curiosity.Migrations.IntegrationTests;
 
 public class TransactionTests
 {
@@ -54,8 +54,8 @@ public class TransactionTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "TransactionScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
@@ -90,8 +90,8 @@ public class TransactionTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "TransactionScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);

@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
-namespace Curiosity.Migrations.DependencyTests.CodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.DependencyCodeMigrations;
 
-public class CodeMigration_5_0_NotOkDependencies : CodeMigration
+public class CodeMigration_5_0_NotOkDependencies : CodeMigration, IDependencyMigration
 {
     /// <inheritdoc />
     public override MigrationVersion Version { get; } = new(5);

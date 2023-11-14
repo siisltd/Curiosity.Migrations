@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Curiosity.Migrations.TransactionTests.TransactionCodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.TransactionCodeMigrations;
 
 public class CodeMigration_5_0 : CodeMigration, ITransactionMigration
 {

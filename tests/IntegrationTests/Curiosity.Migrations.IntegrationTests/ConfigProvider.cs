@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Curiosity.Migrations.TransactionTests;
+namespace Curiosity.Migrations.IntegrationTests;
 
 public static class ConfigProvider
 {

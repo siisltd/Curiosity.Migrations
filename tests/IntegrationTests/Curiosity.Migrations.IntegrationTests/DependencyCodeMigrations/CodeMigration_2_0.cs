@@ -2,9 +2,9 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Curiosity.Migrations.DependencyTests.CodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.DependencyCodeMigrations;
 
-public class CodeMigration_2_0 : CodeMigration
+public class CodeMigration_2_0 : CodeMigration, IDependencyMigration
 {
     /// <inheritdoc />
     public override MigrationVersion Version { get; } = new(2);
