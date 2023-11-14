@@ -1,17 +1,11 @@
 # Changelog
 
-## [4.3.0] - 2023-11-13
+## [4.3.0] - 2023-11-14
 
 ### Added
 
-- Options for migration dependencies.
-```
---CURIOSITY:Dependencies=Major1.Minor1 Major2.Minor2
-```
-
-### Changed
-
-- New parameter at ScriptMigration constructor.
+- Migration dependencies: ability to specify how one migration depends from another. 
+Both code and script migrations supports this.
 
 ## [4.2.0] - 2023-04-21
 
