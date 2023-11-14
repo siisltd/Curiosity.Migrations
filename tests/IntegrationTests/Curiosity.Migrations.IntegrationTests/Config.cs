@@ -1,4 +1,4 @@
-namespace Curiosity.Migrations.TransactionTests;
+namespace Curiosity.Migrations.IntegrationTests;
 
 public class Config
 {

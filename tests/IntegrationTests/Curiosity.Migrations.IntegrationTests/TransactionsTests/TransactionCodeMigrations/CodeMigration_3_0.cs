@@ -5,35 +5,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace Curiosity.Migrations.TransactionTests.CodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.TransactionsTests.TransactionCodeMigrations;
 
-public class CodeMigration_5_0 : CodeMigration
+public class CodeMigration_3_0 : CodeMigration, ITransactionMigration
 {
     /// <inheritdoc />
-    public override MigrationVersion Version { get; } = new(5);
+    public override MigrationVersion Version { get; } = new(3);
 
     /// <inheritdoc />
-    public override string Comment => "Migrations with switched off transactions";
+    public override string Comment { get; } = "Migration using multiple EF context with one connection";
 
-    public CodeMigration_5_0()
-    {
-        IsTransactionRequired = false;
-    }
-
+    /// <inheritdoc />
     public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var tempContextOptionsBuilder = new DbContextOptionsBuilder<TempContext>();
         tempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
-
+            
         var anotherTempContextOptionsBuilder = new DbContextOptionsBuilder<AnotherTempContext>();
         anotherTempContextOptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
 
         await using (var tempContext = new TempContext(tempContextOptionsBuilder.Options))
         await using (var anotherContext = new AnotherTempContext(anotherTempContextOptionsBuilder.Options))
         {
-            // tempContext.Database.UseTransaction(transaction);
-            // anotherContext.Database.UseTransaction(transaction);
-
+            await tempContext.Database.UseTransactionAsync(transaction, cancellationToken);
+            await anotherContext.Database.UseTransactionAsync(transaction, cancellationToken);
+                
             var request1 = new BackgroundProcessorRequestEntity
             {
                 CreatedUtc = DateTime.UtcNow,
@@ -58,8 +54,8 @@ public class CodeMigration_5_0 : CodeMigration
             tempContext.Requests.Add(request1);
             anotherContext.Requests.Add(request2);
 
-            await tempContext.SaveChangesAsync(cancellationToken);
-            await anotherContext.SaveChangesAsync(cancellationToken);
+            await tempContext.SaveChangesAsync();
+            await anotherContext.SaveChangesAsync();
         }
     }
 
@@ -117,12 +113,15 @@ public class CodeMigration_5_0 : CodeMigration
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BackgroundProcessorRequestEntity>(entity => { entity.HasKey(e => e.Id); });
+            modelBuilder.Entity<BackgroundProcessorRequestEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+            });
         }
 
         public virtual DbSet<BackgroundProcessorRequestEntity> Requests { get; set; } = null!;
     }
-
+        
     private class AnotherTempContext : DbContext
     {
         public AnotherTempContext(DbContextOptions<AnotherTempContext> options) : base(options)
@@ -131,7 +130,10 @@ public class CodeMigration_5_0 : CodeMigration
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BackgroundProcessorRequestEntity>(entity => { entity.HasKey(e => e.Id); });
+            modelBuilder.Entity<BackgroundProcessorRequestEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+            });
         }
 
         public virtual DbSet<BackgroundProcessorRequestEntity> Requests { get; set; } = null!;

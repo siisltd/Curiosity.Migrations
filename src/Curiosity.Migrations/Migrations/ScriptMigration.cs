@@ -33,6 +33,10 @@ public class ScriptMigration : IMigration
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
     public bool IsLongRunning { get; protected set; }
 
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    public IReadOnlyList<MigrationVersion> Dependencies { get; protected set; }
+
     /// <summary>
     /// SQL script to apply migration split into batches.
     /// </summary>
@@ -46,7 +50,9 @@ public class ScriptMigration : IMigration
         IReadOnlyList<ScriptMigrationBatch> upScripts,
         string? comment,
         bool isTransactionRequired = true,
-        bool isLongRunning = false)
+        bool isLongRunning = false,
+        IReadOnlyList<MigrationVersion>? dependencies = null
+        )
     {
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
         Guard.AssertNotEmpty(upScripts, nameof(upScripts));
@@ -59,6 +65,7 @@ public class ScriptMigration : IMigration
         Comment = comment;
         IsTransactionRequired = isTransactionRequired;
         IsLongRunning = isLongRunning;
+        Dependencies = dependencies ?? Array.Empty<MigrationVersion>();
     }
 
     /// <inheritdoc />

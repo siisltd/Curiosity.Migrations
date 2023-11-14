@@ -83,15 +83,21 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 1));
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 2));
-            
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,
@@ -145,15 +151,21 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 1));
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 2));
-            
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,
@@ -257,6 +269,8 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
@@ -264,6 +278,8 @@ public class DbMigrator_Should
         secondMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
@@ -271,11 +287,15 @@ public class DbMigrator_Should
         thirdMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var fourthMigration = new Mock<IMigration>();
         fourthMigration 
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(2));
-            
+        fourthMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,
@@ -328,6 +348,8 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
@@ -335,6 +357,8 @@ public class DbMigrator_Should
         secondMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
@@ -342,11 +366,15 @@ public class DbMigrator_Should
         thirdMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var fourthMigration = new Mock<IMigration>();
         fourthMigration 
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(2));
-            
+        fourthMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,
@@ -399,6 +427,8 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IMigration>();
         secondMigration
             .Setup(x => x.Version)
@@ -406,6 +436,8 @@ public class DbMigrator_Should
         secondMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IMigration>();
         thirdMigration
             .Setup(x => x.Version)
@@ -413,11 +445,15 @@ public class DbMigrator_Should
         thirdMigration
             .Setup(x => x.IsLongRunning)
             .Returns(true);
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var fourthMigration = new Mock<IMigration>();
         fourthMigration 
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(2));
-            
+        fourthMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,
@@ -681,6 +717,9 @@ public class DbMigrator_Should
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(version));
 
+        migration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+
         return migration.Object;
     }
 
@@ -711,14 +750,20 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IDowngradeMigration>();
         secondMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 1));
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IDowngradeMigration>();
         thirdMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 2));
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
             
         var migrations = new List<IMigration>
         {
@@ -770,19 +815,27 @@ public class DbMigrator_Should
         firstMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1));
+        firstMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var secondMigration = new Mock<IDowngradeMigration>();
         secondMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 1));
+        secondMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var thirdMigration = new Mock<IDowngradeMigration>();
         thirdMigration
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(1, 2));
+        thirdMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
         var fourthMigration = new Mock<IDowngradeMigration>();
         fourthMigration 
             .Setup(x => x.Version)
             .Returns(new MigrationVersion(2));
-            
+        fourthMigration.Setup(x => x.Dependencies)
+            .Returns(new List<MigrationVersion>());
+        
         var migrations = new List<IMigration>
         {
             firstMigration.Object,

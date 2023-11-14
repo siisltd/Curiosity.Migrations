@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0] - 2023-11-14
+
+### Added
+
+- Migration dependencies: ability to specify how one migration depends from another. 
+Both code and script migrations supports this.
+
 ## [4.2.0] - 2023-04-21
 
 ### Changed

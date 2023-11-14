@@ -159,7 +159,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 await _migrationConnection.CreateMigrationHistoryTableIfNotExistsAsync(cancellationToken);
                 _logger?.LogInformation($"Creating \"{_migrationConnection.MigrationHistoryTableName}\" table completed");
             }
-
+            
             // get migrations to apply
             var migrationsToApply = await GetMigrationsToApplyAsync(isUpgrade, false, cancellationToken);
             if (migrationsToApply.Count == 0)
@@ -196,7 +196,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var policy = isUpgrade
                 ? _upgradePolicy
                 : _downgradePolicy;
-            var migrationResult = await MigrateAsync(migrationsToApply, isUpgrade, policy, cancellationToken);
+            var migrationResult = await ApplyMigrations(migrationsToApply, isUpgrade, policy, cancellationToken);
 
             await _migrationConnection.CloseConnectionAsync();
             _logger?.LogInformation($"Migrating database \"{_migrationConnection.DatabaseName}\" completed. Successfully applied {migrationsToApply.Count} migrations");
@@ -380,7 +380,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         return true;
     }
 
-    private async Task<(IReadOnlyList<MigrationInfo> Applied, IReadOnlyList<MigrationInfo> Skipped)> MigrateAsync(
+    private async Task<(IReadOnlyList<MigrationInfo> Applied, IReadOnlyList<MigrationInfo> Skipped)> ApplyMigrations(
         IReadOnlyList<IMigration> orderedMigrations,
         bool isUpgrade,
         MigrationPolicy policy,
@@ -399,8 +399,9 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             ? "Upgrade"
             : "Downgrade";
 
-        var appliedMigrations = new List<MigrationInfo>(orderedMigrations.Count);
-        var skippedMigrations = new List<MigrationInfo>();
+        var appliedMigrationVersions = new HashSet<MigrationVersion>(await _migrationConnection.GetAppliedMigrationVersionsAsync(cancellationToken));
+        var currentAppliedMigrations = new List<MigrationInfo>(orderedMigrations.Count);
+        var currentSkippedMigrations = new List<MigrationInfo>();
 
         for (var i = 0; i < orderedMigrations.Count; i++)
         {
@@ -410,15 +411,25 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             // check policies
             if (!policy.HasFlag(MigrationPolicy.LongRunningAllowed) && migration.IsLongRunning)
             {
-                skippedMigrations.Add(currentMigration);
+                currentSkippedMigrations.Add(currentMigration);
                 _logger?.LogWarning($"Skip long-running migration \"{migration.Version}\" due to policy restriction");
                 continue;
             }
             if (!policy.HasFlag(MigrationPolicy.ShortRunningAllowed) && !migration.IsLongRunning)
             {
-                skippedMigrations.Add(currentMigration);
+                currentSkippedMigrations.Add(currentMigration);
                 _logger?.LogWarning($"Skip short-running migration \"{migration.Version}\" due to policy restriction");
                 continue;
+            }
+
+            if (migration.Dependencies.Count > 0)
+            {
+                foreach (var dependency in migration.Dependencies)
+                {
+                    if(!appliedMigrationVersions.Contains(dependency))
+                        throw new MigrationException(MigrationErrorCode.MigratingError, 
+                            $"Migration with version \"{migration.Version}\" depends on unapplied migration \"{dependency}\"");
+                }
             }
 
             DbTransaction? transaction = null;
@@ -461,7 +472,8 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 // when disposed if either commands fails
                 transaction?.Commit();
 
-                appliedMigrations.Add(currentMigration);
+                currentAppliedMigrations.Add(currentMigration);
+                appliedMigrationVersions.Add(currentMigration.Version);
                 _logger?.LogInformation($"{operationName} to \"{migration.Version}\" (database \"{_migrationConnection.DatabaseName}\") completed.");
             }
             catch (MigrationException e)
@@ -486,7 +498,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             }
         }
 
-        return (appliedMigrations, skippedMigrations);
+        return (currentAppliedMigrations, currentSkippedMigrations);
     }
 
     /// <inheritdoc />

@@ -5,7 +5,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>Curiosity.Migrations.TransactionTests</RootNamespace>
+        <RootNamespace>Curiosity.Migrations.IntegrationTests</RootNamespace>
 
         <LangVersion>11</LangVersion>
 
@@ -43,6 +43,24 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="ScriptMigrations\4.0-script_without_transction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DependenciesTests\DependencyScriptMigrations\1.0-correct_script.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DependenciesTests\DependencyScriptMigrations\4.0-script_with_ok_dependencies.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="DependenciesTests\DependencyScriptMigrations\7.0-script_with_not_ok_dependencies.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TransactionsTests\TransactionScriptMigrations\1.0-correct_script.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TransactionsTests\TransactionScriptMigrations\4.0-script_without_transction.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="TransactionsTests\TransactionScriptMigrations\6.0-incorrect_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -29,6 +29,10 @@ public abstract class CodeMigration : IMigration
     /// <inheritdoc />
     public bool IsLongRunning { get; protected set; } = false;
 
+    /// <inheritdoc />
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    public IReadOnlyList<MigrationVersion> Dependencies { get; protected set; } = Array.Empty<MigrationVersion>();
+
     /// <summary>
     /// Provides access to underlying database.
     /// </summary>
@@ -64,6 +68,8 @@ public abstract class CodeMigration : IMigration
         MigrationConnection = migrationConnection ?? throw new ArgumentNullException(nameof(migrationConnection));
         Variables = variables ?? throw new ArgumentNullException(nameof(variables));
         Logger = migrationLogger;
+
+        Dependencies ??= Array.Empty<MigrationVersion>();
     }
 
     /// <inheritdoc />

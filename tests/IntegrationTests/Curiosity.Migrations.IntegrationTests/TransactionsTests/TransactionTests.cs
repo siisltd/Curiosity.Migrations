@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Curiosity.Migrations.IntegrationTests.TransactionsTests.TransactionCodeMigrations;
 using Curiosity.Migrations.PostgreSQL;
 using Xunit;
 
-namespace Curiosity.Migrations.TransactionTests;
+namespace Curiosity.Migrations.IntegrationTests.TransactionsTests;
 
 public class TransactionTests
 {
@@ -18,8 +19,8 @@ public class TransactionTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "TransactionsTests/TransactionScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
@@ -53,8 +54,8 @@ public class TransactionTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "TransactionsTests/TransactionScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
@@ -89,8 +90,8 @@ public class TransactionTests
 
 
         var builder = new MigrationEngineBuilder();
-        builder.UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly());
-        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "ScriptMigrations"));
+        builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
+        builder.UseScriptMigrations().FromDirectory(Path.Combine(Directory.GetCurrentDirectory(), "TransactionsTests/TransactionScriptMigrations"));
         builder.ConfigureForPostgreSql(connectionString);
 
         builder.UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);

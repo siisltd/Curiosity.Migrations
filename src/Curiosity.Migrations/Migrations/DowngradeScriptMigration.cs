@@ -27,7 +27,8 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
         IReadOnlyList<ScriptMigrationBatch>? downScripts,
         string? comment,
         bool isTransactionRequired = true,
-        bool isLongRunning = false)
+        bool isLongRunning = false,
+        List<MigrationVersion>? dependencies = null)
         : base(
             migrationLogger,
             migrationConnection,
@@ -35,7 +36,8 @@ public class DowngradeScriptMigration : ScriptMigration, IDowngradeMigration
             upScripts,
             comment,
             isTransactionRequired,
-            isLongRunning)
+            isLongRunning,
+            dependencies)
     {
         DownScripts = downScripts?.ToArray() ?? Array.Empty<ScriptMigrationBatch>();
     }

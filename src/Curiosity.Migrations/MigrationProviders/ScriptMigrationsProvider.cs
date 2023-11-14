@@ -317,6 +317,21 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                     }
 
                     break;
+                case "DEPENDENCIES":
+                    var migrationDependencies = optionsMatch.Groups[2].Value.ToUpper().Trim().TrimEnd(';');
+                    
+                    if(String.IsNullOrWhiteSpace(migrationDependencies))
+                        throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
+
+                    var rawVersions = migrationDependencies.Split(',');
+                    var versions = rawVersions
+                        .Select(x => 
+                            MigrationVersion.TryParse(x.Trim(), out var version) 
+                                ? version 
+                                : throw new InvalidOperationException($"Can't parse migration dependency {version}"));
+                    options.Dependencies.AddRange(versions);
+
+                    break;
                 default:
                     throw new InvalidOperationException($"Option \"{optionsMatch.Groups[1].Value}\" is unknown");
             }
@@ -324,7 +339,7 @@ public class ScriptMigrationsProvider : IMigrationsProvider
 
         return options;
     }
-
+    
     /// <summary>
     /// Creates script migration. Replace variables placeholders with real values
     /// </summary>
@@ -370,7 +385,8 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 downScript,
                 migrationScriptInfo.Comment,
                 migrationScriptInfo.Options.IsTransactionRequired,
-                migrationScriptInfo.Options.IsLongRunning)
+                migrationScriptInfo.Options.IsLongRunning,
+                migrationScriptInfo.Options.Dependencies)
             : new ScriptMigration(
                 migrationLogger,
                 migrationConnection,
@@ -378,7 +394,8 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 upScript,
                 migrationScriptInfo.Comment,
                 migrationScriptInfo.Options.IsTransactionRequired,
-                migrationScriptInfo.Options.IsLongRunning);
+                migrationScriptInfo.Options.IsLongRunning,
+                migrationScriptInfo.Options.Dependencies);
     }
 
     private struct ScriptParsingOptions
@@ -418,5 +435,6 @@ public class ScriptMigrationsProvider : IMigrationsProvider
         public bool IsTransactionRequired { get; set; } = true;
 
         public bool IsLongRunning { get; set; }
+        public List<MigrationVersion> Dependencies { get; set; } = new();
     }
 }

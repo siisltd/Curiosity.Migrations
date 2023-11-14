@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.UnitTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.PostgreSql.IntegrationTests", "tests\IntegrationTests\Curiosity.Migrations.PostgreSql.IntegrationTests\Curiosity.Migrations.PostgreSql.IntegrationTests.csproj", "{3BDC5BA6-1A8B-443D-B3F7-D0983921E3C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.TransactionTests", "tests\IntegrationTests\Curiosity.Migrations.TransactionTests\Curiosity.Migrations.TransactionTests.csproj", "{A37CE3F0-5A47-49F9-A777-D3661607E4D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.IntegrationTests", "tests\IntegrationTests\Curiosity.Migrations.IntegrationTests\Curiosity.Migrations.IntegrationTests.csproj", "{A37CE3F0-5A47-49F9-A777-D3661607E4D5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{D80331ED-3602-4967-8813-2F38B9D1CCE3}"
 ProjectSection(SolutionItems) = preProject
