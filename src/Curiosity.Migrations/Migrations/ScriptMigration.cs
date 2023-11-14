@@ -65,7 +65,7 @@ public class ScriptMigration : IMigration
         Comment = comment;
         IsTransactionRequired = isTransactionRequired;
         IsLongRunning = isLongRunning;
-        Dependencies = dependencies ?? new List<MigrationVersion>();
+        Dependencies = dependencies ?? Array.Empty<MigrationVersion>();
     }
 
     /// <inheritdoc />

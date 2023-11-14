@@ -320,13 +320,13 @@ public class ScriptMigrationsProvider : IMigrationsProvider
                 case "DEPENDENCIES":
                     var migrationDependencies = optionsMatch.Groups[2].Value.ToUpper().Trim().TrimEnd(';');
                     
-                    if(string.IsNullOrWhiteSpace(migrationDependencies))
+                    if(String.IsNullOrWhiteSpace(migrationDependencies))
                         throw new InvalidOperationException($"Value \"{optionsMatch.Groups[2].Value}\" is not assignable to the option \"{optionsMatch.Groups[1].Value}\"");
 
-                    var rawVersions = migrationDependencies.Split(' ');
+                    var rawVersions = migrationDependencies.Split(',');
                     var versions = rawVersions
                         .Select(x => 
-                            MigrationVersion.TryParse(x, out var version) 
+                            MigrationVersion.TryParse(x.Trim(), out var version) 
                                 ? version 
                                 : throw new InvalidOperationException($"Can't parse migration dependency {version}"));
                     options.Dependencies.AddRange(versions);

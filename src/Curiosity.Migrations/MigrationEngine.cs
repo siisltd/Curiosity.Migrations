@@ -399,7 +399,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             ? "Upgrade"
             : "Downgrade";
 
-        var appliedMigrationVersions = (await _migrationConnection.GetAppliedMigrationVersionsAsync(cancellationToken)).ToList();
+        var appliedMigrationVersions = (await _migrationConnection.GetAppliedMigrationVersionsAsync(cancellationToken)).ToHashSet();
         var currentAppliedMigrations = new List<MigrationInfo>(orderedMigrations.Count);
         var currentSkippedMigrations = new List<MigrationInfo>();
 
@@ -422,7 +422,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 continue;
             }
 
-            if (migration.Dependencies.Any())
+            if (migration.Dependencies.Count > 0)
             {
                 foreach (var dependency in migration.Dependencies)
                 {
