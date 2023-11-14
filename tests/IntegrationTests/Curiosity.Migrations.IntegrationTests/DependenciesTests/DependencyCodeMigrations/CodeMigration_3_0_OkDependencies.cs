@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Curiosity.Migrations.IntegrationTests.DependencyCodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.DependenciesTests.DependencyCodeMigrations;
 
 public class CodeMigration_3_0_OkDependencies : CodeMigration, IDependencyMigration
 {

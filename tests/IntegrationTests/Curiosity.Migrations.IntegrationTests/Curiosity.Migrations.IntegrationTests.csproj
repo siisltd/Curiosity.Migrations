@@ -45,22 +45,22 @@
       <None Update="ScriptMigrations\4.0-script_without_transction.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="TransactionScriptMigrations\1.0-correct_script.sql">
+      <None Update="DependenciesTests\DependencyScriptMigrations\1.0-correct_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="TransactionScriptMigrations\4.0-script_without_transction.sql">
+      <None Update="DependenciesTests\DependencyScriptMigrations\4.0-script_with_ok_dependencies.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="TransactionScriptMigrations\6.0-incorrect_script.sql">
+      <None Update="DependenciesTests\DependencyScriptMigrations\7.0-script_with_not_ok_dependencies.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="DependencyScriptMigrations\1.0-correct_script.sql">
+      <None Update="TransactionsTests\TransactionScriptMigrations\1.0-correct_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="DependencyScriptMigrations\4.0-script_with_ok_dependencies.sql">
+      <None Update="TransactionsTests\TransactionScriptMigrations\4.0-script_without_transction.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="DependencyScriptMigrations\7.0-script_with_not_ok_dependencies.sql">
+      <None Update="TransactionsTests\TransactionScriptMigrations\6.0-incorrect_script.sql">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

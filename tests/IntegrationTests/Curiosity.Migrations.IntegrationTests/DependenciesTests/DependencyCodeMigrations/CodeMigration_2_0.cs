@@ -2,7 +2,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Curiosity.Migrations.IntegrationTests.DependencyCodeMigrations;
+namespace Curiosity.Migrations.IntegrationTests.DependenciesTests.DependencyCodeMigrations;
 
 public class CodeMigration_2_0 : CodeMigration, IDependencyMigration
 {
