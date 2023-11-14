@@ -399,7 +399,7 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             ? "Upgrade"
             : "Downgrade";
 
-        var appliedMigrationVersions = (await _migrationConnection.GetAppliedMigrationVersionsAsync(cancellationToken)).ToHashSet();
+        var appliedMigrationVersions = new HashSet<MigrationVersion>(await _migrationConnection.GetAppliedMigrationVersionsAsync(cancellationToken));
         var currentAppliedMigrations = new List<MigrationInfo>(orderedMigrations.Count);
         var currentSkippedMigrations = new List<MigrationInfo>();
 

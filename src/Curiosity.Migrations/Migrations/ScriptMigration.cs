@@ -35,7 +35,7 @@ public class ScriptMigration : IMigration
 
     /// <inheritdoc />
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-    public List<MigrationVersion> Dependencies { get; protected set;} = new();
+    public IReadOnlyList<MigrationVersion> Dependencies { get; protected set; }
 
     /// <summary>
     /// SQL script to apply migration split into batches.
@@ -51,7 +51,7 @@ public class ScriptMigration : IMigration
         string? comment,
         bool isTransactionRequired = true,
         bool isLongRunning = false,
-        List<MigrationVersion>? dependencies = null
+        IReadOnlyList<MigrationVersion>? dependencies = null
         )
     {
         Guard.AssertNotNull(migrationConnection, nameof(migrationConnection));
