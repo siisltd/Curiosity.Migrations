@@ -1,0 +1,11 @@
+version: 2
+
+# Build documentation with MkDocs
+mkdocs:
+  configuration: mkdocs.yml
+
+# Optionally specify the Python version and additional dependencies
+python:
+  version: 3.8
+  install:
+    - requirements: docs/requirements.txt 
