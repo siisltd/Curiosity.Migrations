@@ -38,7 +38,7 @@ var migrationEngine = builder.Build();
 To execute migrations, you can use the `IMigrationEngine` interface. Here is how you can upgrade or downgrade the database:
 
 ```csharp
-// Perform the migration
+// Perform the upgrade
 await migrationEngine.UpgradeDatabaseAsync();
 
 // To downgrade

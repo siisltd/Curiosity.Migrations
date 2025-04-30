@@ -8,17 +8,22 @@ The `Curiosity.Migrations` library facilitates database schema migrations throug
 
 1. **Configuration**: The migration process begins with configuring the `MigrationEngine` using the `MigrationEngineBuilder`. This involves setting up migration providers, policies, and the target version.
 
-2. **Migration Detection**: The migrator identifies which migrations need to be applied by comparing the current database state with available migrations and the specified target version.
+2. During the migration process, the `MigrationEngine` ensures that the necessary database and migration journal table are present before applying migrations:
 
-3. **Upgrade and Downgrade**: Depending on the target version, the migrator determines whether to perform an upgrade or downgrade:
+- **Database Creation**: The migrator checks if the database exists. If it does not, the database is created with specified earlier settings.
+
+- **Migration Journal Table Creation**: Once the database is confirmed to exist, the migrator checks for the migration journal table. It's a table with stored info about applied migration.
+
+These steps ensure that the migration process has the required infrastructure to track and apply migrations effectively.
+
+3. **Migration Detection**: The migrator identifies which migrations need to be applied by comparing the current database state with available migrations and the specified target version.
+
+4. **Upgrade and Downgrade**: Depending on the target version, the migrator determines whether to perform an upgrade or downgrade:
    - **Upgrade**: Applies migrations in ascending order up to the target version.
    - **Downgrade**: Applies migrations in descending order down to the target version.
 
-4. **Execution**: The migrator executes the migrations according to the defined policies, ensuring that the database schema is updated correctly.
+Then migrator executes the migrations according to the defined policies, ensuring that the database schema is updated correctly.
 
-5. **Logging**: Throughout the process, logging is used to track the progress and any issues that arise.
-
-This structured approach ensures that migrations are applied consistently and in the correct order, maintaining the integrity of the database schema. The `MigrationEngine` uses the configurations to guide the migration process, applying the necessary migrations to reach the desired state.
 
 ## Versioning 
 
@@ -99,17 +104,41 @@ This process ensures that the database schema is updated correctly according to 
 
 ### Migration Types
 
-- **Short-Running Migrations**: These are migrations that are expected to complete quickly. They are typically used for small changes that do not require extensive processing time.
-  
-- **Long-Running Migrations**: These migrations take a longer time to complete and are used for more extensive changes that may involve significant data processing or restructuring.
+The separation of migrations into long-running and short-running types serves several important purposes:
+
+1. **Resource Management**: Long-running migrations typically involve intensive data operations that could consume significant database resources over extended periods. By identifying these operations separately, the system can apply appropriate policies to manage resource utilization.
+
+2. **Selective Execution**: Using `MigrationPolicy`, you can choose to run only short-running migrations in certain scenarios (like during application startup) while scheduling long-running migrations for maintenance windows.
+
+3. **Production Safety**: Long-running migrations can be risky to run in production environments during peak hours. The separation allows you to:
+   - Apply short-running structural changes (like adding columns) immediately
+   - Defer intensive data migrations (like updating millions of rows) to off-peak hours
+
+4. **Batched Processing**: Long-running migrations often implement batch processing patterns (as seen in `MassUpdateCodeMigrationBase`) that:
+   - Process data in smaller chunks
+   - Include delays between operations to reduce database load
+   - Allow the database to remain responsive to other operations
+
+For example, consider a scenario where you need to:
+- Add a new column to a table (a quick, short-running operation)
+- Populate that column with calculated values for millions of existing records (a long-running operation)
+
+With migration types, you can perform these as separate migrations and apply them according to appropriate policies and timing.
 
 The `MigrationPolicy` allows you to specify whether short-running or long-running migrations are permitted, providing control over the types of operations that can be performed during the migration process.
+
+By default, migrations are configured as short-running (`IsLongRunning = false`). This can be seen in the `CodeMigration` base class where `IsLongRunning` is initialized to `false`. For SQL script migrations, the default is also short-running unless explicitly set otherwise.
+
+To mark a migration as long-running, you can:
+
+- For code migrations: Set the `IsLongRunning` property to `true` in your migration class
+- For script migrations: Add the comment `-- CURIOSITY: LONG-RUNNING = TRUE` to your SQL script
 
 ## Policy
 
 The `Curiosity.Migrations` library uses a `MigrationPolicy` to control which types of migrations are permitted during the migration process. The policy is defined using a set of flags that specify the allowed operations.
 
-### Available Policies
+Available Policies:
 
 - **AllForbidden**: No migrations are allowed to run.
 - **ShortRunningAllowed**: Only short-running migrations are permitted.
@@ -117,8 +146,6 @@ The `Curiosity.Migrations` library uses a `MigrationPolicy` to control which typ
 - **AllAllowed**: All migrations, regardless of their duration, are allowed to run.
 
 These policies can be combined using bitwise operations to create custom configurations that suit specific migration requirements.
-
-### Separate Policies for Upgrade and Downgrade
 
 The library allows you to define separate policies for upgrading and downgrading the database schema. This means you can specify different rules for what is allowed during an upgrade versus a downgrade. For example, you might allow all migrations during an upgrade but restrict downgrades to only short-running migrations.
 
@@ -137,12 +164,13 @@ The `MigrationEngine` uses these configurations to determine the order and appli
 
 The `Curiosity.Migrations` library allows for configuring the migration process through the `MigrationEngine`. The configuration involves setting up the migration connection, policies for upgrading and downgrading, and specifying target versions if needed.
 
-### Key Configuration Elements
+Key Configuration Elements:
 
 - **Migration Connection**: Establishes the connection to the database where migrations will be applied.
 - **Migration Policies**: Define the rules for upgrading and downgrading the database schema.
 - **Target Version**: Specifies the version to which the database should be migrated. This can be set to a specific version or left open-ended to apply all available migrations.
 - **Pre-Migrations**: Optional scripts that can be executed before the main migration process.
+
 
 The `MigrationEngine` uses these configurations to determine the order and application of migrations, ensuring that the database schema is updated correctly according to the specified policies and target version.
 
@@ -172,13 +200,3 @@ var migrationEngine = builder.Build();
 ```
 
 This example demonstrates how to set up a migration engine with script and code migrations, configure policies for upgrades and downgrades, use a logger, and specify a target version.
-
-### Database and Migration Journal Table Creation
-
-During the migration process, the `Curiosity.Migrations` library ensures that the necessary database and migration journal table are present before applying migrations:
-
-- **Database Creation**: The migrator checks if the database exists. If it does not, the database is created using the `CreateDatabaseIfNotExistsAsync` method.
-
-- **Migration Journal Table Creation**: Once the database is confirmed to exist, the migrator checks for the migration journal table. If it is absent, the table is created using the `CreateMigrationHistoryTableIfNotExistsAsync` method.
-
-These steps ensure that the migration process has the required infrastructure to track and apply migrations effectively.

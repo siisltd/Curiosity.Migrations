@@ -1,13 +1,6 @@
 # Transactions
 
-Transactions are a fundamental aspect of database migrations, ensuring that changes are applied consistently and reliably. They allow a series of operations to be grouped into a single unit of work, which is either fully completed or fully rolled back. This atomicity is crucial for maintaining data integrity, especially in complex migrations involving multiple steps or operations.
-
-## Importance of Transactions
-
-- **Data Integrity**: Transactions ensure that all operations within a migration are completed successfully before committing the changes. If any operation fails, the transaction can be rolled back, leaving the database in a consistent state.
-- **Error Handling**: By using transactions, errors can be handled more gracefully. If an error occurs during a migration, the transaction can be rolled back, preventing partial updates that could lead to data corruption.
-- **Concurrency Control**: Transactions help manage concurrent access to the database, ensuring that multiple migrations or operations do not interfere with each other.
-- **Consistency**: Transactions ensure that the database remains in a consistent state, even in the event of a failure. This is particularly important in environments where multiple migrations may be applied simultaneously.
+Transactions are a fundamental aspect of database migrations, ensuring that changes are applied consistently and reliably. This atomicity is crucial for maintaining data integrity, especially in complex migrations involving multiple steps or operations.
 
 By default, transactions are enabled for both script and code migrations. This means that each migration is executed within its own transaction, providing the benefits of atomicity, consistency, and error handling. However, there are scenarios where you might want to disable transactions, such as when performing operations that cannot be executed within a transaction, like creating indexes concurrently.
 
@@ -47,7 +40,7 @@ Example of disabling a transaction in a code migration:
 ```csharp
 public class MyCodeMigration : CodeMigration
 {
-    public override MigrationVersion Version => new MigrationVersion(1, 0, 0);
+    public override MigrationVersion Version => new MigrationVersion(1, 0);
     public override string? Comment => "Example migration";
 
     public MyCodeMigration()
