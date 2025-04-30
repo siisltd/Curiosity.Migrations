@@ -14,7 +14,7 @@ builder.UseVariable("%VARIABLIE%", variableValue);
 
 ### Script migrations
 
-Then in your database script use this variables:
+In script migrations, preprocessing is performed to substitute variables with their values before execution.
 
 ```sql
 -- %VARIABLIE% %AnotherVariable%
