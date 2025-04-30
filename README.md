@@ -1,57 +1,212 @@
-# Curiosity.Migrations [![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) [![(License)](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Mirgations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
+# Curiosity.Migrations [![Build Status](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) [![License](https://img.shields.io/github/license/siisltd/curiosity.migrations.svg)](https://github.com/siisltd/Curiosity.Migrations/blob/master/LICENSE) [![NuGet Downloads](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) [![Documentation Status](https://readthedocs.org/projects/curiosity-migrations/badge/?version=latest)](https://curiosity-migrations.readthedocs.io/)
 
+## Introduction
 
-Database migration framework for .NET and .NET Core.
+Curiosity.Migrations is a powerful, flexible database migration framework for .NET and .NET Core applications that gives you precise control over how your database evolves. It combines the performance and control of raw SQL with the flexibility of C# code migrations, all wrapped in a robust, enterprise-ready migration system.
 
-|Branch|Build status|
-|---|---|
-|master|[![Build and Test](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml)|
+Unlike ORM-specific migration tools, Curiosity.Migrations is database-focused and designed for scenarios where you need fine-grained control over migration execution, especially for large production databases where performance and safety are critical.
 
-`Curiosity.Migrations` is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.
+## Why Use Curiosity.Migrations?
 
-Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. 
-Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database). 
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔧 Precise Control</h3>
+      <p>Write raw SQL when you need optimal performance, or use C# code when you need complex logic. You control exactly what runs against your database.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🚀 Production-Ready</h3>
+      <p>Built for enterprise applications with safety features, long-running migration support, and granular policies to control what runs in each environment.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔄 Bidirectional</h3>
+      <p>First-class support for downgrade migrations enables safe rollbacks when deployments don't go as planned.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>📊 Progressive Migrations</h3>
+      <p>Separate long-running data migrations from quick schema changes to keep your application responsive during upgrades.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🧪 Testability</h3>
+      <p>Create and initialize test databases with specific migration states for reliable integration testing.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🧩 Extensibility</h3>
+      <p>Customize where migrations come from, how they're logged, and how they're applied to fit your workflow.</p>
+    </td>
+  </tr>
+</table>
 
-# Features
+## Core Features
 
-`Curiosity.Migration` has a lot of useful features. You can find more information about them at special articles:
+### Migration Types
 
-- [Script migrations](https://curiosity-migrations.readthedocs.io/features/script_migration/index.md): write your own DDL SQL scripts
-  - [Batches](https://curiosity-migrations.readthedocs.io/features/script_migration/batches.md): separate a big SQL script into small batches 
-- [Code migrations](https://curiosity-migrations.readthedocs.io/features/code_migration/index.md): manipulate data from C#, useful for database seeding
-  - [Dependency Injection](https://curiosity-migrations.readthedocs.io/features/code_migration/di.md): inject dependencies into code migrations
-  - [EntityFramework Integration](https://curiosity-migrations.readthedocs.io/features/code_migration/ef_integration.md): use `EntityFramework` for data manipulation from code migrations
-- [Migration Providers](https://curiosity-migrations.readthedocs.io/features/migration_providers.md): store migrations in a different way (files, embedded resources, etc)
-- [Variable substitutions](https://curiosity-migrations.readthedocs.io/features/variables.md): allows to insert some dynamic data to your migrations
-- [Transactions](https://curiosity-migrations.readthedocs.io/features/transactions.md): you can enable or disable transaction for separate migration
-- [Pre-migrations](https://curiosity-migrations.readthedocs.io/features/pre_migrations.md): executes SQL or code before main migration
-- [Journal](https://curiosity-migrations.readthedocs.io/features/journal.md): choose your own table to store migration history
-- [Downgrade migrations](https://curiosity-migrations.readthedocs.io/features/downgrade.md): allows you to reverse applied migrations
+- **[Script Migrations](https://curiosity-migrations.readthedocs.io/features/script_migration/index)**: Write raw SQL for direct database access
+  - [Batched Execution](https://curiosity-migrations.readthedocs.io/features/script_migration/batches): Split large scripts into manageable chunks
+  - Full support for database-specific SQL features and optimizations
 
-## Supported databases
+- **[Code Migrations](https://curiosity-migrations.readthedocs.io/features/code_migration/index)**: Implement migrations in C# for complex scenarios
+  - [Dependency Injection](https://curiosity-migrations.readthedocs.io/features/code_migration/di): Use your application's services in migrations
+  - [Entity Framework Integration](https://curiosity-migrations.readthedocs.io/features/code_migration/ef_integration): Leverage EF Core when needed
+  - Implement custom validation, logging, or business logic during migrations
+
+### Safety and Control
+
+- **[Policies](https://curiosity-migrations.readthedocs.io/basics#migration-policies)**: Control which migrations run in different environments
+- **[Dependencies](https://curiosity-migrations.readthedocs.io/features/dependencies)**: Specify explicit requirements between migrations
+- **[Downgrade Migrations](https://curiosity-migrations.readthedocs.io/features/downgrade)**: Safely roll back changes when needed
+- **[Transactions](https://curiosity-migrations.readthedocs.io/features/transactions)**: Configure transaction behavior per migration
+- **Long-running vs Short-running**: Separate quick schema changes from data-intensive operations
+
+### Extensibility
+
+- **[Migration Providers](https://curiosity-migrations.readthedocs.io/features/migration_providers)**: Source migrations from files, embedded resources, etc.
+- **[Variables](https://curiosity-migrations.readthedocs.io/features/variables)**: Dynamic value substitution in migrations
+- **[Pre-migrations](https://curiosity-migrations.readthedocs.io/features/pre_migrations)**: Run setup scripts before main migrations
+- **[Custom Journal](https://curiosity-migrations.readthedocs.io/features/journal)**: Configure how applied migrations are tracked
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install core package
+dotnet add package Curiosity.Migrations
+
+# Install database provider (currently PostgreSQL)
+dotnet add package Curiosity.Migrations.PostgreSQL
+```
+
+### Basic Setup
+
+```csharp
+// Configure the migration engine
+var builder = new MigrationEngineBuilder(services)
+    .UseScriptMigrations().FromDirectory("./Migrations")  // Add SQL migrations
+    .UseCodeMigrations().FromAssembly(Assembly.GetExecutingAssembly())  // Add code migrations
+    .ConfigureForPostgreSql("Host=localhost;Database=myapp;Username=postgres;Password=secret")
+    .UseUpgradeMigrationPolicy(MigrationPolicy.AllAllowed);
+
+// Build and run the engine
+var migrationEngine = builder.Build();
+var result = await migrationEngine.UpgradeDatabaseAsync();
+
+// Check results
+if (result.IsSuccessful)
+{
+    Console.WriteLine($"Successfully migrated to version {result.CurrentVersion}");
+}
+```
+
+Get started quickly with the [**Quick Start Guide**](https://curiosity-migrations.readthedocs.io/quickstart) or dive into [**Core Concepts**](https://curiosity-migrations.readthedocs.io/basics).
+
+## Supported Databases
 
 <table>
   <tbody>
     <tr>
       <td align="center" valign="middle">
-          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png">
+        <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png" width="200">
+        <br>
+        <b>PostgreSQL</b>
       </td>
     </tr>
   </tbody>
 </table>
 
-If you don't find a desired database, you can contribute and add support by yourself.
+Support for additional databases can be added through contributions.
 
-## Install
+## Comparing with Alternatives
 
-`Curiosity.Migrations` is available as a Nuget package.
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Curiosity.Migrations</th>
+      <th>EF Core Migrations</th>
+      <th>FluentMigrator</th>
+      <th>DbUp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Direct SQL Control</td>
+      <td>✅ Full</td>
+      <td>⚠️ Generated</td>
+      <td>⚠️ Generated</td>
+      <td>✅ Full</td>
+    </tr>
+    <tr>
+      <td>Code Migrations</td>
+      <td>✅ Native</td>
+      <td>⚠️ Limited</td>
+      <td>⚠️ Via API</td>
+      <td>❌ No</td>
+    </tr>
+    <tr>
+      <td>Downgrade Support</td>
+      <td>✅ First-class</td>
+      <td>⚠️ Limited</td>
+      <td>⚠️ Limited</td>
+      <td>❌ No</td>
+    </tr>
+    <tr>
+      <td>Long-running Migrations</td>
+      <td>✅ Optimized</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+    </tr>
+    <tr>
+      <td>Migration Policies</td>
+      <td>✅ Configurable</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+      <td>❌ No</td>
+    </tr>
+    <tr>
+      <td>DI Support</td>
+      <td>✅ Native</td>
+      <td>⚠️ Limited</td>
+      <td>⚠️ Limited</td>
+      <td>⚠️ Basic</td>
+    </tr>
+    <tr>
+      <td>Best For</td>
+      <td>Enterprise apps, complex migrations, performance-critical systems</td>
+      <td>Simple CRUD apps with EF Core</td>
+      <td>Cross-database projects</td>
+      <td>Simple script runners</td>
+    </tr>
+  </tbody>
+</table>
 
-| Package | Build Status | Version | Downloads |
-|---------|------------|------------|------------|
-| Curiosity.Migrations | [![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
-| Curiosity.Migrations.PostgreSQL | [![Build and Test Utils](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/siisltd/Curiosity.Migrations/actions/workflows/build.yml) | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
+For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](https://curiosity-migrations.readthedocs.io/philosophy).
 
+## Available Packages
 
-## Getting help
+| Package | Version | Downloads |
+|---------|---------|-----------|
+| Curiosity.Migrations | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
+| Curiosity.Migrations.PostgreSQL | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
 
-You can find documentation and samples at [ReadTheDocs](https://curiosity-migrations.readthedocs.io/).
+## Documentation
+
+* [Quick Start Guide](https://curiosity-migrations.readthedocs.io/quickstart) - Getting started with Curiosity.Migrations
+* [Core Concepts](https://curiosity-migrations.readthedocs.io/basics) - Understanding the fundamental concepts
+* [The Philosophy Behind Curiosity.Migrations](https://curiosity-migrations.readthedocs.io/idea) - Why this library exists
+* [Feature Documentation](#core-features) - Detailed guides for each feature
+* [Supported Databases](https://curiosity-migrations.readthedocs.io/supported_databases) - Currently supported database systems
+
+## Community and Support
+
+* [GitHub Issues](https://github.com/siisltd/Curiosity.Migrations/issues) - Report bugs or request features
+* [GitHub Discussions](https://github.com/siisltd/Curiosity.Migrations/discussions) - Ask questions and discuss ideas
+
+## License
+
+Curiosity.Migrations is licensed under the [MIT License](https://github.com/siisltd/Curiosity.Migrations/blob/master/LICENSE).

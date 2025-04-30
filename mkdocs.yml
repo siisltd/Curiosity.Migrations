@@ -1,13 +1,15 @@
-site_name: Curiosity.Migrations Documention
-site_url: https://siisltdmigrations.rtfd.io
+site_name: Curiosity.Migrations Documentation
+site_url: https://curiosity-migrations.readthedocs.io
 site_description: Curiosity.Migrations - Database migration framework for .NET and .NET Core
-site_author: SIIS Ltd
-copyright: <a href="https://survey-studio.com">SIIS Ltd</a> © 2020
+site_author: SIIS Ltd | Markeli
+copyright: <a href="https://survey-studio.com">SIIS Ltd | Markeli</a> © 2025
 
 nav:
   - 'Intro': index.md
   - 'Quick Start': quickstart.md
+  - 'The Philosophy Behind Curiosity.Migrations': philosophy.md
   - 'Basics': basics.md
+  - 'Supported Databaes': supported_databases.md
   - 'Features':
     - 'Script Migration':
       - 'What is it': features/script_migration/index.md
@@ -20,10 +22,10 @@ nav:
     - 'Variables': features/variables.md
     - 'Transactions': features/transactions.md
     - 'Pre-migrations': features/pre_migrations.md
+    - 'Logging': features/logging.md
     - 'Journal': features/journal.md
     - 'Downgrade': features/downgrade.md
-  - Samples: samples/index.md
-  - 'Changelog':
+    - 'Dependencies': features/dependencies.md
     - 'Curiosity.Migration': changelog/curiosity.migration.md
     - 'Curiosity.Migration.PostgreSQL': changelog/curiosity.migration.postgres.md
 

@@ -1,8 +1,6 @@
 # Script migration
 
-Script migrations are used to apply changes to a database using raw SQL scripts. They are particularly useful when you need to execute complex SQL commands that are difficult to express using higher-level abstractions. Script migrations can be organized into batches, allowing for more granular control over the execution order and transaction management.
-
-The `ScriptMigration` class provides the core functionality for executing these SQL scripts. It supports both upgrade and downgrade operations, enabling you to apply and revert changes as needed. Each script can be split into multiple batches, which are executed sequentially.
+Script migrations are used to apply changes to a database using raw SQL scripts. Script migrations can be organized into batches, allowing for more granular control over the execution order and transaction management.
 
 To use script migrations, you can define them in SQL files and organize them in directories or embed them in assemblies. The `ScriptMigrationsProvider` class facilitates the discovery and execution of these scripts from specified locations.
 

@@ -2,14 +2,13 @@
 
 Migration providers are responsible for supplying migrations from various sources to the migration engine. They implement the `IMigrationsProvider` interface, which defines a method to return a collection of migrations.
 
-
 The purpose of a migration provider is to abstract the source of migrations, allowing the migration engine to apply them without needing to know their origin. This enables flexibility in how migrations are defined and retrieved, whether from code, scripts, or other sources.
 
 ## Existed providers
 
 ### CodeMigrationsProvider
 
-The `CodeMigrationsProvider` is designed to handle migrations written in C#. This provider is ideal for implementing complex logic that might be challenging to achieve with SQL alone. Migrations are sourced from specified assemblies, allowing for a structured and organized approach to migration management.
+The `CodeMigrationsProvider` is designed to handle migrations written in C#. Migrations are sourced from specified assemblies, allowing for a structured and organized approach to migration management.
 
 #### Methods
 
