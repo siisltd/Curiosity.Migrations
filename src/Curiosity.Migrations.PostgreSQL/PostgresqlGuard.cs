@@ -27,11 +27,10 @@ internal static class PostgresqlGuard
 
         try
         {
-            var _ = new NpgsqlConnectionStringBuilder(connectionString);
+            _ = new NpgsqlConnectionStringBuilder(connectionString);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             throw new ArgumentException("Incorrect connection string", paramName, e);
         }
     }

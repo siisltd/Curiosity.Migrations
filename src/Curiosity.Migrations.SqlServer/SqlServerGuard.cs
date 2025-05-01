@@ -19,6 +19,15 @@ public static class SqlServerGuard
     public static void AssertConnectionString(string connectionString, string? paramName = null)
     {
         Guard.AssertNotEmpty(connectionString, paramName ?? nameof(connectionString));
+        
+        try
+        {
+            _ = new SqlConnectionStringBuilder(connectionString);
+        }
+        catch (Exception e)
+        {
+            throw new ArgumentException("Incorrect connection string", paramName, e);
+        }
     }
 
     /// <summary>

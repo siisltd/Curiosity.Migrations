@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Curiosity.Migrations.SqlServer\Curiosity.Migrations.SqlServer.csproj" />
-    <ProjectReference Include="..\..\src\Curiosity.Migrations.SqlServer\Curiosity.Migrations.SqlServer.csproj" />
   </ItemGroup>
 
 </Project> 

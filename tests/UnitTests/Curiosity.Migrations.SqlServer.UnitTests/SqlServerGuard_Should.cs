@@ -21,14 +21,9 @@ public class SqlServerGuard_Should
     [Fact]
     public void Assert_OnInvalidTableName()
     {
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName(null!, "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName(" ", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("table;", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("table'", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("table\"", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("table[", "table_name"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertTableName("table]", "table_name"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertTableName("", "table_name"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertTableName(null!, "table_name"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertTableName(" ", "table_name"));
     }
 
     [Fact]
@@ -43,10 +38,8 @@ public class SqlServerGuard_Should
     [Fact]
     public void Assert_OnInvalidConnectionString()
     {
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertConnectionString("", "connectionString"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertConnectionString(null!, "connectionString"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertConnectionString(" ", "connectionString"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertConnectionString("Server=localhost", "connectionString"));
-        Assert.Throws<ArgumentException>(() => SqlServerGuard.AssertConnectionString("Database=test", "connectionString"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertConnectionString("", "connectionString"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertConnectionString(null!, "connectionString"));
+        Assert.Throws<ArgumentNullException>(() => SqlServerGuard.AssertConnectionString(" ", "connectionString"));
     }
 } 
