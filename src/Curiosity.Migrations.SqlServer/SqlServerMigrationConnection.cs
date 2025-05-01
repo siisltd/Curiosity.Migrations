@@ -6,22 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Curiosity.Migrations.MsSql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
-namespace Curiosity.Migrations.MsSql;
+namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
-/// Facade over connection to a MS SQL database for migration.
+/// Facade over connection to a SQL Server database for migration.
 /// </summary>
 /// <inheritdoc cref="IMigrationConnection"/>
-public class MsSqlMigrationConnection : IMigrationConnection
+public class SqlServerMigrationConnection : IMigrationConnection
 {
     /// <summary>
     /// Connection string without initial catalog, pointing to the default/master database.
     /// </summary>
     private readonly string _connectionStringWithoutInitialCatalog;
-    private readonly MsSqlMigrationConnectionOptions _options;
+    private readonly SqlServerMigrationConnectionOptions _options;
     private readonly MigrationActionHelper _actionHelper;
 
     /// <summary>
@@ -54,9 +55,9 @@ public class MsSqlMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public string MigrationHistoryTableName { get; }
 
-    /// <inheritdoc cref="MsSqlMigrationConnection"/>
+    /// <inheritdoc cref="SqlServerMigrationConnection"/>
     /// <param name="options">Options to connect and manage database.</param>
-    public MsSqlMigrationConnection(MsSqlMigrationConnectionOptions options)
+    public SqlServerMigrationConnection(SqlServerMigrationConnectionOptions options)
     {
         Guard.AssertNotNull(options, nameof(options));
 
@@ -114,7 +115,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public DbTransaction BeginTransaction()
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return SqlConnection!.BeginTransaction();
     }
@@ -204,17 +205,15 @@ public class MsSqlMigrationConnection : IMigrationConnection
         return _actionHelper.TryExecuteAsync(
             async () =>
             {
-                using (var connection = new SqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection.OpenAsync(cancellationToken);
-                    var result = await ExecuteScalarSqlInternalAsync(
-                        connection,
-                        sqlQuery,
-                        queryParams,
-                        cancellationToken);
+                using var connection = new SqlConnection(_connectionStringWithoutInitialCatalog);
+                await connection.OpenAsync(cancellationToken);
+                var result = await ExecuteScalarSqlInternalAsync(
+                    connection,
+                    sqlQuery,
+                    queryParams,
+                    cancellationToken);
 
-                    return result;
-                }
+                return result;
             },
             MigrationErrorCode.MigratingError,
             "Can not execute SQL query");
@@ -410,7 +409,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public async Task CreateMigrationHistoryTableIfNotExistsAsync(CancellationToken cancellationToken = default)
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
         
         var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
         
@@ -455,7 +454,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(tableName, nameof(tableName));
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             async () =>
@@ -478,14 +477,14 @@ public class MsSqlMigrationConnection : IMigrationConnection
 
     private async Task<string> GetSchemaNameFromConnectionStringAsync()
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         // Get the default schema for the current user
         var result = await ExecuteScalarSqlAsync(
             "SELECT SCHEMA_NAME()",
             null);
 
-        return result?.ToString() ?? MsSqlMigrationConnectionOptions.DefaultSchemaName;
+        return result?.ToString() ?? SqlServerMigrationConnectionOptions.DefaultSchemaName;
     }
 
     /// <inheritdoc />
@@ -495,7 +494,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(script, nameof(script));
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             () => ExecuteScalarSqlInternalAsync(
@@ -510,7 +509,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<MigrationVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default)
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return await _actionHelper.TryExecuteAsync(
             async () =>
@@ -574,7 +573,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
         string? migrationName,
         CancellationToken cancellationToken = default)
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             async () =>
@@ -600,7 +599,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
     /// <inheritdoc />
     public Task DeleteAppliedMigrationVersionAsync(MigrationVersion version, CancellationToken cancellationToken = default)
     {
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             async () =>
@@ -627,7 +626,7 @@ public class MsSqlMigrationConnection : IMigrationConnection
         CancellationToken cancellationToken = default)
     {
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
-        MsSqlGuard.AssertConnection(SqlConnection);
+        SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
             () => ExecuteNonQueryInternalAsync(

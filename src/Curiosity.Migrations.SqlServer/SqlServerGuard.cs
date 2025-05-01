@@ -2,14 +2,15 @@ using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Data.SqlClient;
+using Curiosity.Migrations;
 
-namespace Curiosity.Migrations.MsSql;
+namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
-/// Guard to check input data on correctness for MsSql provider.
+/// Guard to check input data on correctness for SqlServer provider.
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
-public static class MsSqlGuard
+public static class SqlServerGuard
 {
     /// <summary>
     /// Asserts that connection string is valid.

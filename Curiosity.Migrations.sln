@@ -7,6 +7,8 @@ ProjectSection(SolutionItems) = preProject
 	docs\quickstart.md = docs\quickstart.md
 	docs\requirements.txt = docs\requirements.txt
 	docs\basics.md = docs\basics.md
+	docs\philosophy.md = docs\philosophy.md
+	docs\supported_databases.md = docs\supported_databases.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
@@ -15,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.PostgreSQL", "src\Curiosity.Migrations.PostgreSQL\Curiosity.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.MsSql", "src\Curiosity.Migrations.MsSql\Curiosity.Migrations.MsSql.csproj", "{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.SqlServer", "src\Curiosity.Migrations.SqlServer\Curiosity.Migrations.SqlServer.csproj", "{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{8DB6C739-ACB4-47CD-B72E-A5180C22B84F}"
 EndProject
@@ -45,6 +47,8 @@ ProjectSection(SolutionItems) = preProject
 	docs\features\migration_providers.md = docs\features\migration_providers.md
 	docs\features\pre_migrations.md = docs\features\pre_migrations.md
 	docs\features\downgrade.md = docs\features\downgrade.md
+	docs\features\dependencies.md = docs\features\dependencies.md
+	docs\features\logging.md = docs\features\logging.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylesheets", "stylesheets", "{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC}"
@@ -69,6 +73,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changelog", "changelog", "{
 ProjectSection(SolutionItems) = preProject
 	docs\changelog\curiosity.migration.md = docs\changelog\curiosity.migration.md
 	docs\changelog\curiosity.migration.postgres.md = docs\changelog\curiosity.migration.postgres.md
+	docs\changelog\curiosity.migration.sqlserver.md = docs\changelog\curiosity.migration.sqlserver.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{EC0D7D04-8030-41E3-BE96-47DB3ADF99E3}"

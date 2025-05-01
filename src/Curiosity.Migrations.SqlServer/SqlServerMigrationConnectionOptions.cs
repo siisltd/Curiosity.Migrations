@@ -1,9 +1,11 @@
-namespace Curiosity.Migrations.MsSql;
+using Curiosity.Migrations;
+
+namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
-/// Options for <see cref="MsSqlMigrationConnection"/>
+/// Options for <see cref="SqlServerMigrationConnection"/>
 /// </summary>
-public class MsSqlMigrationConnectionOptions : IMigrationConnectionOptions
+public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
 {
     /// <summary>
     /// Default value for <see cref="MigrationHistoryTableName"/>
@@ -85,37 +87,28 @@ public class MsSqlMigrationConnectionOptions : IMigrationConnectionOptions
     /// </summary>
     public bool ReadCommittedSnapshot { get; }
 
-    /// <inheritdoc cref="MsSqlMigrationConnectionOptions"/>
-    public MsSqlMigrationConnectionOptions(
+    /// <inheritdoc cref="SqlServerMigrationConnectionOptions"/>
+    public SqlServerMigrationConnectionOptions(
         string connectionString,
-        string? migrationHistoryTableName = null,
+        string migrationHistoryTableName = DefaultMigrationTableName,
         string? schemaName = null,
-        string defaultDatabase = "master",
+        string? defaultDatabase = null,
+        bool allowSnapshotIsolation = false,
+        bool readCommittedSnapshot = false,
         string? collation = null,
-        int? maxConnections = null,
-        int? initialSize = null,
-        int? fileGrowth = null,
-        int? maxSize = null,
         string? dataFilePath = null,
         string? logFilePath = null,
-        bool allowSnapshotIsolation = false,
-        bool readCommittedSnapshot = false)
+        int? initialSize = null,
+        int? maxSize = null,
+        int? fileGrowth = null,
+        int? maxConnections = null)
     {
-        MsSqlGuard.AssertConnectionString(connectionString, nameof(connectionString));
+        SqlServerGuard.AssertConnectionString(connectionString, nameof(connectionString));
+        SqlServerGuard.AssertTableName(migrationHistoryTableName, nameof(migrationHistoryTableName));
         Guard.AssertNotEmpty(defaultDatabase, nameof(defaultDatabase));
 
         ConnectionString = connectionString;
-
-        if (migrationHistoryTableName != null)
-        {
-            MsSqlGuard.AssertTableName(migrationHistoryTableName, nameof(migrationHistoryTableName));
-            MigrationHistoryTableName = migrationHistoryTableName;
-        }
-        else
-        {
-            MigrationHistoryTableName = DefaultMigrationTableName;
-        }
-
+        MigrationHistoryTableName = migrationHistoryTableName;
         SchemaName = schemaName;
         DefaultDatabase = defaultDatabase;
         Collation = collation;
