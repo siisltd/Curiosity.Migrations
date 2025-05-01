@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+
+        <PackageId>Curiosity.Migrations.MsSql</PackageId>
+        <Title>MS SQL Server provider for Curiosity.Migrations. </Title>
+        <Description>Curiosity.Migrations is a migration framework that uses SQL scripts and code migration to alter your database schema or seed a data.</Description>
+        <Summary>Without migrations you need to create a lots of sql scripts that have to be run manually by every developer involved. Migrations solve the problem of evolving a database schema for multiple databases (for example, the developer's local database, the test database and the production database).</Summary>
+        <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity; mssql; sqlserver</PackageTags>
+        <Language>English</Language>
+
+        <PackageVersion>4.0.2</PackageVersion>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+
+        <Authors>Maxim Markelow (@markeli), Kirill Lutsenko, Andrei Vinogradov</Authors>
+        <Company>SIIS Ltd</Company>
+        <Copyright>SIIS Ltd, 2023</Copyright>
+
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageProjectUrl>https://curiosity-migrations.readthedocs.io/</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/siisltd/Curiosity.Migrations</RepositoryUrl>
+        <PackageReleaseNotes>https://github.com/siisltd/Curiosity.Migrations/tree/master/src/Curiosity.Migrations/CHANGELOG.md</PackageReleaseNotes>
+        <PackageIcon>siisltd.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <TargetFrameworks>net6.0;net7.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+    </PropertyGroup>
+
+    <PropertyGroup>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\siisltd.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\netstandard2.0\Curiosity.Migrations.MsSql.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Curiosity.Migrations\Curiosity.Migrations.csproj" />
+    </ItemGroup>
+
+</Project> 
