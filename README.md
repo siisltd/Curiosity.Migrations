@@ -117,7 +117,7 @@ Get started quickly with the [**Quick Start Guide**](https://curiosity-migration
         <b>PostgreSQL</b>
       </td>
       <td align="center" valign="middle">
-        <img src="https://raw.githubusercontent.com/microsoft/sqlserver-graphics/main/Microsoft%20SQL%20Server/SVG/SQL%20Server%20logo%20(2022).svg" width="200">
+        <img src="https://upload.wikimedia.org/wikipedia/de/8/8c/Microsoft_SQL_Server_Logo.svg" width="200">
         <br>
         <b>SQL Server</b>
       </td>
