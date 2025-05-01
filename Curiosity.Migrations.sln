@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{22DB0148-0BD7-4846-B63F-421B490392AB}"
 EndProject
@@ -8,6 +7,8 @@ ProjectSection(SolutionItems) = preProject
 	docs\quickstart.md = docs\quickstart.md
 	docs\requirements.txt = docs\requirements.txt
 	docs\basics.md = docs\basics.md
+	docs\philosophy.md = docs\philosophy.md
+	docs\supported_databases.md = docs\supported_databases.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{44C236B2-FD3A-4F44-AD71-0289973BA57B}"
@@ -16,12 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.PostgreSQL", "src\Curiosity.Migrations.PostgreSQL\Curiosity.Migrations.PostgreSQL.csproj", "{E43F2D68-2971-4AB3-9392-BCCCF39253F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.SqlServer", "src\Curiosity.Migrations.SqlServer\Curiosity.Migrations.SqlServer.csproj", "{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{8DB6C739-ACB4-47CD-B72E-A5180C22B84F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntegrationTests", "IntegrationTests", "{98A180F1-B3B9-41F0-9974-2333B4F03390}"
-ProjectSection(SolutionItems) = preProject
-	tests\IntegrationTests\env-compose.yml = tests\IntegrationTests\env-compose.yml
-EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.UnitTests", "tests\UnitTests\Curiosity.Migrations.UnitTests\Curiosity.Migrations.UnitTests.csproj", "{E21F04B2-76AB-4BA9-A85C-2347CAABC0AC}"
 EndProject
@@ -44,6 +44,8 @@ ProjectSection(SolutionItems) = preProject
 	docs\features\migration_providers.md = docs\features\migration_providers.md
 	docs\features\pre_migrations.md = docs\features\pre_migrations.md
 	docs\features\downgrade.md = docs\features\downgrade.md
+	docs\features\dependencies.md = docs\features\dependencies.md
+	docs\features\logging.md = docs\features\logging.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylesheets", "stylesheets", "{CF336091-3119-4EC3-A4F3-EC0A7C31EEFC}"
@@ -68,6 +70,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changelog", "changelog", "{
 ProjectSection(SolutionItems) = preProject
 	docs\changelog\curiosity.migration.md = docs\changelog\curiosity.migration.md
 	docs\changelog\curiosity.migration.postgres.md = docs\changelog\curiosity.migration.postgres.md
+	docs\changelog\curiosity.migration.sqlserver.md = docs\changelog\curiosity.migration.sqlserver.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{EC0D7D04-8030-41E3-BE96-47DB3ADF99E3}"
@@ -79,6 +82,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.Utils"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.PostgreSQL.UnitTests", "tests\UnitTests\Curiosity.Migrations.PostgreSQL.UnitTests\Curiosity.Migrations.PostgreSQL.UnitTests.csproj", "{0FAA319D-210A-4FC4-AA3E-EC9BE03F024B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.SqlServer.IntegrationTests", "tests\IntegrationTests\Curiosity.Migrations.SqlServer.IntegrationTests\Curiosity.Migrations.SqlServer.IntegrationTests.csproj", "{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curiosity.Migrations.SqlServer.UnitTests", "tests\UnitTests\Curiosity.Migrations.SqlServer.UnitTests\Curiosity.Migrations.SqlServer.UnitTests.csproj", "{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +94,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE} = {22DB0148-0BD7-4846-B63F-421B490392AB}
 		{E43F2D68-2971-4AB3-9392-BCCCF39253F6} = {22DB0148-0BD7-4846-B63F-421B490392AB}
+		{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3} = {22DB0148-0BD7-4846-B63F-421B490392AB}
 		{8DB6C739-ACB4-47CD-B72E-A5180C22B84F} = {44C236B2-FD3A-4F44-AD71-0289973BA57B}
 		{98A180F1-B3B9-41F0-9974-2333B4F03390} = {44C236B2-FD3A-4F44-AD71-0289973BA57B}
 		{E21F04B2-76AB-4BA9-A85C-2347CAABC0AC} = {8DB6C739-ACB4-47CD-B72E-A5180C22B84F}
@@ -101,6 +109,8 @@ Global
 		{EC0D7D04-8030-41E3-BE96-47DB3ADF99E3} = {0E062AC8-023E-4D62-A696-8363130215DF}
 		{3FB22746-EBBF-4A2C-A0B3-73AD18AA42A5} = {22DB0148-0BD7-4846-B63F-421B490392AB}
 		{0FAA319D-210A-4FC4-AA3E-EC9BE03F024B} = {8DB6C739-ACB4-47CD-B72E-A5180C22B84F}
+		{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F} = {98A180F1-B3B9-41F0-9974-2333B4F03390}
+		{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C} = {8DB6C739-ACB4-47CD-B72E-A5180C22B84F}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E2F484A1-607F-4193-9592-341EFE7890BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -131,5 +141,17 @@ Global
 		{0FAA319D-210A-4FC4-AA3E-EC9BE03F024B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FAA319D-210A-4FC4-AA3E-EC9BE03F024B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FAA319D-210A-4FC4-AA3E-EC9BE03F024B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BD873E3-3DA9-4CA9-830C-C72FAFC02CA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC0B5D77-D588-43E8-A45F-9CA1ABB9C59F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71CDD06E-EA2B-474E-8AA4-9FCD4CAE630C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -19,6 +19,8 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.0.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
+        <PackageReference Include="Testcontainers" Version="3.7.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="3.7.0" />
         <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
           <PrivateAssets>all</PrivateAssets>
@@ -37,9 +39,6 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="ScriptMigrations\6.0-incorrect_script.sql">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="config.yml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="ScriptMigrations\4.0-script_without_transction.sql">

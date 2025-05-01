@@ -4,19 +4,25 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Curiosity.Migrations.IntegrationTests.DependenciesTests.DependencyCodeMigrations;
+using Curiosity.Migrations.IntegrationTests.Fixtures;
 using Curiosity.Migrations.PostgreSQL;
 using Xunit;
 
 namespace Curiosity.Migrations.IntegrationTests.DependenciesTests;
 
-public class DependencyTests
+public class DependencyTests : IClassFixture<PostgreSqlContainerFixture>
 {
+    private readonly PostgreSqlContainerFixture _containerFixture;
+    
+    public DependencyTests(PostgreSqlContainerFixture containerFixture)
+    {
+        _containerFixture = containerFixture;
+    }
+
     [Fact]
     public async Task Migrate_Script_OkDependencies()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_script_code_ok");
-
+        var connectionString = _containerFixture.GetConnectionString("test_script_code_ok");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());
@@ -50,9 +56,7 @@ public class DependencyTests
     [Fact]
     public async Task Migrate_Script_CodeNotOkDependencies()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_code_not_ok");
-
+        var connectionString = _containerFixture.GetConnectionString("test_code_not_ok");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());
@@ -86,9 +90,7 @@ public class DependencyTests
     [Fact]
     public async Task Migrate_Script_ScriptNotOkDependencies()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_script_not_ok");
-
+        var connectionString = _containerFixture.GetConnectionString("test_script_not_ok");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<IDependencyMigration>(Assembly.GetExecutingAssembly());

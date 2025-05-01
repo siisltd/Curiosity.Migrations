@@ -21,26 +21,25 @@ internal static class PostgresqlGuard
             throw new InvalidOperationException($"Connection is not opened. Use OpenConnectionAsync method to open connection before any operation.");
     }
 
-    public static void AssertConnectionString(string paramValue, string paramName)
+    public static void AssertConnectionString(string connectionString, string? paramName = null)
     {
-        Guard.AssertNotEmpty(paramValue, paramName);
+        Guard.AssertNotEmpty(connectionString, paramName ?? nameof(connectionString));
 
         try
         {
-            var _ = new NpgsqlConnectionStringBuilder(paramValue);
+            _ = new NpgsqlConnectionStringBuilder(connectionString);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             throw new ArgumentException("Incorrect connection string", paramName, e);
         }
     }
 
-    public static void AssertTableName(string paramValue, string paramName)
+    public static void AssertTableName(string tableName, string? paramName = null)
     {
-        Guard.AssertNotEmpty(paramValue, paramName);
+        Guard.AssertNotEmpty(tableName, paramName ?? nameof(tableName));
 
-        if (!TableNameRexExp.IsMatch(paramValue))
+        if (!TableNameRexExp.IsMatch(tableName))
             throw new ArgumentException($"Incorrect table name. Name should be matched by regexp \"{TableNameRegExpPattern}\"", paramName);
     }
 }

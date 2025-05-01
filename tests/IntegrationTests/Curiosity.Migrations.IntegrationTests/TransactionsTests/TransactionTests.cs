@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Curiosity.Migrations.IntegrationTests.Fixtures;
 using Curiosity.Migrations.IntegrationTests.TransactionsTests.TransactionCodeMigrations;
 using Curiosity.Migrations.PostgreSQL;
 using Xunit;
 
 namespace Curiosity.Migrations.IntegrationTests.TransactionsTests;
 
-public class TransactionTests
+public class TransactionTests : IClassFixture<PostgreSqlContainerFixture>
 {
+    private readonly PostgreSqlContainerFixture _containerFixture;
+    
+    public TransactionTests(PostgreSqlContainerFixture containerFixture)
+    {
+        _containerFixture = containerFixture;
+    }
+
     [Fact]
     public async Task Migrate_AllScriptOk_NoRollback()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_ok");
-
+        var connectionString = _containerFixture.GetConnectionString("test_ok");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
@@ -49,9 +55,7 @@ public class TransactionTests
     [Fact]
     public async Task Migrate_AllScriptOk_SwitchedOffTransaction()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_without_transactions");
-
+        var connectionString = _containerFixture.GetConnectionString("test_without_transactions");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
@@ -85,9 +89,7 @@ public class TransactionTests
     [Fact]
     public async Task Migrate_AllScriptOk_Rollback()
     {
-        var config = ConfigProvider.GetConfig();
-        var connectionString = String.Format(config.ConnectionStringMask, "test_rollback");
-
+        var connectionString = _containerFixture.GetConnectionString("test_rollback");
 
         var builder = new MigrationEngineBuilder();
         builder.UseCodeMigrations().FromAssembly<ITransactionMigration>(Assembly.GetExecutingAssembly());
