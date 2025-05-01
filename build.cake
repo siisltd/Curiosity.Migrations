@@ -64,10 +64,9 @@ Task("IntegrationTests")
     .Does(() =>
     {        
         Information("IntegrationTests task...");
-
-        Information("Running docker...");
-        StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml up -d");
-        Information("Running docker completed");
+        
+        // TestContainers will handle Docker automatically
+        Information("Running integration tests with TestContainers...");
 
         var projects = GetFiles("./tests/IntegrationTests/**/*csproj");
         foreach(var project in projects)
@@ -82,13 +81,7 @@ Task("IntegrationTests")
                     NoBuild = false
                 });
         }
-    })
-    .Finally(() =>
-    {  
-        Information("Stopping docker...");
-        StartProcess("docker-compose", "-f ./tests/IntegrationTests/env-compose.yml down");
-        Information("Stopping docker completed");
-    });  
+    });
     
 Task("Pack")
     .Does(() =>

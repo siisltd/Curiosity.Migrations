@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Curiosity.Migrations.MsSql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
@@ -347,10 +346,14 @@ public class SqlServerMigrationConnection : IMigrationConnection
         var queryBuilder = new StringBuilder();
         
         // Start with basic CREATE DATABASE statement
-        queryBuilder.AppendLine($"CREATE DATABASE [{DatabaseName}]");
+        queryBuilder.Append($"CREATE DATABASE [{DatabaseName}]");
         
-        // Add WITH options only if specified
-        var withOptions = new List<string>();
+        // Add collation if specified - must come right after database name
+        if (_options.Collation != null)
+        {
+            queryBuilder.Append($" COLLATE {_options.Collation}");
+        }
+        queryBuilder.AppendLine();
         
         // Add file specifications only if explicitly provided
         if (_options.DataFilePath != null)
@@ -382,25 +385,6 @@ public class SqlServerMigrationConnection : IMigrationConnection
                 queryBuilder.AppendLine($"    FILENAME = '{_options.LogFilePath}\\{DatabaseName}.ldf'");
                 queryBuilder.AppendLine(")");
             }
-        }
-        
-        // Add collation if specified
-        if (_options.Collation != null)
-        {
-            withOptions.Add($"COLLATE {_options.Collation}");
-        }
-        
-        // Add max connections if specified
-        if (_options.MaxConnections.HasValue)
-        {
-            withOptions.Add($"MAX_CONNECTIONS = {_options.MaxConnections.Value}");
-        }
-        
-        // Append WITH clause if any options are specified
-        if (withOptions.Count > 0)
-        {
-            queryBuilder.AppendLine("WITH");
-            queryBuilder.AppendLine(string.Join(",\n", withOptions));
         }
         
         return queryBuilder.ToString();

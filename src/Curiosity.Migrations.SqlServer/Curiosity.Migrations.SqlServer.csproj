@@ -9,13 +9,13 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity; sqlserver</PackageTags>
         <Language>English</Language>
 
-        <PackageVersion>4.0.2</PackageVersion>
+        <PackageVersion>4.0.0</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
 
-        <Authors>Maxim Markelow (@markeli), Kirill Lutsenko, Andrei Vinogradov</Authors>
-        <Company>SIIS Ltd</Company>
-        <Copyright>SIIS Ltd, 2023</Copyright>
+        <Authors>Maxim Markelow (@markeli)</Authors>
+        <Company>SIIS Ltd | Markeli</Company>
+        <Copyright>SIIS Ltd | Markeli, 2025</Copyright>
 
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>

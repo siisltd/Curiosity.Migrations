@@ -1,5 +1,3 @@
-using Curiosity.Migrations;
-
 namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>

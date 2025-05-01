@@ -1,12 +1,20 @@
 using System;
 using System.Threading.Tasks;
 using Curiosity.Migrations.PostgreSQL;
+using Curiosity.Migrations.PostgreSql.IntegrationTests.Fixtures;
 using Xunit;
 
 namespace Curiosity.Migrations.PostgreSql.IntegrationTests;
 
-public class PostgreSqlDbCreationTests
+public class PostgreSqlDbCreationTests : IClassFixture<PostgresContainerFixture>
 {
+    private readonly PostgresContainerFixture _containerFixture;
+    
+    public PostgreSqlDbCreationTests(PostgresContainerFixture containerFixture)
+    {
+        _containerFixture = containerFixture;
+    }
+
     [Fact]
     public async Task CreateDb_WithoutParams_Ok()
     {
@@ -16,7 +24,7 @@ public class PostgreSqlDbCreationTests
         try
         {
             var options = new PostgresMigrationConnectionOptions(
-                String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName));
+                _containerFixture.GetConnectionString(dbName));
             migrationConnection = new PostgresMigrationConnection(options);
             await migrationConnection.CreateDatabaseIfNotExistsAsync();
         }
@@ -26,10 +34,25 @@ public class PostgreSqlDbCreationTests
             {
                 try
                 {
-
-                    await migrationConnection.OpenConnectionAsync();
-                    await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
-                    await migrationConnection.CloseConnectionAsync();
+                    // Connect to postgres to drop the test database
+                    var postgresOptions = new PostgresMigrationConnectionOptions(
+                        _containerFixture.GetConnectionString("postgres"));
+                    using var postgresConnection = new PostgresMigrationConnection(postgresOptions);
+                    await postgresConnection.OpenConnectionAsync();
+                    
+                    // Disconnect any other connections to the database
+                    var disconnectQuery = $@"
+                        SELECT pg_terminate_backend(pg_stat_activity.pid)
+                        FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname = '{dbName}'
+                          AND pid <> pg_backend_pid()";
+                    
+                    await postgresConnection.ExecuteNonQuerySqlAsync(disconnectQuery, null);
+                    
+                    // Drop the database
+                    await postgresConnection.ExecuteNonQuerySqlAsync(
+                        $"DROP DATABASE IF EXISTS \"{dbName}\"",
+                        null);
                 }
                 catch (Exception)
                 {
@@ -48,7 +71,7 @@ public class PostgreSqlDbCreationTests
         try
         {
             var options = new PostgresMigrationConnectionOptions(
-                String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
+                _containerFixture.GetConnectionString(dbName),
                 template: "template0");
             migrationConnection = new PostgresMigrationConnection(options);
             await migrationConnection.CreateDatabaseIfNotExistsAsync();
@@ -59,10 +82,25 @@ public class PostgreSqlDbCreationTests
             {
                 try
                 {
-
-                    await migrationConnection.OpenConnectionAsync();
-                    await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
-                    await migrationConnection.CloseConnectionAsync();
+                    // Connect to postgres to drop the test database
+                    var postgresOptions = new PostgresMigrationConnectionOptions(
+                        _containerFixture.GetConnectionString("postgres"));
+                    using var postgresConnection = new PostgresMigrationConnection(postgresOptions);
+                    await postgresConnection.OpenConnectionAsync();
+                    
+                    // Disconnect any other connections to the database
+                    var disconnectQuery = $@"
+                        SELECT pg_terminate_backend(pg_stat_activity.pid)
+                        FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname = '{dbName}'
+                          AND pid <> pg_backend_pid()";
+                    
+                    await postgresConnection.ExecuteNonQuerySqlAsync(disconnectQuery, null);
+                    
+                    // Drop the database
+                    await postgresConnection.ExecuteNonQuerySqlAsync(
+                        $"DROP DATABASE IF EXISTS \"{dbName}\"",
+                        null);
                 }
                 catch (Exception)
                 {
@@ -81,7 +119,7 @@ public class PostgreSqlDbCreationTests
         try
         {
             var options = new PostgresMigrationConnectionOptions(
-                String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
+                _containerFixture.GetConnectionString(dbName),
                 template: "template0",
                 databaseEncoding: "SQL_ASCII");
             migrationConnection = new PostgresMigrationConnection(options);
@@ -93,10 +131,25 @@ public class PostgreSqlDbCreationTests
             {
                 try
                 {
-
-                    await migrationConnection.OpenConnectionAsync();
-                    await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
-                    await migrationConnection.CloseConnectionAsync();
+                    // Connect to postgres to drop the test database
+                    var postgresOptions = new PostgresMigrationConnectionOptions(
+                        _containerFixture.GetConnectionString("postgres"));
+                    using var postgresConnection = new PostgresMigrationConnection(postgresOptions);
+                    await postgresConnection.OpenConnectionAsync();
+                    
+                    // Disconnect any other connections to the database
+                    var disconnectQuery = $@"
+                        SELECT pg_terminate_backend(pg_stat_activity.pid)
+                        FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname = '{dbName}'
+                          AND pid <> pg_backend_pid()";
+                    
+                    await postgresConnection.ExecuteNonQuerySqlAsync(disconnectQuery, null);
+                    
+                    // Drop the database
+                    await postgresConnection.ExecuteNonQuerySqlAsync(
+                        $"DROP DATABASE IF EXISTS \"{dbName}\"",
+                        null);
                 }
                 catch (Exception)
                 {
@@ -115,7 +168,7 @@ public class PostgreSqlDbCreationTests
         try
         {
             var options = new PostgresMigrationConnectionOptions(
-                String.Format(ConfigProvider.GetConfig().ConnectionStringMask, dbName),
+                _containerFixture.GetConnectionString(dbName),
                 template: "template0",
                 connectionLimit: 10,
                 lcCollate: "C",
@@ -130,10 +183,25 @@ public class PostgreSqlDbCreationTests
             {
                 try
                 {
-
-                    await migrationConnection.OpenConnectionAsync();
-                    await migrationConnection.ExecuteNonQuerySqlAsync($"DROP TABLE IF EXISTS {dbName}", null);
-                    await migrationConnection.CloseConnectionAsync();
+                    // Connect to postgres to drop the test database
+                    var postgresOptions = new PostgresMigrationConnectionOptions(
+                        _containerFixture.GetConnectionString("postgres"));
+                    using var postgresConnection = new PostgresMigrationConnection(postgresOptions);
+                    await postgresConnection.OpenConnectionAsync();
+                    
+                    // Disconnect any other connections to the database
+                    var disconnectQuery = $@"
+                        SELECT pg_terminate_backend(pg_stat_activity.pid)
+                        FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname = '{dbName}'
+                          AND pid <> pg_backend_pid()";
+                    
+                    await postgresConnection.ExecuteNonQuerySqlAsync(disconnectQuery, null);
+                    
+                    // Drop the database
+                    await postgresConnection.ExecuteNonQuerySqlAsync(
+                        $"DROP DATABASE IF EXISTS \"{dbName}\"",
+                        null);
                 }
                 catch (Exception)
                 {

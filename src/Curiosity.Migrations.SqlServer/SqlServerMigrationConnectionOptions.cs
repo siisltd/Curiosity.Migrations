@@ -1,5 +1,3 @@
-using Curiosity.Migrations;
-
 namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
@@ -17,6 +15,11 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
     /// </summary>
     public const string DefaultSchemaName = "dbo";
 
+    /// <summary>
+    /// Default database to use when connecting to SQL Server
+    /// </summary>
+    public const string DefaultDatabaseName = "master";
+
     /// <inheritdoc />
     public string ConnectionString { get; }
 
@@ -31,7 +34,7 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
 
     /// <summary>
     /// Default database to use when the target database does not exist or needs to be created.
-    /// If not provided, the default is 'master'.
+    /// Defaults to 'master' if not specified.
     /// </summary>
     public string DefaultDatabase { get; }
 
@@ -105,12 +108,11 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
     {
         SqlServerGuard.AssertConnectionString(connectionString, nameof(connectionString));
         SqlServerGuard.AssertTableName(migrationHistoryTableName, nameof(migrationHistoryTableName));
-        Guard.AssertNotEmpty(defaultDatabase, nameof(defaultDatabase));
-
+        
         ConnectionString = connectionString;
         MigrationHistoryTableName = migrationHistoryTableName;
         SchemaName = schemaName;
-        DefaultDatabase = defaultDatabase;
+        DefaultDatabase = defaultDatabase ?? DefaultDatabaseName;
         Collation = collation;
         MaxConnections = maxConnections;
         InitialSize = initialSize;

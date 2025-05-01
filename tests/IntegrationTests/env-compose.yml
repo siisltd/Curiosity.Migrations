@@ -1,9 +1,6 @@
-# Внешний порт для доступа - 5433, т.к. 5432 скорее всего занят
-version: '3.1'
 
 services:
-
-  db:
+  postgres:
     image: postgres
     restart: always
     environment:
@@ -11,4 +8,16 @@ services:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: test
     ports:
+    # Внешний порт для доступа - 5433, т.к. 5432 скорее всего занят      - 
     - 5533:5432
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Password123
+      MSSQL_PID: Developer
+      MSSQL_SA_USER: sa
+    ports:
+    - 1433:1433

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
-namespace Curiosity.Migrations.MsSql;
+namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
 /// Helper class to try executing actions for migrations with catching errors, logging errors

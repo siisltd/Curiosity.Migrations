@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Data.SqlClient;
-using Curiosity.Migrations;
 
 namespace Curiosity.Migrations.SqlServer;
 

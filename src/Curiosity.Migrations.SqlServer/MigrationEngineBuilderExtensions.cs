@@ -1,6 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using Curiosity.Migrations;
-
 namespace Curiosity.Migrations.SqlServer;
 
 /// <summary>
