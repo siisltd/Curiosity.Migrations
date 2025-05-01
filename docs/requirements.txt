@@ -1,2 +1,4 @@
 mkdocs-material
 markdown-include
+pymdown-extensions
+pygments

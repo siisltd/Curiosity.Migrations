@@ -51,6 +51,17 @@ markdown_extensions:
       permalink: true
   - markdown_include.include:
       base_path: docs
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - def_list
+  - attr_list
 
 
 extra_css:
