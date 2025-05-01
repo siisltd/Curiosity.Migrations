@@ -4,7 +4,7 @@
   <tbody>
     <tr>
       <td align="center" valign="middle">
-          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png">
+          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png" width="200">
       </td>
       <td align="center" valign="middle">
           <img src="https://upload.wikimedia.org/wikipedia/de/8/8c/Microsoft_SQL_Server_Logo.svg" width="200">
