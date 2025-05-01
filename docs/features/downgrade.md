@@ -2,7 +2,7 @@
 
 ## Overview
 
-Downgrade migrations are a powerful feature in Curiosity.Migrations that allow you to revert your database to a previous state. While most migration systems focus primarily on forward evolution, Curiosity.Migrations gives equal importance to the ability to safely roll back changes when needed.
+Downgrade migrations are a powerful feature in `Curiosity.Migrations` that allow you to revert your database to a previous state. While most migration systems focus primarily on forward evolution, `Curiosity.Migrations` gives equal importance to the ability to safely roll back changes when needed.
 
 This bidirectional migration capability provides safety nets for production deployments, flexibility during development, and easier management of complex release strategies.
 
@@ -31,7 +31,7 @@ This ensures the database returns to the desired previous state in an orderly ma
 
 ## Implementation Options
 
-Curiosity.Migrations offers two ways to implement downgrade migrations:
+`Curiosity.Migrations` offers two ways to implement downgrade migrations:
 
 ### 1. Script-Based Downgrades
 
@@ -265,7 +265,7 @@ The following operations require special care during downgrades:
 
 2. **Backup Before Downgrading**: Create a database backup before executing any downgrade operation in production.
 
-> You can make backups with pre-migration feature of Curiosity.Migrations.  
+   > You can make backups with pre-migration feature of `Curiosity.Migrations`.  
 
 3. **Version in Small Increments**: Smaller, more focused migrations are easier to downgrade reliably.
 

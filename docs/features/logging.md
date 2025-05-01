@@ -2,7 +2,7 @@
 
 ## General Logging
 
-Curiosity.Migrations provides logging capabilities to monitor the migration process. You can specify a logger that will track all migration events, including database creation, table creation, migration execution, errors, and warnings.
+`Curiosity.Migrations` provides logging capabilities to monitor the migration process. You can specify a logger that will track all migration events, including database creation, table creation, migration application, and any errors that occur during the process.
 
 To enable general logging:
 
@@ -20,6 +20,7 @@ var migrationEngine = new MigrationEngineBuilder()
 ```
 
 The general logger tracks major events like:
+
 - Database existence checks and creation
 - Migration table checks and creation
 - Migration execution progress and errors
@@ -102,7 +103,6 @@ public class UserDataMigration : CodeMigration
     }
 }
 ```
-
 The `Logger` property is nullable, which means it might be `null` if no logger was configured when creating the migration engine. Always use the null-conditional operator (`?.`) when accessing it to avoid `NullReferenceException`.
 
 Common logging patterns in code migrations include:

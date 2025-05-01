@@ -2,7 +2,7 @@
 
 ## Overview
 
-Migration dependencies are a powerful feature in Curiosity.Migrations that allow you to explicitly define relationships between migrations. Rather than relying solely on version numbers to determine execution order, dependencies give you precise control over which migrations must be applied before others.
+Migration dependencies are a powerful feature in `Curiosity.Migrations` that allow you to explicitly define relationships between migrations. Rather than relying solely on version numbers to determine execution order, dependencies give you precise control over which migrations must be applied before others.
 
 This feature is essential for managing complex migration scenarios, particularly in large applications with multiple development teams or when migrations affect related database objects but are developed independently.
 

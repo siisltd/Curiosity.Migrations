@@ -1,8 +1,8 @@
-# EntityFramework Integration
+# Entity Framework Core Integration
 
 ## Overview
 
-Curiosity.Migrations supports using Entity Framework Core inside your code migrations. This allows you to perform complex data operations using an ORM rather than raw SQL.
+`Curiosity.Migrations` supports using Entity Framework Core inside your code migrations. This allows you to perform complex data operations using an ORM rather than raw SQL.
 
 ## Using Entity Framework in Migrations
 

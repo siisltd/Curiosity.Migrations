@@ -1,14 +1,14 @@
-# The Philosophy Behind Curiosity.Migrations
+# The Philosophy Behind `Curiosity.Migrations`
 
 ## Introduction
 
-Curiosity.Migrations is a .NET database migration framework designed for enterprise-grade applications that require precise control, comprehensive safety features, and detailed monitoring when managing database schema and data changes. Unlike ORM-focused migration tools, Curiosity.Migrations embraces both direct SQL and C# code approaches to give developers maximum flexibility and performance control.
+`Curiosity.Migrations` is a .NET database migration framework designed for enterprise-grade applications that require precise control, comprehensive safety features, and detailed monitoring when managing database schema and data changes. Unlike ORM-focused migration tools, `Curiosity.Migrations` embraces both direct SQL and C# code approaches to give developers maximum flexibility and performance control.
 
 ## Core Principles
 
 ### 1. Migration as Code
 
-Curiosity.Migrations embraces the migration-as-code philosophy, treating database changes the same way you treat application code changes:
+`Curiosity.Migrations` embraces the migration-as-code philosophy, treating database changes the same way you treat application code changes:
 
 - **Version Control**: Every database change is versioned and tracked in your source repository
 - **History Tracking**: Complete audit trail of all database modifications
@@ -39,7 +39,7 @@ ON users USING gin(name gin_trgm_ops);
 
 ### 3. Code Migrations
 
-For complex data transformation scenarios, Curiosity.Migrations supports code-based migrations:
+For complex data transformation scenarios, `Curiosity.Migrations` supports code-based migrations:
 
 - **Complex Logic**: Implement sophisticated business rules during migration
 - **External Integration**: Connect to external systems during migration process
@@ -102,7 +102,7 @@ public class NormalizeUserEmails : MassUpdateCodeMigrationBase
 
 ### 4. Safety in Production
 
-Curiosity.Migrations implements robust safety mechanisms for production environments:
+`Curiosity.Migrations` implements robust safety mechanisms for production environments:
 
 - **Migration Policies**: Configure what types of migrations can run in different environments
 - **Dependency Management**: Ensure migrations run in the correct order with explicit dependencies
@@ -149,7 +149,7 @@ if (result.IsSuccessful)
 
 ### 6. Testability
 
-Curiosity.Migrations simplifies database testing:
+`Curiosity.Migrations` simplifies database testing:
 
 - **Isolated Test Databases**: Easily create and initialize test databases
 - **Migration State Control**: Test against specific database versions
@@ -174,9 +174,9 @@ public async Task SetUp()
 }
 ```
 
-## When to Use Curiosity.Migrations
+## When to Use `Curiosity.Migrations`
 
-Curiosity.Migrations is particularly well-suited for:
+`Curiosity.Migrations` is particularly well-suited for:
 
 1. **Enterprise Applications**: Where safety, control, and reliability are paramount
 2. **Performance-Critical Systems**: When you need optimized SQL for large datasets
@@ -186,11 +186,11 @@ Curiosity.Migrations is particularly well-suited for:
 
 ## Comparison to .NET Alternatives
 
-Curiosity.Migrations offers distinct advantages when compared to other .NET database migration tools:
+`Curiosity.Migrations` offers distinct advantages when compared to other .NET database migration tools:
 
 ### Entity Framework Core Migrations
 
-| Feature | EF Core Migrations | Curiosity.Migrations |
+| Feature | EF Core Migrations | `Curiosity.Migrations` |
 |---------|-------------------|----------------------|
 | **Approach** | Code-first model-driven | SQL-first with code support |
 | **SQL Control** | Generated from model changes | Direct, handcrafted SQL |
@@ -202,7 +202,7 @@ Curiosity.Migrations offers distinct advantages when compared to other .NET data
 
 ### FluentMigrator
 
-| Feature | FluentMigrator | Curiosity.Migrations |
+| Feature | FluentMigrator | `Curiosity.Migrations` |
 |---------|----------------|----------------------|
 | **Approach** | Fluent C# API | Direct SQL + C# code |
 | **SQL Control** | Generated from fluent API | Direct SQL or generated |
@@ -214,7 +214,7 @@ Curiosity.Migrations offers distinct advantages when compared to other .NET data
 
 ### DbUp
 
-| Feature | DbUp | Curiosity.Migrations |
+| Feature | DbUp | `Curiosity.Migrations` |
 |---------|------|----------------------|
 | **Approach** | SQL script runner | SQL + code migrations |
 | **Complexity** | Simple | More feature-rich |
@@ -226,7 +226,7 @@ Curiosity.Migrations offers distinct advantages when compared to other .NET data
 
 ### Evolve
 
-| Feature | Evolve | Curiosity.Migrations |
+| Feature | Evolve | `Curiosity.Migrations` |
 |---------|--------|----------------------|
 | **Approach** | Flyway-inspired | SQL + code migrations |
 | **Testing Support** | Basic | Extensive |
@@ -237,4 +237,4 @@ Curiosity.Migrations offers distinct advantages when compared to other .NET data
 
 ## Summary
 
-Curiosity.Migrations balances the precision of direct SQL with the power of C# code migrations, while prioritizing safety, monitoring, and testability for enterprise-grade applications. It's designed for teams that need fine-grained control over their database changes and require robust processes for managing these changes across different environments.
+`Curiosity.Migrations` balances the precision of direct SQL with the power of C# code migrations, while prioritizing safety, monitoring, and testability for enterprise-grade applications. It's designed for teams that need fine-grained control over their database changes and require robust processes for managing these changes across different environments.

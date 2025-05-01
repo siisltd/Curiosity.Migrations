@@ -1,6 +1,6 @@
-# Batches
+# Script Migration Batches
 
-Script migrations in Curiosity.Migrations can be divided into batches to provide more granular control over SQL script execution. Batches are particularly useful in the following scenarios:
+Script migrations in `Curiosity.Migrations` can be divided into batches to provide more granular control over SQL script execution. Batches are particularly useful in the following scenarios:
 
 - **Complex Migrations**: When you need to execute multiple SQL operations in a specific order within a single migration.
 - **Readability**: To improve script readability by organizing related SQL statements into logical groups.

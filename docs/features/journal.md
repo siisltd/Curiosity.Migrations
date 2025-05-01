@@ -12,7 +12,7 @@ Journal is database table that records the history of all applied migrations. Th
 
 - **Rollback Support**: By maintaining a comprehensive history of applied migrations, the journal facilitates rollback operations. This allows the database to revert to a previous state if necessary, providing flexibility and safety in managing schema changes.
 
-#### Configuration in Curiosity.Migrations
+#### Configuration in `Curiosity.Migrations`
 
 In `Curiosity.Migrations`, the journal is automatically managed by the migration engine. It is created if it does not exist and updated with each applied migration. The table's name can be configured through the `MigrationConnectionOptions`, allowing developers to customize it according to their database naming conventions.
 

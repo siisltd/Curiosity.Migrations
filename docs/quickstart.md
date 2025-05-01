@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Curiosity.Migrations is a flexible database migration framework for .NET applications that provides precise control over database schema and data changes. This quick start guide will help you get up and running with the basic functionality in just a few minutes.
+`Curiosity.Migrations` is a flexible database migration framework for .NET applications that provides precise control over database schema and data changes. This quick start guide will help you get up and running with the basic functionality in just a few minutes.
 
 By the end of this guide, you'll know how to:
 - Install the necessary packages
@@ -319,7 +319,7 @@ public class AddEmailMigration : CodeMigration, IDowngradeMigration
 
 ## Next Steps
 
-Now that you've got the basics of Curiosity.Migrations, check out these resources for more advanced usage:
+Now that you've got the basics of `Curiosity.Migrations`, check out these resources for more advanced usage:
 
 - [Migration Concepts](./basics.md) - Understanding core concepts
 - [Script Migrations](./features/script_migration/index.md) - Detailed information on SQL migrations
