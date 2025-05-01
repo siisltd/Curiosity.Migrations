@@ -1,1 +1,1 @@
-../../src/Curiosity.Migrations.MsSql/CHANGELOG.md
+../../src/Curiosity.Migrations.SqlServer/CHANGELOG.md
