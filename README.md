@@ -46,13 +46,13 @@ Unlike ORM-specific migration tools, Curiosity.Migrations is database-focused an
 ### Migration Types
 
 - **[Script Migrations](https://curiosity-migrations.readthedocs.io/features/script_migration/index)**: Write raw SQL for direct database access
-  - [Batched Execution](https://curiosity-migrations.readthedocs.io/features/script_migration/batches): Split large scripts into manageable chunks
-  - Full support for database-specific SQL features and optimizations
+    - [Batched Execution](https://curiosity-migrations.readthedocs.io/features/script_migration/batches): Split large scripts into manageable chunks
+    - Full support for database-specific SQL features and optimizations
 
 - **[Code Migrations](https://curiosity-migrations.readthedocs.io/features/code_migration/index)**: Implement migrations in C# for complex scenarios
-  - [Dependency Injection](https://curiosity-migrations.readthedocs.io/features/code_migration/di): Use your application's services in migrations
-  - [Entity Framework Integration](https://curiosity-migrations.readthedocs.io/features/code_migration/ef_integration): Leverage EF Core when needed
-  - Implement custom validation, logging, or business logic during migrations
+    - [Dependency Injection](https://curiosity-migrations.readthedocs.io/features/code_migration/di): Use your application's services in migrations
+    - [Entity Framework Integration](https://curiosity-migrations.readthedocs.io/features/code_migration/ef_integration): Leverage EF Core when needed
+    - Implement custom validation, logging, or business logic during migrations
 
 ### Safety and Control
 

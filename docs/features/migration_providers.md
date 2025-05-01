@@ -14,23 +14,23 @@ The `CodeMigrationsProvider` is designed to handle migrations written in C#. Mig
 
 - **FromAssembly**
   
-  Use this method to set up an assembly for scanning migrations. This is useful when you want to include all migrations from a specific assembly.
-  
-  ```csharp
-  var builder = new MigrationEngineBuilder(services)
-      .UseCodeMigrations()
-      .FromAssembly(assembly);
-  ```
+    Use this method to set up an assembly for scanning migrations. This is useful when you want to include all migrations from a specific assembly.
+
+    ```csharp
+    var builder = new MigrationEngineBuilder(services)
+        .UseCodeMigrations()
+        .FromAssembly(assembly);
+    ```
 
 - **FromAssembly<T>**
   
-  Use this method to set up an assembly for scanning migrations with a specified type. This is beneficial when you want to filter migrations by a specific type within an assembly.
-  
-  ```csharp
-  var builder = new MigrationEngineBuilder(services)
-      .UseCodeMigrations()
-      .FromAssembly<MyMigrationType>(assembly);
-  ```
+    Use this method to set up an assembly for scanning migrations with a specified type. This is beneficial when you want to filter migrations by a specific type within an assembly.
+
+    ```csharp
+    var builder = new MigrationEngineBuilder(services)
+        .UseCodeMigrations()
+        .FromAssembly<MyMigrationType>(assembly);
+    ```
 
 ### ScriptMigrationsProvider
 
@@ -40,23 +40,23 @@ The `ScriptMigrationsProvider` is designed to handle migrations using raw SQL sc
 
 - **FromDirectory**
   
-  Use this method to set up a directory for scanning migrations. This is useful when you want to include all script migrations from a specific directory.
+    Use this method to set up a directory for scanning migrations. This is useful when you want to include all script migrations from a specific directory.
   
-  ```csharp
-  var builder = new MigrationEngineBuilder(services)
-      .UseScriptMigrations()
-      .FromDirectory("/path/to/scripts");
-  ```
+    ```csharp
+    var builder = new MigrationEngineBuilder(services)
+        .UseScriptMigrations()
+        .FromDirectory("/path/to/scripts");
+    ```
 
 - **FromAssembly**
   
-  Use this method to set up an assembly where script migrations are embedded. This is beneficial when you want to include script migrations from embedded resources within an assembly.
+    Use this method to set up an assembly where script migrations are embedded. This is beneficial when you want to include script migrations from embedded resources within an assembly.
   
-  ```csharp
-  var builder = new MigrationEngineBuilder(services)
-      .UseScriptMigrations()
-      .FromAssembly(assembly, "MyNamespace");
-  ```
+    ```csharp
+    var builder = new MigrationEngineBuilder(services)
+        .UseScriptMigrations()
+        .FromAssembly(assembly, "MyNamespace");
+    ```
 
 ## How to add custom provider
 

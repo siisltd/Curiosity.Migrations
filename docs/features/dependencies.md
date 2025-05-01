@@ -131,87 +131,87 @@ Here's a complete example showing a chain of dependent migrations:
 
 1. First, create the users table:
 
-```sql
--- Version: 1.0
--- users.sql
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-```
+    ```sql
+    -- Version: 1.0
+    -- users.sql
+    CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+    ```
 
 2. Next, add authentication fields:
 
-```sql
--- Version: 2.0
--- authentication.sql
---CURIOSITY:Dependencies=1.0
+    ```sql
+    -- Version: 2.0
+    -- authentication.sql
+    --CURIOSITY:Dependencies=1.0
 
-ALTER TABLE users 
-ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '',
-ADD COLUMN email VARCHAR(255) UNIQUE,
-ADD COLUMN last_login TIMESTAMP;
-```
+    ALTER TABLE users 
+    ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '',
+    ADD COLUMN email VARCHAR(255) UNIQUE,
+    ADD COLUMN last_login TIMESTAMP;
+    ```
 
 3. Then add permissions:
 
-```sql
--- Version: 3.0
--- permissions.sql
---CURIOSITY:Dependencies=2.0
+    ```sql
+    -- Version: 3.0
+    -- permissions.sql
+    --CURIOSITY:Dependencies=2.0
 
-CREATE TABLE permissions (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT
-);
+    CREATE TABLE permissions (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE,
+        description TEXT
+    );
 
-CREATE TABLE user_permissions (
-    user_id INT NOT NULL REFERENCES users(id),
-    permission_id INT NOT NULL REFERENCES permissions(id),
-    granted_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (user_id, permission_id)
-);
-```
+    CREATE TABLE user_permissions (
+        user_id INT NOT NULL REFERENCES users(id),
+        permission_id INT NOT NULL REFERENCES permissions(id),
+        granted_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (user_id, permission_id)
+    );
+    ```
 
 4. Finally, seed initial permissions:
 
-```csharp
-public class SeedPermissionsMigration : CodeMigration
-{
-    public override MigrationVersion Version => new(3, 1);
-    
-    public override string? Comment => "Seed initial permissions";
-
-    public SeedPermissionsMigration()
+    ```csharp
+    public class SeedPermissionsMigration : CodeMigration
     {
-        Dependencies = new List<MigrationVersion>() { new(3, 0) };
-    }
-    
-    public override async Task UpgradeAsync(DbTransaction? transaction = null, 
-        CancellationToken cancellationToken = default)
-    {
-        var defaultPermissions = new[] {
-            ("user.read", "Can view user information"),
-            ("user.create", "Can create new users"),
-            ("user.update", "Can modify user information"),
-            ("user.delete", "Can delete users")
-        };
+        public override MigrationVersion Version => new(3, 1);
         
-        foreach (var (name, description) in defaultPermissions)
+        public override string? Comment => "Seed initial permissions";
+
+        public SeedPermissionsMigration()
         {
-            await MigrationConnection.ExecuteNonQuerySqlAsync(
-                "INSERT INTO permissions (name, description) VALUES (@name, @description)",
-                new Dictionary<string, object?> {
-                    { "@name", name },
-                    { "@description", description }
-                },
-                cancellationToken);
+            Dependencies = new List<MigrationVersion>() { new(3, 0) };
+        }
+        
+        public override async Task UpgradeAsync(DbTransaction? transaction = null, 
+            CancellationToken cancellationToken = default)
+        {
+            var defaultPermissions = new[] {
+                ("user.read", "Can view user information"),
+                ("user.create", "Can create new users"),
+                ("user.update", "Can modify user information"),
+                ("user.delete", "Can delete users")
+            };
+            
+            foreach (var (name, description) in defaultPermissions)
+            {
+                await MigrationConnection.ExecuteNonQuerySqlAsync(
+                    "INSERT INTO permissions (name, description) VALUES (@name, @description)",
+                    new Dictionary<string, object?> {
+                        { "@name", name },
+                        { "@description", description }
+                    },
+                    cancellationToken);
+            }
         }
     }
-}
-```
+    ```
 
 This chain of migrations ensures that:
 - The users table exists before adding authentication fields

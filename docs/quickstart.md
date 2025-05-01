@@ -49,6 +49,7 @@ You can create migrations either as SQL scripts or as C# code. Let's see example
 Create SQL files with version numbers in the filename. Here's an example of a script migration:
 
 **Migrations/1.0.sql**:
+
 ```sql
 -- Migration: Create Users table
 CREATE TABLE Users (
@@ -62,6 +63,7 @@ CREATE INDEX idx_users_username ON Users(Username);
 ```
 
 **Migrations/2.0.sql**:
+
 ```sql
 -- Migration: Add email to Users table
 ALTER TABLE Users ADD COLUMN Email VARCHAR(255);
