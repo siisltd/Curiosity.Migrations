@@ -31,7 +31,7 @@ public class PostgreSqlContainerFixture : IAsyncLifetime
     public PostgreSqlContainerFixture()
     {
         Container = new PostgreSqlBuilder()
-            .WithImage("postgres:latest")
+            .WithImage("postgres:14.17-bookworm")
             .WithUsername(Username)
             .WithPassword(Password)
             .WithDatabase("postgres")
