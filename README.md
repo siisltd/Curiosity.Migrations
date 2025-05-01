@@ -112,7 +112,7 @@ Get started quickly with the [**Quick Start Guide**](https://curiosity-migration
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png" width="200">
+        <img src="https://icon2.cleanpng.com/20180528/szi/kisspng-amazon-com-postgresql-amazon-relational-database-s-strive-5b0cbb173568b4.0208830815275609832188.jpg" width="200">
         <br>
         <b>PostgreSQL</b>
       </td>
