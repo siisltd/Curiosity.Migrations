@@ -103,6 +103,7 @@ public class UserDataMigration : CodeMigration
     }
 }
 ```
+
 The `Logger` property is nullable, which means it might be `null` if no logger was configured when creating the migration engine. Always use the null-conditional operator (`?.`) when accessing it to avoid `NullReferenceException`.
 
 Common logging patterns in code migrations include:

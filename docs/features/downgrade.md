@@ -283,11 +283,13 @@ The following operations require special care during downgrades:
 Here's a pattern for safely removing columns with the ability to restore data during downgrades:
 
 **Upgrade**:
+
 1. Add a new column or structure
 2. Migrate data from old column to new structure
 3. Remove old column (after verification)
 
 **Downgrade**:
+
 1. Recreate the old column
 2. Migrate data back from new structure to old column
 3. Remove new structure (after verification)
