@@ -27,7 +27,6 @@ public class SqlServerMigrationConnectionTestFixture : IAsyncLifetime
         Options = new SqlServerMigrationConnectionOptions(
             _containerFixture.GetConnectionString(DbName),
             collation: "SQL_Latin1_General_CP1_CI_AS",
-            maxConnections: 10,
             initialSize: 10,
             fileGrowth: 5,
             maxSize: 100,

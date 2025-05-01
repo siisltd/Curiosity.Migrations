@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -26,21 +27,23 @@ internal class MigrationActionHelper
     /// <param name="action">Code that should be executed and that can cause postgres exceptions.</param>
     /// <param name="errorCodeType">Type for exception that will be thrown if unknown exception occurs.</param>
     /// <param name="errorMessage">Message for exception that will be thrown if unknown exception occurs.</param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T">Type of returned result.</typeparam>
     /// <returns>Result of invoking passed function.</returns>
     /// <exception cref="InvalidOperationException">In case when IOE get caught - it will be rethrown.</exception>
     /// <exception cref="MigrationException">Any exception except IOE will be rethrown as MigrationException.</exception>
     public async Task<T> TryExecuteAsync<T>(
-        Func<Task<T>> action,
+        Func<CancellationToken, Task<T>> action,
         MigrationErrorCode errorCodeType,
-        string errorMessage)
+        string errorMessage,
+        CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(action, nameof(action));
         Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
 
         try
         {
-            return await action.Invoke();
+            return await action.Invoke(cancellationToken);
         }
         catch (MigrationException)
         {
@@ -75,16 +78,17 @@ internal class MigrationActionHelper
 
     /// <inheritdoc cref="TryExecuteAsync{T}"/>
     public async Task TryExecuteAsync(
-        Func<Task> action,
+        Func<CancellationToken, Task> action,
         MigrationErrorCode errorCodeType,
-        string errorMessage)
+        string errorMessage,
+        CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(action, nameof(action));
         Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
 
         try
         {
-            await action.Invoke();
+            await action.Invoke(cancellationToken);
         }
         catch (MigrationException)
         {

@@ -99,16 +99,17 @@ public class SqlServerMigrationConnection : IMigrationConnection
             throw new InvalidOperationException("Connection has already been opened");
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 var connection = new SqlConnection(ConnectionString);
 
-                await connection.OpenAsync(cancellationToken);
+                await connection.OpenAsync(ct);
 
                 SqlConnection = connection;
             },
             MigrationErrorCode.CreatingDbError,
-            $"Can not open connection to database \"{DatabaseName}\"");
+            $"Can not open connection to database \"{DatabaseName}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -123,25 +124,26 @@ public class SqlServerMigrationConnection : IMigrationConnection
     public Task CreateDatabaseIfNotExistsAsync(CancellationToken cancellationToken = default)
     {
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                var isDatabaseExist = await CheckIfDatabaseExistsAsync(DatabaseName, cancellationToken);
+                var isDatabaseExist = await CheckIfDatabaseExistsAsync(DatabaseName, ct);
                 if (isDatabaseExist) return;
 
                 var createDbQuery = BuildCreateDatabaseSqlQuery();
                 await ExecuteNonQuerySqlWithoutInitialCatalogAsync(
                     createDbQuery,
                     null,
-                    cancellationToken);
+                    ct);
                 
                 // If isolation options are set, apply them after database creation
                 if (_options.AllowSnapshotIsolation || _options.ReadCommittedSnapshot)
                 {
-                    await ConfigureDatabaseIsolationLevelsAsync(cancellationToken);
+                    await ConfigureDatabaseIsolationLevelsAsync(ct);
                 }
             },
             MigrationErrorCode.CreatingDbError,
-            $"Can not create database \"{DatabaseName}\"");
+            $"Can not create database \"{DatabaseName}\"",
+            cancellationToken);
     }
 
     private async Task ConfigureDatabaseIsolationLevelsAsync(CancellationToken cancellationToken)
@@ -177,7 +179,7 @@ public class SqlServerMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(databaseName, nameof(databaseName));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 var result =
                     await ExecuteScalarSqlWithoutInitialCatalogAsync(
@@ -186,11 +188,12 @@ public class SqlServerMigrationConnection : IMigrationConnection
                         {
                             {"@databaseName", databaseName}
                         },
-                        cancellationToken);
+                        ct);
                 return Convert.ToInt32(result) > 0;
             },
             MigrationErrorCode.Unknown,
-            $"Can not check existence of a \"{databaseName}\" database");
+            $"Can not check existence of a \"{databaseName}\" database",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -202,20 +205,21 @@ public class SqlServerMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 using var connection = new SqlConnection(_connectionStringWithoutInitialCatalog);
-                await connection.OpenAsync(cancellationToken);
+                await connection.OpenAsync(ct);
                 var result = await ExecuteScalarSqlInternalAsync(
                     connection,
                     sqlQuery,
                     queryParams,
-                    cancellationToken);
+                    ct);
 
                 return result;
             },
             MigrationErrorCode.MigratingError,
-            "Can not execute SQL query");
+            "Can not execute SQL query",
+            cancellationToken);
     }
 
     private Task<object?> ExecuteScalarSqlInternalAsync(
@@ -324,21 +328,22 @@ public class SqlServerMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 using var connection = new SqlConnection(_connectionStringWithoutInitialCatalog);
-                await connection.OpenAsync(cancellationToken);
+                await connection.OpenAsync(ct);
 
                 var result = await ExecuteNonQueryInternalAsync(
                     connection,
                     sqlQuery,
                     queryParams,
-                    cancellationToken);
+                    ct);
 
                 return result;
             },
             MigrationErrorCode.MigratingError,
-            $"Can not execute SQL query without initial catalog");
+            $"Can not execute SQL query without initial catalog",
+            cancellationToken);
     }
 
     private string BuildCreateDatabaseSqlQuery()
@@ -395,22 +400,23 @@ public class SqlServerMigrationConnection : IMigrationConnection
     {
         SqlServerGuard.AssertConnection(SqlConnection);
         
-        var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
+        var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(cancellationToken);
         
         await _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 // First, ensure the schema exists
-                await EnsureSchemaExistsAsync(schema, cancellationToken);
+                await EnsureSchemaExistsAsync(schema, ct);
                 
-                var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, cancellationToken);
+                var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, ct);
                 if (isTableExist) return;
 
                 var tableScript = GetMigrationHistoryTableScript(schema, MigrationHistoryTableName);
-                await ExecuteNonQuerySqlAsync(tableScript, null, cancellationToken);
+                await ExecuteNonQuerySqlAsync(tableScript, null, ct);
             },
             MigrationErrorCode.CreatingHistoryTable,
-            $"Can not create migration history table \"{MigrationHistoryTableName}\"");
+            $"Can not create migration history table \"{MigrationHistoryTableName}\"",
+            cancellationToken);
     }
 
     private async Task EnsureSchemaExistsAsync(string schema, CancellationToken cancellationToken)
@@ -441,9 +447,9 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
+                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
                 var result = await ExecuteScalarSqlAsync(
                     "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = @schema AND TABLE_NAME = @tableName",
                     new Dictionary<string, object?>
@@ -451,22 +457,24 @@ public class SqlServerMigrationConnection : IMigrationConnection
                         {"@schema", schema},
                         {"@tableName", tableName}
                     },
-                    cancellationToken);
+                    ct);
                 
                 return Convert.ToInt32(result) > 0;
             },
             MigrationErrorCode.MigratingError,
-            $"Can not check existence of a table \"{tableName}\"");
+            $"Can not check existence of a table \"{tableName}\"",
+            cancellationToken);
     }
 
-    private async Task<string> GetSchemaNameFromConnectionStringAsync()
+    private async Task<string> GetSchemaNameFromConnectionStringAsync(CancellationToken cancellationToken = default)
     {
         SqlServerGuard.AssertConnection(SqlConnection);
 
         // Get the default schema for the current user
         var result = await ExecuteScalarSqlAsync(
             "SELECT SCHEMA_NAME()",
-            null);
+            null,
+            cancellationToken);
 
         return result?.ToString() ?? SqlServerMigrationConnectionOptions.DefaultSchemaName;
     }
@@ -481,13 +489,14 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteScalarSqlInternalAsync(
+            ct => ExecuteScalarSqlInternalAsync(
                 SqlConnection!,
                 script,
                 queryParams,
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            "Can not execute SQL query");
+            "Can not execute SQL query",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -496,14 +505,14 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return await _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 try
                 {
-                    var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
+                    var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
                     
                     // First check if the table exists
-                    var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, cancellationToken);
+                    var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, ct);
                     if (!isTableExist)
                     {
                         return Array.Empty<MigrationVersion>();
@@ -517,10 +526,10 @@ public class SqlServerMigrationConnection : IMigrationConnection
                         
                     try
                     {
-                        using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                        using var reader = await command.ExecuteReaderAsync(ct);
                         if (!reader.HasRows) return Array.Empty<MigrationVersion>();
                                 
-                        while (await reader.ReadAsync(cancellationToken))
+                        while (await reader.ReadAsync(ct))
                         {
                             var stringVersion = reader.GetString(0);
                                     
@@ -548,7 +557,7 @@ public class SqlServerMigrationConnection : IMigrationConnection
                 }
             },
             MigrationErrorCode.MigratingError,
-            "Can not get applied migration versions");
+            "Can not get applied migration versions", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -560,9 +569,9 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
+                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
                 var query = $"INSERT INTO [{schema}].[{MigrationHistoryTableName}] (name, version, created) " +
                           "VALUES (@migrationName, @version, @createdAt)";
                 
@@ -574,10 +583,11 @@ public class SqlServerMigrationConnection : IMigrationConnection
                         {"@version", version.ToString()},
                         {"@createdAt", DateTime.UtcNow}
                     },
-                    cancellationToken);
+                    ct);
             },
             MigrationErrorCode.MigratingError,
-            $"Can not save info about applied migration \"{version}\"");
+            $"Can not save info about applied migration \"{version}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -586,9 +596,9 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync();
+                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
                 var query = $"DELETE FROM [{schema}].[{MigrationHistoryTableName}] WHERE version = @version";
                 
                 await ExecuteNonQuerySqlAsync(
@@ -597,10 +607,11 @@ public class SqlServerMigrationConnection : IMigrationConnection
                     {
                         {"@version", version.ToString()}
                     },
-                    cancellationToken);
+                    ct);
             },
             MigrationErrorCode.MigratingError,
-            $"Can not delete info about applied migration \"{version}\"");
+            $"Can not delete info about applied migration \"{version}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -613,20 +624,21 @@ public class SqlServerMigrationConnection : IMigrationConnection
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteNonQueryInternalAsync(
+            ct => ExecuteNonQueryInternalAsync(
                 SqlConnection!,
                 sqlQuery,
                 queryParams,
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            "Can not execute non-query SQL");
+            "Can not execute non-query SQL",
+            cancellationToken);
     }
 
     /// <inheritdoc />
     public Task CloseConnectionAsync()
     {
         return _actionHelper.TryExecuteAsync(
-            () =>
+            _ =>
             {
                 if (SqlConnection == null) return Task.CompletedTask;
                 

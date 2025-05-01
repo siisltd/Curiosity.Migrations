@@ -32,47 +32,14 @@ internal class MigrationActionHelper
     /// <returns>Result of <see cref="func"/>.</returns>
     /// <exception cref="MigrationException">If <see cref="func"/> throw exception.</exception>
     internal async Task<T> TryExecuteAsync<T>(
-        Func<Task<T>> func,
+        Func<CancellationToken, Task<T>> func,
         MigrationErrorCode errorCode,
-        string errorMessage)
+        string errorMessage,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            return await func();
-        }
-        catch (MigrationException)
-        {
-            throw;
-        }
-        catch (SqlException sqlEx)
-        {
-            throw CreateMigrationExceptionFromSqlException(sqlEx, errorCode, errorMessage);
-        }
-        catch (Exception e)
-        {
-            throw new MigrationException(
-                errorCode,
-                $"{errorMessage} Database: {_databaseName}",
-                e);
-        }
-    }
-
-    /// <summary>
-    /// Tries to execute async function with error handling.
-    /// </summary>
-    /// <param name="func">Func to execute.</param>
-    /// <param name="errorCode">Type of error if occurred.</param>
-    /// <param name="errorMessage">Error message if error occurred.</param>
-    /// <returns>Result of <see cref="func"/>.</returns>
-    /// <exception cref="MigrationException">If <see cref="func"/> throw exception.</exception>
-    internal async Task TryExecuteAsync(
-        Func<Task> func,
-        MigrationErrorCode errorCode,
-        string errorMessage)
-    {
-        try
-        {
-            await func();
+            return await func(cancellationToken);
         }
         catch (MigrationException)
         {

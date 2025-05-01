@@ -43,12 +43,6 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
     /// If null, the server's default collation will be used.
     /// </summary>
     public string? Collation { get; }
-
-    /// <summary>
-    /// Maximum number of concurrent connections that can be established to the database.
-    /// If null, SQL Server defaults will be used.
-    /// </summary>
-    public int? MaxConnections { get; }
     
     /// <summary>
     /// The initial file size for the database's primary data file in MB.
@@ -103,8 +97,7 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
         string? logFilePath = null,
         int? initialSize = null,
         int? maxSize = null,
-        int? fileGrowth = null,
-        int? maxConnections = null)
+        int? fileGrowth = null)
     {
         SqlServerGuard.AssertConnectionString(connectionString, nameof(connectionString));
         SqlServerGuard.AssertTableName(migrationHistoryTableName, nameof(migrationHistoryTableName));
@@ -114,7 +107,6 @@ public class SqlServerMigrationConnectionOptions : IMigrationConnectionOptions
         SchemaName = schemaName;
         DefaultDatabase = defaultDatabase ?? DefaultDatabaseName;
         Collation = collation;
-        MaxConnections = maxConnections;
         InitialSize = initialSize;
         FileGrowth = fileGrowth;
         MaxSize = maxSize;
