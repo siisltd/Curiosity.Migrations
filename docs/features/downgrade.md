@@ -86,6 +86,7 @@ public class AddEmailToUsersMigration : CodeMigration, IDowngradeMigration
 ### Script Migration Example
 
 **1.0.up.sql** - Create Users table:
+
 ```sql
 CREATE TABLE Users (
     Id SERIAL PRIMARY KEY,
@@ -103,12 +104,14 @@ COMMENT ON TABLE Users IS 'Stores user account information';
 ```
 
 **1.0.down.sql** - Drop Users table:
+
 ```sql
 -- Drop the table and all associated objects
 DROP TABLE IF EXISTS Users CASCADE;
 ```
 
 **2.0.up.sql** - Add email to Users:
+
 ```sql
 -- Add email column
 ALTER TABLE Users ADD COLUMN Email VARCHAR(255);
@@ -121,6 +124,7 @@ CREATE INDEX idx_users_email ON Users(Email);
 ```
 
 **2.0.down.sql** - Remove email:
+
 ```sql
 -- Remove all objects related to email column
 DROP INDEX IF EXISTS idx_users_email;
