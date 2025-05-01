@@ -39,8 +39,7 @@ public static class MigrationEngineBuilderExtensions
         string? logFilePath = null,
         int? initialSize = null,
         int? maxSize = null,
-        int? fileGrowth = null,
-        int? maxConnections = null)
+        int? fileGrowth = null)
     {
         Guard.AssertNotNull(builder, nameof(builder));
 
@@ -56,8 +55,7 @@ public static class MigrationEngineBuilderExtensions
             logFilePath,
             initialSize,
             maxSize,
-            fileGrowth,
-            maxConnections);
+            fileGrowth);
 
         builder.UseMigrationConnectionFactory(new SqlServerMigrationConnectionFactory(options));
 

@@ -110,16 +110,17 @@ public class PostgresMigrationConnection : IMigrationConnection
             throw new InvalidOperationException("Connection have been already opened");
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 var connection = new NpgsqlConnection(ConnectionString);
 
-                await connection.OpenAsync(cancellationToken);
+                await connection.OpenAsync(ct);
 
                 NpgsqlConnection = connection;
             },
             MigrationErrorCode.CreatingDbError,
-            $"Can not open connection to database \"{DatabaseName}\"");
+            $"Can not open connection to database \"{DatabaseName}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -134,19 +135,20 @@ public class PostgresMigrationConnection : IMigrationConnection
     public Task CreateDatabaseIfNotExistsAsync(CancellationToken cancellationToken = default)
     {
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                var isDatabaseExist = await CheckIfDatabaseExistsAsync(DatabaseName, cancellationToken);
+                var isDatabaseExist = await CheckIfDatabaseExistsAsync(DatabaseName, ct);
                 if (isDatabaseExist) return;
 
                 var createDbQuery = BuildCreateDatabaseSqlQuery();
                 await ExecuteNonQuerySqlWithoutInitialCatalogAsync(
                     createDbQuery,
                     null,
-                    cancellationToken);
+                    ct);
             },
             MigrationErrorCode.CreatingDbError,
-            $"Can not create database \"{DatabaseName}\"");
+            $"Can not create database \"{DatabaseName}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -157,7 +159,7 @@ public class PostgresMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(databaseName, nameof(databaseName));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 var result =
                     await ExecuteScalarSqlWithoutInitialCatalogAsync(
@@ -166,11 +168,12 @@ public class PostgresMigrationConnection : IMigrationConnection
                         {
                             {"@databaseName", databaseName}
                         },
-                        cancellationToken);
+                        ct);
                 return result is 1 or true;
             },
             MigrationErrorCode.Unknown,
-            $"Can not check existence of a \"{databaseName}\" database");
+            $"Can not check existence of a \"{databaseName}\" database",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -182,22 +185,21 @@ public class PostgresMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                await using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection.OpenAsync(cancellationToken);
-                    var result = await ExecuteScalarSqlInternalAsync(
-                        connection,
-                        sqlQuery,
-                        queryParams,
-                        cancellationToken);
+                await using var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog);
+                await connection.OpenAsync(ct);
+                var result = await ExecuteScalarSqlInternalAsync(
+                    connection,
+                    sqlQuery,
+                    queryParams,
+                    ct);
 
-                    return result;
-                }
+                return result;
             },
             MigrationErrorCode.MigratingError,
-            "Can not execute SQl query");
+            "Can not execute SQl query",
+            cancellationToken);
     }
 
     private Task<object?> ExecuteScalarSqlInternalAsync(
@@ -313,22 +315,21 @@ public class PostgresMigrationConnection : IMigrationConnection
         Guard.AssertNotEmpty(sqlQuery, nameof(sqlQuery));
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                await using (var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog))
-                {
-                    await connection.OpenAsync(cancellationToken);
-                    var result = await ExecuteNonQueryInternalAsync(
-                        connection,
-                        sqlQuery,
-                        queryParams,
-                        cancellationToken);
+                await using var connection = new NpgsqlConnection(_connectionStringWithoutInitialCatalog);
+                await connection.OpenAsync(ct);
+                var result = await ExecuteNonQueryInternalAsync(
+                    connection,
+                    sqlQuery,
+                    queryParams,
+                    ct);
 
-                    return result;
-                }
+                return result;
             },
             MigrationErrorCode.MigratingError,
-            "Can not execute SQl query");
+            "Can not execute SQl query",
+            cancellationToken);
     }
 
     /// <summary>
@@ -445,13 +446,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS uix_{0}_version ON {0} (version);
         var query = String.Format(queryFormat, MigrationHistoryTableName, _defaultVariables[DefaultVariables.User]);
 
         await _actionHelper.TryExecuteAsync(
-            () => ExecuteNonQueryInternalAsync(
+            ct => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 query,
                 null,
-                cancellationToken),
+                ct),
             MigrationErrorCode.CreatingHistoryTable,
-            $"Can not create history table \"{MigrationHistoryTableName}\" in database \"{DatabaseName}\"");
+            $"Can not create history table \"{MigrationHistoryTableName}\" in database \"{DatabaseName}\"",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -463,7 +465,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uix_{0}_version ON {0} (version);
         PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
                 var checkTableExistenceQuery = @"
 SELECT EXISTS (
@@ -481,11 +483,12 @@ SELECT EXISTS (
                             {"@tableScheme", GetSchemeNameFromConnectionString()},
                             {"@tableName", tableName}
                         },
-                        cancellationToken);
+                        ct);
                 return result is 1 or true;
             },
             MigrationErrorCode.Unknown,
-            $"Can not check existence of \"{tableName}\" table");
+            $"Can not check existence of \"{tableName}\" table",
+            cancellationToken);
     }
 
     private string GetSchemeNameFromConnectionString()
@@ -509,13 +512,14 @@ SELECT EXISTS (
         PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteScalarSqlInternalAsync(
+            ct => ExecuteScalarSqlInternalAsync(
                 NpgsqlConnection!,
                 script,
                 queryParams,
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            "Can not execute script");
+            "Can not execute script",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -530,42 +534,33 @@ SELECT EXISTS (
         command.CommandText = query;
 
         return await _actionHelper.TryExecuteAsync(
-            async () =>
+            async ct =>
             {
-                try
+                LogCommand(command);
+
+                var appliedMigrations = new List<MigrationVersion>();
+
+                await using var reader = await command.ExecuteReaderAsync(ct);
+                if (!reader.HasRows) return Array.Empty<MigrationVersion>();
+
+                while (await reader.ReadAsync(ct))
                 {
-                    LogCommand(command);
+                    var stringVersion = reader.GetString(0);
 
-                    var appliedMigrations = new List<MigrationVersion>();
+                    if (!MigrationVersion.TryParse(stringVersion, out var version))
+                        throw new MigrationException(
+                            MigrationErrorCode.MigratingError,
+                            $"Incorrect migration version (source value = {stringVersion}).",
+                            DatabaseName);
 
-                    await using (var reader = await command.ExecuteReaderAsync(cancellationToken))
-                    {
-                        if (!reader.HasRows) return Array.Empty<MigrationVersion>();
-
-                        while (await reader.ReadAsync(cancellationToken))
-                        {
-                            var stringVersion = reader.GetString(0);
-
-                            if (!MigrationVersion.TryParse(stringVersion, out var version))
-                                throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
-
-                            appliedMigrations.Add(version);
-                        }
-
-                        return appliedMigrations.OrderBy(x => x).ToArray();
-                    }
+                    appliedMigrations.Add(version);
                 }
-                catch (PostgresException e)
-                {
-                    // Migration table does not exist.
-                    if (e.SqlState == "42P01")
-                        return Array.Empty<MigrationVersion>();
 
-                    throw;
-                }
+                return appliedMigrations.OrderBy(x => x).ToArray();
             },
             MigrationErrorCode.MigratingError,
-            "Can't fetch applied migrations from history table");
+            "Can't fetch applied migrations from history table",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -583,7 +578,7 @@ VALUES (@migrationName, @version)";
         var sql = String.Format(sqlFormat, MigrationHistoryTableName);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteNonQueryInternalAsync(
+            ct => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 sql,
                 new Dictionary<string, object?>
@@ -591,9 +586,10 @@ VALUES (@migrationName, @version)";
                     {"@migrationName", migrationName},
                     {"@version", version.ToString()}
                 },
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            $"Can not save applied migration version to database \"{DatabaseName}\" (version = {version})");
+            $"Can not save applied migration version to database \"{DatabaseName}\" (version = {version})",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -605,16 +601,17 @@ VALUES (@migrationName, @version)";
         var sql = String.Format(sqlFormat, MigrationHistoryTableName);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteNonQueryInternalAsync(
+            ct => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 sql,
                 new Dictionary<string, object?>
                 {
                     {"@version", version.ToString()}
                 },
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            $"Can not delete applied migration version from database \"{DatabaseName}\" (version = {version})");
+            $"Can not delete applied migration version from database \"{DatabaseName}\" (version = {version})",
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -627,20 +624,21 @@ VALUES (@migrationName, @version)";
         PostgresqlGuard.AssertConnection(NpgsqlConnection);
 
         return _actionHelper.TryExecuteAsync(
-            () => ExecuteNonQueryInternalAsync(
+            ct => ExecuteNonQueryInternalAsync(
                 NpgsqlConnection!,
                 sqlQuery,
                 queryParams,
-                cancellationToken),
+                ct),
             MigrationErrorCode.MigratingError,
-            "Can not execute script");
+            "Can not execute script",
+            cancellationToken);
     }
 
     /// <inheritdoc />
     public Task CloseConnectionAsync()
     {
         return _actionHelper.TryExecuteAsync(
-            () =>
+            _ =>
             {
                 if (NpgsqlConnection == null) return Task.CompletedTask;
                 if (NpgsqlConnection.State == ConnectionState.Closed) return Task.CompletedTask;
@@ -651,7 +649,8 @@ VALUES (@migrationName, @version)";
                 return Task.CompletedTask;
             },
             MigrationErrorCode.MigratingError,
-            "Can not close connection to a database");
+            "Can not close connection to a database",
+            CancellationToken.None);
     }
 
     /// <inheritdoc />

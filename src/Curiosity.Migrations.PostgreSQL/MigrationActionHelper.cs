@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -26,42 +27,39 @@ internal class MigrationActionHelper
     /// <param name="action">Code that should be executed and that can cause postgres exceptions.</param>
     /// <param name="errorCodeType">Type for exception that will be thrown if unknown exception occurs.</param>
     /// <param name="errorMessage">Message for exception that will be thrown if unknown exception occurs.</param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T">Type of returned result.</typeparam>
     /// <returns>Result of invoking passed function.</returns>
     /// <exception cref="InvalidOperationException">In case when IOE get caught - it will be rethrown.</exception>
     /// <exception cref="MigrationException">Any exception except IOE will be rethrown as MigrationException.</exception>
     public async Task<T> TryExecuteAsync<T>(
-        Func<Task<T>> action,
+        Func<CancellationToken, Task<T>> action,
         MigrationErrorCode errorCodeType,
-        string errorMessage)
+        string errorMessage,
+        CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(action, nameof(action));
         Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
 
         try
         {
-            return await action.Invoke();
+            return await action.Invoke(cancellationToken);
         }
         catch (MigrationException)
         {
             throw;
         }
         catch (PostgresException e)
-            when (e.SqlState.StartsWith("08")
-                  || e.SqlState is "3D000" or "3F000")
         {
-            throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to database \"{_databaseName}\"", e);
-        }
-        catch (PostgresException e)
-            when (e.SqlState.StartsWith("28")
-                  || e.SqlState is "0P000" or "42501" or "42000")
-        {
-            throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for \"{_databaseName}\"", e);
+            throw CreateMigrationExceptionFromPostgresException(e, errorCodeType, errorMessage);
         }
         catch (NpgsqlException e)
         {
-            throw new MigrationException(MigrationErrorCode.MigratingError, $"Error occured while migrating database \"{_databaseName}\"", e);
+            throw new MigrationException(
+                MigrationErrorCode.MigratingError,
+                "Error occured while migrating database",
+                e,
+                _databaseName);
         }
         catch (InvalidOperationException)
         {
@@ -69,43 +67,43 @@ internal class MigrationActionHelper
         }
         catch (Exception e)
         {
-            throw new MigrationException(errorCodeType, errorMessage, e);
+            throw new MigrationException(
+                errorCodeType,
+                errorMessage,
+                e,
+                _databaseName);
         }
     }
 
     /// <inheritdoc cref="TryExecuteAsync{T}"/>
     public async Task TryExecuteAsync(
-        Func<Task> action,
+        Func<CancellationToken, Task> action,
         MigrationErrorCode errorCodeType,
-        string errorMessage)
+        string errorMessage,
+        CancellationToken cancellationToken = default)
     {
         Guard.AssertNotNull(action, nameof(action));
         Guard.AssertNotEmpty(errorMessage, nameof(errorMessage));
 
         try
         {
-            await action.Invoke();
+            await action.Invoke(cancellationToken);
         }
         catch (MigrationException)
         {
             throw;
         }
         catch (PostgresException e)
-            when (e.SqlState.StartsWith("08")
-                  || e.SqlState is "3D000" or "3F000")
         {
-            throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to the database \"{_databaseName}\"", e);
-        }
-        catch (PostgresException e)
-            when (e.SqlState.StartsWith("28")
-                  || e.SqlState is "0P000" or "42501" or "42000")
-        {
-            throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for \"{_databaseName}\"", e);
+            throw CreateMigrationExceptionFromPostgresException(e, errorCodeType, errorMessage);
         }
         catch (NpgsqlException e)
         {
-            throw new MigrationException(MigrationErrorCode.MigratingError, $"Error occured while migrating the database \"{_databaseName}\"", e);
+            throw new MigrationException(
+                MigrationErrorCode.MigratingError,
+                "Error occured while migrating the database",
+                e,
+                _databaseName);
         }
         catch (InvalidOperationException)
         {
@@ -113,7 +111,44 @@ internal class MigrationActionHelper
         }
         catch (Exception e)
         {
-            throw new MigrationException(errorCodeType, errorMessage, e);
+            throw new MigrationException(
+                errorCodeType,
+                errorMessage,
+                e,
+                _databaseName);
         }
+    }
+
+    /// <summary>
+    /// Creates a MigrationException from a PostgresException with an appropriate error code.
+    /// </summary>
+    private MigrationException CreateMigrationExceptionFromPostgresException(
+        PostgresException e,
+        MigrationErrorCode defaultErrorCode,
+        string errorMessage)
+    {
+        if (e.SqlState.StartsWith("08") || e.SqlState is "3D000" or "3F000")
+        {
+            return new MigrationException(
+                MigrationErrorCode.ConnectionError,
+                "Can not connect to database",
+                e,
+                _databaseName);
+        }
+        
+        if (e.SqlState.StartsWith("28") || e.SqlState is "0P000" or "42501" or "42000")
+        {
+            return new MigrationException(
+                MigrationErrorCode.AuthorizationError,
+                "Invalid authorization specification for database",
+                e,
+                _databaseName);
+        }
+        
+        return new MigrationException(
+            defaultErrorCode,
+            $"{errorMessage}. PostgreSQL Error: {e.SqlState}, Message: {e.Message}",
+            e,
+            _databaseName);
     }
 }

@@ -88,4 +88,3 @@ var migrationEngine = builder.Build();
 | initialSize | Initial size of database (MB) | SQL Server default |
 | maxSize | Maximum size of database (MB) | SQL Server default |
 | fileGrowth | File growth increment (MB) | SQL Server default |
-| maxConnections | Maximum number of connections | SQL Server default |

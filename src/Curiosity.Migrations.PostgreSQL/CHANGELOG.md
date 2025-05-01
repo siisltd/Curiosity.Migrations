@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.3] - 2025-05-01
+
+### Changed
+
+- Improved cancellation support in `PostgresMigrationConnection`.
+- Improved parsing `PostgresException` in `MigrationActionHelper`.
+- Simplified fetching applied migrations
+
+
 ## [4.0.2] - 2023-04-10
 
 ### Fixed

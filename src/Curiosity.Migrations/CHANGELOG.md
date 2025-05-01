@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.3.1] - 2025-05-01
+
+### Added
+
+- Added database name to `MigrationException`. 
+
 ## [4.3.0] - 2023-11-14
 
 ### Added
