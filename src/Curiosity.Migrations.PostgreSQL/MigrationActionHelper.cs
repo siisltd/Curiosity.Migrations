@@ -50,17 +50,8 @@ internal class MigrationActionHelper
             throw;
         }
         catch (PostgresException e)
-            when (e.SqlState.StartsWith("08")
-                  || e.SqlState is "3D000" or "3F000")
         {
-            throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to database \"{_databaseName}\"", e);
-        }
-        catch (PostgresException e)
-            when (e.SqlState.StartsWith("28")
-                  || e.SqlState is "0P000" or "42501" or "42000")
-        {
-            throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for \"{_databaseName}\"", e);
+            throw CreateMigrationExceptionFromPostgresException(e, errorCodeType, errorMessage);
         }
         catch (NpgsqlException e)
         {
@@ -95,17 +86,8 @@ internal class MigrationActionHelper
             throw;
         }
         catch (PostgresException e)
-            when (e.SqlState.StartsWith("08")
-                  || e.SqlState is "3D000" or "3F000")
         {
-            throw new MigrationException(MigrationErrorCode.ConnectionError, $"Can not connect to the database \"{_databaseName}\"", e);
-        }
-        catch (PostgresException e)
-            when (e.SqlState.StartsWith("28")
-                  || e.SqlState is "0P000" or "42501" or "42000")
-        {
-            throw new MigrationException(MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for \"{_databaseName}\"", e);
+            throw CreateMigrationExceptionFromPostgresException(e, errorCodeType, errorMessage);
         }
         catch (NpgsqlException e)
         {
@@ -119,5 +101,35 @@ internal class MigrationActionHelper
         {
             throw new MigrationException(errorCodeType, errorMessage, e);
         }
+    }
+
+    /// <summary>
+    /// Creates a MigrationException from a PostgresException with an appropriate error code.
+    /// </summary>
+    private MigrationException CreateMigrationExceptionFromPostgresException(
+        PostgresException e,
+        MigrationErrorCode defaultErrorCode,
+        string errorMessage)
+    {
+        if (e.SqlState.StartsWith("08") || e.SqlState is "3D000" or "3F000")
+        {
+            return new MigrationException(
+                MigrationErrorCode.ConnectionError,
+                $"Can not connect to database \"{_databaseName}\"",
+                e);
+        }
+        
+        if (e.SqlState.StartsWith("28") || e.SqlState is "0P000" or "42501" or "42000")
+        {
+            return new MigrationException(
+                MigrationErrorCode.AuthorizationError,
+                $"Invalid authorization specification for \"{_databaseName}\"",
+                e);
+        }
+        
+        return new MigrationException(
+            defaultErrorCode,
+            $"{errorMessage}. PostgreSQL Error: {e.SqlState}, Message: {e.Message}. Database: {_databaseName}",
+            e);;
     }
 }

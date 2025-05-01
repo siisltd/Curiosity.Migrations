@@ -28,6 +28,7 @@ internal class MigrationActionHelper
     /// <param name="func">Func to execute.</param>
     /// <param name="errorCode">Type of error if occurred.</param>
     /// <param name="errorMessage">Error message if error occurred.</param>
+    /// <param name="cancellationToken"></param>
     /// <typeparam name="T">Result type of func.</typeparam>
     /// <returns>Result of <see cref="func"/>.</returns>
     /// <exception cref="MigrationException">If <see cref="func"/> throw exception.</exception>
