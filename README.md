@@ -77,8 +77,10 @@ Unlike ORM-specific migration tools, Curiosity.Migrations is database-focused an
 # Install core package
 dotnet add package Curiosity.Migrations
 
-# Install database provider (currently PostgreSQL)
+# Install database provider (PostgreSQL or SQL Server)
 dotnet add package Curiosity.Migrations.PostgreSQL
+# or
+dotnet add package Curiosity.Migrations.SqlServer
 ```
 
 ### Basic Setup
@@ -113,6 +115,11 @@ Get started quickly with the [**Quick Start Guide**](https://curiosity-migration
         <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/master/docs/images/postgresql.png" width="200">
         <br>
         <b>PostgreSQL</b>
+      </td>
+      <td align="center" valign="middle">
+        <img src="https://raw.githubusercontent.com/microsoft/sqlserver-graphics/main/Microsoft%20SQL%20Server/SVG/SQL%20Server%20logo%20(2022).svg" width="200">
+        <br>
+        <b>SQL Server</b>
       </td>
     </tr>
   </tbody>
@@ -193,6 +200,7 @@ For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](
 |---------|---------|-----------|
 | Curiosity.Migrations | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
 | Curiosity.Migrations.PostgreSQL | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
+| Curiosity.Migrations.SqlServer | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.SqlServer.svg)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.SqlServer)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer) |
 
 ## Documentation
 
