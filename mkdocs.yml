@@ -26,6 +26,7 @@ nav:
     - 'Journal': features/journal.md
     - 'Downgrade': features/downgrade.md
     - 'Dependencies': features/dependencies.md
+  - 'Changelogs':
     - 'Curiosity.Migration': changelog/curiosity.migration.md
     - 'Curiosity.Migration.PostgreSQL': changelog/curiosity.migration.postgres.md
 

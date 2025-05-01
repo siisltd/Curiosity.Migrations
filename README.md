@@ -98,7 +98,7 @@ var result = await migrationEngine.UpgradeDatabaseAsync();
 // Check results
 if (result.IsSuccessful)
 {
-    Console.WriteLine($"Successfully migrated to version {result.CurrentVersion}");
+    Console.WriteLine($"Successfully migrated");
 }
 ```
 

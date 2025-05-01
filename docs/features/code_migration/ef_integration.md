@@ -31,35 +31,6 @@ public override async Task UpgradeAsync(DbTransaction? transaction = null, Cance
 }
 ```
 
-### Using Multiple DbContexts
-
-You can use multiple Entity Framework contexts within a single migration, all sharing the same connection and transaction:
-
-```csharp
-public override async Task UpgradeAsync(DbTransaction? transaction = null, CancellationToken cancellationToken = default)
-{
-    var context1OptionsBuilder = new DbContextOptionsBuilder<FirstContext>();
-    context1OptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
-    
-    var context2OptionsBuilder = new DbContextOptionsBuilder<SecondContext>();
-    context2OptionsBuilder.UseNpgsql(MigrationConnection.Connection!);
-    
-    await using (var firstContext = new FirstContext(context1OptionsBuilder.Options))
-    await using (var secondContext = new SecondContext(context2OptionsBuilder.Options))
-    {
-        // Attach the same transaction to both contexts
-        await firstContext.Database.UseTransactionAsync(transaction, cancellationToken);
-        await secondContext.Database.UseTransactionAsync(transaction, cancellationToken);
-        
-        // Work with both contexts in the same transaction
-        // ...
-        
-        await firstContext.SaveChangesAsync(cancellationToken);
-        await secondContext.SaveChangesAsync(cancellationToken);
-    }
-}
-```
-
 ### Transaction Control
 
 By default, code migrations run within a transaction. You can disable this behavior by setting `IsTransactionRequired = false` in your migration constructor:

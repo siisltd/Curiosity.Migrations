@@ -15,24 +15,6 @@ Curiosity.Migrations embraces the migration-as-code philosophy, treating databas
 - **Environment Consistency**: Same migration process across development, testing, and production
 - **Schema-Code Alignment**: Database schema changes are synchronized with application code changes
 
-```csharp
-// Each migration is a discrete, versioned unit of change
-public class AddEmailToUsers : CodeMigration
-{
-    public override MigrationVersion Version => new MigrationVersion(20230615);
-    public override string? Comment => "Add email column to Users table";
-    
-    public override async Task UpgradeAsync(DbTransaction? transaction = null, 
-        CancellationToken cancellationToken = default)
-    {
-        await MigrationConnection.ExecuteNonQuerySqlAsync(
-            "ALTER TABLE users ADD COLUMN email VARCHAR(255);", 
-            null, 
-            cancellationToken);
-    }
-}
-```
-
 ### 2. Raw SQL Migrations
 
 The library prioritizes raw SQL migrations, giving developers precise control over database operations:
@@ -125,7 +107,7 @@ Curiosity.Migrations implements robust safety mechanisms for production environm
 - **Migration Policies**: Configure what types of migrations can run in different environments
 - **Dependency Management**: Ensure migrations run in the correct order with explicit dependencies
 - **Pre-execution Validation**: Verify database state before applying changes
-- **Rollback Capabilities**: Ability to r evert failed migrations when issues occur
+- **Rollback Capabilities**: Ability to revert failed migrations when issues occur
 - **Long-running Migration Control**: Separate potentially dangerous long-running operations
 
 ```csharp

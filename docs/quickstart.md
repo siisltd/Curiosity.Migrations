@@ -377,7 +377,6 @@ namespace MyApp
             // Report results
             if (result.IsSuccessful)
             {
-                Console.WriteLine($"Database is now at version {result.CurrentVersion}");
                 Console.WriteLine($"Applied {result.AppliedMigrations.Count} migrations");
                 
                 // Your application logic here
