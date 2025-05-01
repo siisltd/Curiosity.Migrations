@@ -536,35 +536,27 @@ SELECT EXISTS (
         return await _actionHelper.TryExecuteAsync(
             async ct =>
             {
-                try
+                LogCommand(command);
+
+                var appliedMigrations = new List<MigrationVersion>();
+
+                await using var reader = await command.ExecuteReaderAsync(ct);
+                if (!reader.HasRows) return Array.Empty<MigrationVersion>();
+
+                while (await reader.ReadAsync(ct))
                 {
-                    LogCommand(command);
+                    var stringVersion = reader.GetString(0);
 
-                    var appliedMigrations = new List<MigrationVersion>();
+                    if (!MigrationVersion.TryParse(stringVersion, out var version))
+                        throw new MigrationException(
+                            MigrationErrorCode.MigratingError,
+                            $"Incorrect migration version (source value = {stringVersion}).",
+                            DatabaseName);
 
-                    await using var reader = await command.ExecuteReaderAsync(ct);
-                    if (!reader.HasRows) return Array.Empty<MigrationVersion>();
-
-                    while (await reader.ReadAsync(ct))
-                    {
-                        var stringVersion = reader.GetString(0);
-
-                        if (!MigrationVersion.TryParse(stringVersion, out var version))
-                            throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
-
-                        appliedMigrations.Add(version);
-                    }
-
-                    return appliedMigrations.OrderBy(x => x).ToArray();
+                    appliedMigrations.Add(version);
                 }
-                catch (PostgresException e)
-                {
-                    // Migration table does not exist.
-                    if (e.SqlState == "42P01")
-                        return Array.Empty<MigrationVersion>();
 
-                    throw;
-                }
+                return appliedMigrations.OrderBy(x => x).ToArray();
             },
             MigrationErrorCode.MigratingError,
             "Can't fetch applied migrations from history table",

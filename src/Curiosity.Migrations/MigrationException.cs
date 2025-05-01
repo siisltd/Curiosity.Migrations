@@ -17,12 +17,19 @@ internal class MigrationException : Exception
     /// </summary>
     public MigrationInfo? MigrationInfo { get; }
 
+    /// <summary>
+    /// Name of database where exception was thrown.
+    /// </summary>
+    public string? DatabaseName { get; }
+    
     /// <inheritdoc />
     public MigrationException(
         MigrationErrorCode errorCode,
         string message,
+        string? databaseName = null,
         MigrationInfo? migrationInfo = null) : base(message)
     {
+        DatabaseName = databaseName;
         ErrorCode = errorCode;
         MigrationInfo = migrationInfo;
     }
@@ -32,8 +39,10 @@ internal class MigrationException : Exception
         MigrationErrorCode errorCode,
         string message,
         Exception inner,
+        string? databaseName = null,
         MigrationInfo? migrationInfo = null) : base(message, inner)
     {
+        DatabaseName = databaseName;
         ErrorCode = errorCode;
         MigrationInfo = migrationInfo;
     }

@@ -55,7 +55,11 @@ internal class MigrationActionHelper
         }
         catch (NpgsqlException e)
         {
-            throw new MigrationException(MigrationErrorCode.MigratingError, $"Error occured while migrating database \"{_databaseName}\"", e);
+            throw new MigrationException(
+                MigrationErrorCode.MigratingError,
+                "Error occured while migrating database",
+                e,
+                _databaseName);
         }
         catch (InvalidOperationException)
         {
@@ -63,7 +67,11 @@ internal class MigrationActionHelper
         }
         catch (Exception e)
         {
-            throw new MigrationException(errorCodeType, errorMessage, e);
+            throw new MigrationException(
+                errorCodeType,
+                errorMessage,
+                e,
+                _databaseName);
         }
     }
 
@@ -91,7 +99,11 @@ internal class MigrationActionHelper
         }
         catch (NpgsqlException e)
         {
-            throw new MigrationException(MigrationErrorCode.MigratingError, $"Error occured while migrating the database \"{_databaseName}\"", e);
+            throw new MigrationException(
+                MigrationErrorCode.MigratingError,
+                "Error occured while migrating the database",
+                e,
+                _databaseName);
         }
         catch (InvalidOperationException)
         {
@@ -99,7 +111,11 @@ internal class MigrationActionHelper
         }
         catch (Exception e)
         {
-            throw new MigrationException(errorCodeType, errorMessage, e);
+            throw new MigrationException(
+                errorCodeType,
+                errorMessage,
+                e,
+                _databaseName);
         }
     }
 
@@ -115,21 +131,24 @@ internal class MigrationActionHelper
         {
             return new MigrationException(
                 MigrationErrorCode.ConnectionError,
-                $"Can not connect to database \"{_databaseName}\"",
-                e);
+                "Can not connect to database",
+                e,
+                _databaseName);
         }
         
         if (e.SqlState.StartsWith("28") || e.SqlState is "0P000" or "42501" or "42000")
         {
             return new MigrationException(
                 MigrationErrorCode.AuthorizationError,
-                $"Invalid authorization specification for \"{_databaseName}\"",
-                e);
+                "Invalid authorization specification for database",
+                e,
+                _databaseName);
         }
         
         return new MigrationException(
             defaultErrorCode,
-            $"{errorMessage}. PostgreSQL Error: {e.SqlState}, Message: {e.Message}. Database: {_databaseName}",
-            e);;
+            $"{errorMessage}. PostgreSQL Error: {e.SqlState}, Message: {e.Message}",
+            e,
+            _databaseName);
     }
 }

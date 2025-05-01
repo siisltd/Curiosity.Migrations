@@ -196,7 +196,12 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             var policy = isUpgrade
                 ? _upgradePolicy
                 : _downgradePolicy;
-            var migrationResult = await ApplyMigrations(migrationsToApply, isUpgrade, policy, cancellationToken);
+            var migrationResult = await ApplyMigrations(
+                migrationsToApply,
+                isUpgrade,
+                policy,
+                _migrationConnection.DatabaseName,
+                cancellationToken);
 
             await _migrationConnection.CloseConnectionAsync();
             _logger?.LogInformation($"Migrating database \"{_migrationConnection.DatabaseName}\" completed. Successfully applied {migrationsToApply.Count} migrations");
@@ -368,8 +373,9 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing pre-migration to \"{migration.Version}\" for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
-                    e);
+                    $"Error while executing pre-migration to \"{migration.Version}\": {e.Message}",
+                    e,
+                    _migrationConnection.DatabaseName);
             }
             finally
             {
@@ -384,13 +390,15 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
         IReadOnlyList<IMigration> orderedMigrations,
         bool isUpgrade,
         MigrationPolicy policy,
+        string databaseName,
         CancellationToken cancellationToken = default)
     {
         if (policy == MigrationPolicy.AllForbidden)
         {
             throw new MigrationException(
                 MigrationErrorCode.PolicyError,
-                $"{(isUpgrade ? "Upgrading" : "Downgrading")} is forbidden due to migration policy");
+                $"{(isUpgrade ? "Upgrading" : "Downgrading")} is forbidden due to migration policy",
+                databaseName);
         }
 
         if (orderedMigrations.Count == 0) return (Array.Empty<MigrationInfo>(), Array.Empty<MigrationInfo>());
@@ -427,8 +435,10 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 foreach (var dependency in migration.Dependencies)
                 {
                     if(!appliedMigrationVersions.Contains(dependency))
-                        throw new MigrationException(MigrationErrorCode.MigratingError, 
-                            $"Migration with version \"{migration.Version}\" depends on unapplied migration \"{dependency}\"");
+                        throw new MigrationException(
+                            MigrationErrorCode.MigratingError, 
+                            $"Migration with version \"{migration.Version}\" depends on unapplied migration \"{dependency}\"",
+                            databaseName);
                 }
             }
 
@@ -462,7 +472,10 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                 else
                 {
                     if (!(migration is IDowngradeMigration downgradableMigration))
-                        throw new MigrationException(MigrationErrorCode.MigrationNotFound, $"Migration with version \"{migration.Version}\" doesn't support downgrade");
+                        throw new MigrationException(
+                            MigrationErrorCode.MigrationNotFound,
+                            $"Migration with version \"{migration.Version}\" doesn't support downgrade",
+                            databaseName);
 
                     await downgradableMigration.DowngradeAsync(transaction, cancellationToken);
                     await _migrationConnection.DeleteAppliedMigrationVersionAsync(migration.Version, cancellationToken);
@@ -482,14 +495,16 @@ public sealed class MigrationEngine : IMigrationEngine, IDisposable
                     e.ErrorCode,
                     e.Message,
                     e,
+                    databaseName,
                     currentMigration);
             }
             catch (Exception e)
             {
                 throw new MigrationException(
                     MigrationErrorCode.MigratingError,
-                    $"Error while executing {operationName.ToLower()} migration to \"{migration.Version}\" for database \"{_migrationConnection.DatabaseName}\": {e.Message}",
+                    $"Error while executing {operationName.ToLower()} migration to \"{migration.Version}\": {e.Message}",
                     e,
+                    databaseName,
                     currentMigration);
             }
             finally

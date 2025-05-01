@@ -54,8 +54,9 @@ internal class MigrationActionHelper
         {
             throw new MigrationException(
                 errorCode,
-                $"{errorMessage} Database: {_databaseName}",
-                e);
+                errorMessage,
+                e,
+                _databaseName);
         }
     }
 
@@ -90,8 +91,9 @@ internal class MigrationActionHelper
         {
             throw new MigrationException(
                 errorCode,
-                $"{errorMessage} Database: {_databaseName}",
-                e);
+                errorMessage,
+                e,
+                _databaseName);
         }
     }
 
@@ -107,12 +109,13 @@ internal class MigrationActionHelper
         var errorCode = GetErrorCodeFromSqlException(sqlEx, defaultErrorCode);
         
         // Add SQL error information to the error message
-        var detailedErrorMessage = $"{errorMessage}. SQL Error: {sqlEx.Number}, State: {sqlEx.State}, Message: {sqlEx.Message}. Database: {_databaseName}";
+        var detailedErrorMessage = $"{errorMessage}. SQL Error: {sqlEx.Number}, State: {sqlEx.State}, Message: {sqlEx.Message}";
         
         return new MigrationException(
             errorCode,
             detailedErrorMessage,
-            sqlEx);
+            sqlEx,
+            _databaseName);
     }
 
     /// <summary>

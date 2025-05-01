@@ -500,61 +500,46 @@ public class SqlServerMigrationConnection : IMigrationConnection
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyCollection<MigrationVersion>> GetAppliedMigrationVersionsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<MigrationVersion>> GetAppliedMigrationVersionsAsync(
+        CancellationToken cancellationToken = default)
     {
         SqlServerGuard.AssertConnection(SqlConnection);
 
         return await _actionHelper.TryExecuteAsync(
             async ct =>
             {
-                try
-                {
-                    var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
-                    
-                    // First check if the table exists
-                    var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, ct);
-                    if (!isTableExist)
-                    {
-                        return Array.Empty<MigrationVersion>();
-                    }
+                var schema = _options.SchemaName ?? await GetSchemaNameFromConnectionStringAsync(ct);
 
-                    var result = new List<MigrationVersion>();
-                    using var command = SqlConnection!.CreateCommand();
-                    command.CommandText = $"SELECT version FROM [{schema}].[{MigrationHistoryTableName}]";
-                        
-                    LogCommand(command);
-                        
-                    try
-                    {
-                        using var reader = await command.ExecuteReaderAsync(ct);
-                        if (!reader.HasRows) return Array.Empty<MigrationVersion>();
-                                
-                        while (await reader.ReadAsync(ct))
-                        {
-                            var stringVersion = reader.GetString(0);
-                                    
-                            if (!MigrationVersion.TryParse(stringVersion, out var version))
-                                throw new InvalidOperationException($"Incorrect migration version (source value = {stringVersion}).");
-                                    
-                            result.Add(version);
-                        }
-                                
-                        return result.OrderBy(x => x).ToArray();
-                    }
-                    catch (SqlException e)
-                    {
-                        // If the table structure is not what we expect, it's likely a system error
-                        // Log and return empty to indicate no migrations are applied
-                        _sqlLogger?.LogWarning($"Error reading migration versions: {e.Message}");
-                        return Array.Empty<MigrationVersion>();
-                    }
-                }
-                catch (SqlException e)
+                // First check if the table exists
+                var isTableExist = await CheckIfTableExistsAsync(MigrationHistoryTableName, ct);
+                if (!isTableExist)
                 {
-                    // Table doesn't exist or other SQL error
-                    _sqlLogger?.LogWarning($"Error accessing migration history table: {e.Message}");
                     return Array.Empty<MigrationVersion>();
                 }
+
+                var result = new List<MigrationVersion>();
+                using var command = SqlConnection!.CreateCommand();
+                command.CommandText = $"SELECT version FROM [{schema}].[{MigrationHistoryTableName}]";
+
+                LogCommand(command);
+
+                using var reader = await command.ExecuteReaderAsync(ct);
+                if (!reader.HasRows) return Array.Empty<MigrationVersion>();
+
+                while (await reader.ReadAsync(ct))
+                {
+                    var stringVersion = reader.GetString(0);
+
+                    if (!MigrationVersion.TryParse(stringVersion, out var version))
+                        throw new MigrationException(
+                            MigrationErrorCode.MigratingError,
+                            $"Incorrect migration version (source value = {stringVersion}).",
+                            DatabaseName);
+
+                    result.Add(version);
+                }
+
+                return result.OrderBy(x => x).ToArray();
             },
             MigrationErrorCode.MigratingError,
             "Can not get applied migration versions", cancellationToken);
