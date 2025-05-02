@@ -201,6 +201,7 @@ For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](
 | Curiosity.Migrations | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
 | Curiosity.Migrations.PostgreSQL | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
 | Curiosity.Migrations.SqlServer | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.SqlServer.svg)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.SqlServer)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer) |
+| Curiosity.Migrations.Utils | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.Utils.svg)](https://www.nuget.org/packages/Curiosity.Migrations.Utils/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.Utils)](https://www.nuget.org/packages/Curiosity.Migrations.Utils) |
 
 ## Community and Support
 
