@@ -4,10 +4,10 @@
   <tbody>
     <tr>
       <td align="center" valign="middle">
-          <img src="https://icon2.cleanpng.com/20180528/szi/kisspng-amazon-com-postgresql-amazon-relational-database-s-strive-5b0cbb173568b4.0208830815275609832188.jpg" width="200">
+          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/refs/heads/master/docs/images/postgresql.png" width="200">
       </td>
       <td align="center" valign="middle">
-          <img src="https://upload.wikimedia.org/wikipedia/de/8/8c/Microsoft_SQL_Server_Logo.svg" width="200">
+          <img src="https://raw.githubusercontent.com/siisltd/Curiosity.Migrations/refs/heads/master/docs/images/sqlserver.svg" width="200">
           <br>
           <b>SQL Server</b>
       </td>
