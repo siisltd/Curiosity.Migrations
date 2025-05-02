@@ -45,29 +45,29 @@ Unlike ORM-specific migration tools, Curiosity.Migrations is database-focused an
 
 ### Migration Types
 
-- **[Script Migrations](https://curiosity-migrations.readthedocs.io/features/script_migration/index)**: Write raw SQL for direct database access
-    - [Batched Execution](https://curiosity-migrations.readthedocs.io/features/script_migration/batches): Split large scripts into manageable chunks
+- **[Script Migrations](https://curiosity-migrations.readthedocs.io/en/latest/features/script_migration/)**: Write raw SQL for direct database access
+    - [Batched Execution](https://curiosity-migrations.readthedocs.io/en/latest/features/script_migration/batches/): Split large scripts into manageable chunks
     - Full support for database-specific SQL features and optimizations
 
-- **[Code Migrations](https://curiosity-migrations.readthedocs.io/features/code_migration/index)**: Implement migrations in C# for complex scenarios
-    - [Dependency Injection](https://curiosity-migrations.readthedocs.io/features/code_migration/di): Use your application's services in migrations
-    - [Entity Framework Integration](https://curiosity-migrations.readthedocs.io/features/code_migration/ef_integration): Leverage EF Core when needed
+- **[Code Migrations](https://curiosity-migrations.readthedocs.io/en/latest/features/code_migration/)**: Implement migrations in C# for complex scenarios
+    - [Dependency Injection](https://curiosity-migrations.readthedocs.io/en/latest/features/code_migration/di/): Use your application's services in migrations
+    - [Entity Framework Integration](https://curiosity-migrations.readthedocs.io/en/latest/features/code_migration/ef_integration/): Leverage EF Core when needed
     - Implement custom validation, logging, or business logic during migrations
 
 ### Safety and Control
 
-- **[Policies](https://curiosity-migrations.readthedocs.io/basics#migration-policies)**: Control which migrations run in different environments
-- **[Dependencies](https://curiosity-migrations.readthedocs.io/features/dependencies)**: Specify explicit requirements between migrations
-- **[Downgrade Migrations](https://curiosity-migrations.readthedocs.io/features/downgrade)**: Safely roll back changes when needed
-- **[Transactions](https://curiosity-migrations.readthedocs.io/features/transactions)**: Configure transaction behavior per migration
+- **[Policies](https://curiosity-migrations.readthedocs.io/en/latest/basics/#migration-policies)**: Control which migrations run in different environments
+- **[Dependencies](https://curiosity-migrations.readthedocs.io/en/latest/features/dependencies/)**: Specify explicit requirements between migrations
+- **[Downgrade Migrations](https://curiosity-migrations.readthedocs.io/en/latest/features/downgrade/)**: Safely roll back changes when needed
+- **[Transactions](https://curiosity-migrations.readthedocs.io/en/latest/features/transactions/)**: Configure transaction behavior per migration
 - **Long-running vs Short-running**: Separate quick schema changes from data-intensive operations
 
 ### Extensibility
 
-- **[Migration Providers](https://curiosity-migrations.readthedocs.io/features/migration_providers)**: Source migrations from files, embedded resources, etc.
-- **[Variables](https://curiosity-migrations.readthedocs.io/features/variables)**: Dynamic value substitution in migrations
-- **[Pre-migrations](https://curiosity-migrations.readthedocs.io/features/pre_migrations)**: Run setup scripts before main migrations
-- **[Custom Journal](https://curiosity-migrations.readthedocs.io/features/journal)**: Configure how applied migrations are tracked
+- **[Migration Providers](https://curiosity-migrations.readthedocs.io/en/latest/features/migration_providers/)**: Source migrations from files, embedded resources, etc.
+- **[Variables](https://curiosity-migrations.readthedocs.io/en/latest/features/variables/)**: Dynamic value substitution in migrations
+- **[Pre-migrations](https://curiosity-migrations.readthedocs.io/en/latest/features/pre_migrations/)**: Run setup scripts before main migrations
+- **[Custom Journal](https://curiosity-migrations.readthedocs.io/en/latest/features/journal/)**: Configure how applied migrations are tracked
 
 ## Quick Start
 
@@ -104,7 +104,7 @@ if (result.IsSuccessful)
 }
 ```
 
-Get started quickly with the [**Quick Start Guide**](https://curiosity-migrations.readthedocs.io/quickstart) or dive into [**Core Concepts**](https://curiosity-migrations.readthedocs.io/basics).
+Get started quickly with the [**Quick Start Guide**](https://curiosity-migrations.readthedocs.io/en/latest/quickstart/) or dive into [**Core Concepts**](https://curiosity-migrations.readthedocs.io/en/latest/basics/).
 
 ## Supported Databases
 
@@ -192,7 +192,7 @@ Support for additional databases can be added through contributions.
   </tbody>
 </table>
 
-For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](https://curiosity-migrations.readthedocs.io/philosophy).
+For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](https://curiosity-migrations.readthedocs.io/en/latest/philosophy/).
 
 ## Available Packages
 
@@ -201,14 +201,6 @@ For more detailed comparisons, see [The Philosophy Behind Curiosity.Migrations](
 | Curiosity.Migrations | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.svg)](https://www.nuget.org/packages/Curiosity.Migrations/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations)](https://www.nuget.org/packages/Curiosity.Migrations) |
 | Curiosity.Migrations.PostgreSQL | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.PostgreSQL.svg)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.PostgreSQL)](https://www.nuget.org/packages/Curiosity.Migrations.PostgreSQL) |
 | Curiosity.Migrations.SqlServer | [![NuGet](https://img.shields.io/nuget/v/Curiosity.Migrations.SqlServer.svg)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer/) | [![NuGet](https://img.shields.io/nuget/dt/Curiosity.Migrations.SqlServer)](https://www.nuget.org/packages/Curiosity.Migrations.SqlServer) |
-
-## Documentation
-
-* [Quick Start Guide](https://curiosity-migrations.readthedocs.io/quickstart) - Getting started with Curiosity.Migrations
-* [Core Concepts](https://curiosity-migrations.readthedocs.io/basics) - Understanding the fundamental concepts
-* [The Philosophy Behind Curiosity.Migrations](https://curiosity-migrations.readthedocs.io/idea) - Why this library exists
-* [Feature Documentation](#core-features) - Detailed guides for each feature
-* [Supported Databases](https://curiosity-migrations.readthedocs.io/supported_databases) - Currently supported database systems
 
 ## Community and Support
 
