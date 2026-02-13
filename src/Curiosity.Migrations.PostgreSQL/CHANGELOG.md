@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0] - 2026-02-13
+
+### Changed
+
+- Upgraded `Npgsql` to version `10.0.1`.
+- Now only supports net10.0, net9.0 and net8.0.
+
 ## [4.0.3] - 2025-05-01
 
 ### Changed

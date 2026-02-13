@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0] - 2026-02-13
+
+### Changed
+
+- Upgraded MS packages to `10.*` version.
+- Added net10.0, net9.0 and net8.0 targets.
+
 ## [4.3.1] - 2025-05-01
 
 ### Added

@@ -8,13 +8,13 @@
         <PackageTags>migrations; migration; migrator; versioning; migration-tool; .net-core; .netstandard; database; siisltd; curiosity; utils</PackageTags>
         <Language>English</Language>
         
-        <PackageVersion>4.0.2</PackageVersion>
+        <PackageVersion>4.1.0</PackageVersion>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
 
-        <Authors>Maxim Markelow (@markeli)</Authors>
+        <Authors>Maxim Markelow (@markeli), Andrei Vinogradov (@anri-vin)</Authors>
         <Company>SIIS Ltd</Company>
-        <Copyright>SIIS Ltd, 2023</Copyright>
+        <Copyright>SIIS Ltd, 2026</Copyright>
         
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -29,7 +29,7 @@
         <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
-        <TargetFrameworks>net6.0;net7.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -41,7 +41,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Dapper" Version="2.0.123" />
+      <PackageReference Include="Dapper" Version="2.1.66" />
     </ItemGroup>
 
     <ItemGroup>

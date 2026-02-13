@@ -8,7 +8,6 @@ var configuration = Argument<string>("configuration", "Release");
 var artifactsDir = Directory("./artifacts");
 var packages = "./artifacts/packages";
 var solutionPath = "./Curiosity.Migrations.sln";
-var framework = "netstandard2.1";
 
 var nugetSource = "https://api.nuget.org/v3/index.json";
 var nugetApiKey = Argument<string>("nugetApiKey", null);

@@ -31,7 +31,7 @@ public class SqlServerContainerFixture : IAsyncLifetime
             .WithImage("mcr.microsoft.com/mssql/server:2019-latest")
             .WithPassword(Password)
             .WithPortBinding(1433, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(1433))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(1433))
             .Build();
     }
     

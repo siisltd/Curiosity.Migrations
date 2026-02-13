@@ -37,7 +37,7 @@ public class PostgreSqlContainerFixture : IAsyncLifetime
             .WithDatabase("postgres")
             // Use random port binding to avoid conflicts
             .WithPortBinding(5432, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(5432))
             .Build();
     }
     
